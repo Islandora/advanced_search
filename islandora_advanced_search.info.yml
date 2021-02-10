@@ -1,0 +1,11 @@
+# This .info.yml files provides the basic information about our module to Drupal
+# More: https://www.drupal.org/node/2000204
+name: 'Islandora Advanced Search'
+description: "Creates an Advanced Search block and other enhancements to search."
+type: module
+package: Islandora
+core_version_requirement: ^8 || ^9
+dependencies:
+  - drupal:facets
+  - drupal:facets_summary
+  - drupal:search_api_solr
