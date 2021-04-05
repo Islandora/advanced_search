@@ -71,7 +71,8 @@
     }
   });
 
-  /*** Push state on form/pager/facet change.
+  /**
+   * Push state on form/pager/facet change.
    */
   Drupal.behaviors.islandoraAdvancedSearchViewsAjax = {
     attach: function (context, settings) {

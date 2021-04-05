@@ -18,6 +18,9 @@
     }
     // Remove Recurse parameter.
     delete params[recurse_parameter];
+    // Remove the page if set as submitting the form should always take
+    // the user to the first page (facets do the same).
+    delete params["page"];
     return params;
   }
 
@@ -93,7 +96,7 @@
           // Prevent form submission and push state instead.
           //
           // Logic server side / client side should match to generate the 
-          // approprirate URL with javascript enabled or disable.
+          // appropriate URL with javascript enabled or disable.
           $form.submit(function (e) {
             e.preventDefault();
             e.stopPropagation();
