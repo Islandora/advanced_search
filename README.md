@@ -1,4 +1,4 @@
-# Islandora Advanced Search <!-- omit in toc -->
+# Advanced Search (Formerly Islandora Advanced Search) <!-- omit in toc -->
 
 - [Introduction](#introduction)
 - [Requirements](#requirements)
