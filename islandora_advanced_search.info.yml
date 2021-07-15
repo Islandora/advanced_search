@@ -1,6 +1,6 @@
 # This .info.yml files provides the basic information about our module to Drupal
 # More: https://www.drupal.org/node/2000204
-name: 'Islandora Advanced Search'
+name: 'Advanced Search'
 description: "Creates an Advanced Search block and other enhancements to search."
 type: module
 package: Islandora
