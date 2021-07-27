@@ -5,7 +5,7 @@
  */
 (function ($, Drupal) {
   "use strict";
-
+  showByDisplayMode(null);
   // Generate events on push state.
   (function (history) {
     var pushState = history.pushState;
@@ -62,14 +62,96 @@
 
   // On location change reload all the blocks / ajax view.
   window.addEventListener("pushstate", function (e) {
+    console.log("pushstate....");
+    updatePagerElementsStatus();
     reload(window.location.href);
+
+
   });
 
   window.addEventListener("popstate", function (e) {
+    console.log("popstate....");
+    updatePagerElementsStatus();
     if (e.state != null) {
       reload(window.location.href);
     }
+
   });
+
+  window.addEventListener('beforeunload', function (e) {
+    //e.preventDefault();
+    //e.returnValue = '';
+
+    //delete e['returnValue'];
+  });
+
+  function updatePagerElementsStatus () {
+    var urlParams = new URLSearchParams(window.location.search);
+
+    if (typeof urlParams.get('page') !== 'undefined') {
+      // the variable is defined
+      $(".pager .pager__item").removeClass("is-active");
+      $(".pager .pager__item").each(function() {
+        if ($(this).text() === urlParams.get('page')) {
+          $(this).addClass("is-active");
+        }
+      });
+    }
+    else {
+      // the variable is defined
+      $(".pager .pager__item").removeClass("is-active");
+      $(".pager .pager__item").each(function(index) {
+        console.log(index);
+        if (index === 0) {
+          $(this).addClass("is-active");
+        }
+      });
+    }
+
+    if (typeof urlParams.get('items_per_page') !== 'undefined') {
+      // the variable is defined
+      $(".pager__results .pager__item").removeClass("is-active");
+      $(".pager__results .pager__item").each(function() {
+        if ($(this).text() === urlParams.get('items_per_page')) {
+          $(this).addClass("is-active");
+        }
+      });
+    }
+
+    if (typeof urlParams.get('display') !== 'undefined') {
+      // the variable is defined
+      $(".pager__display .pager__item").removeClass("is-active");
+      $(".pager__display .pager__item").each(function() {
+        var displaymode = $(this).text().toLowerCase();
+        if (displaymode.includes(urlParams.get('display'))) {
+          $(this).addClass("is-active");
+          showByDisplayMode(displaymode);
+
+        }
+      });
+    }
+
+
+  }
+
+  function showByDisplayMode(displaymode = null) {
+    if (displaymode === "") {
+      var urlParams = new URLSearchParams(window.location.search);
+      var displaymode = $(this).text().toLowerCase();
+    }
+
+    $(document).ready(function (event) {
+      if (displaymode !== null && displaymode.includes("grid")) {
+        console.log("show as grid");
+        $('.views-view-grid .item').removeClass('list-group-item');
+        $('.views-view-grid .item').addClass('grid-group-item');
+      }
+      else {
+        console.log("show as list");
+        $('.views-view-grid .item').addClass('list-group-item');
+      }
+    });
+  }
 
   /**
    * Push state on form/pager/facet change.
@@ -119,7 +201,7 @@
       // Attach behavior to pager, summary, facet links.
       $("[data-drupal-pager-id], [data-drupal-facets-summary-id], [data-drupal-facet-id]")
         .once()
-        .find("a:not(.facets-soft-limit-link)")
+        .find("a:not(.facet-item)")
         .click(function (e) {
           // Let ctrl/cmd click open in a new window.
           if (e.shiftKey || e.ctrlKey || e.metaKey) {

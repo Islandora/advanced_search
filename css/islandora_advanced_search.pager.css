@@ -109,3 +109,57 @@
 .pager__link--is-active {
   text-decoration: underline;
 }
+
+
+
+
+
+.view-list .node__details .field,
+.view-list .node__details .node__title,
+.view-grid .node__details .field,
+.view-grid .node__details .node__title {
+  margin-bottom: 0;
+}
+
+.view-list .node__details h2 a,
+.view-grid .node__details h2 a {
+  text-decoration: none;
+}
+
+.view-list .node__details h2 a:hover, .view-list .node__details h2 a:focus,
+.view-grid .node__details h2 a:hover,
+.view-grid .node__details h2 a:focus {
+  text-decoration: underline;
+}
+
+.view-list .node__content .field-type-image__item a {
+  display: block;
+  width: 100%;
+}
+
+.view-grid .node__content .field-type-image__item {
+  height: 128px;
+}
+
+.view-grid .node__content .field-type-image__item img {
+  box-shadow: none;
+  border: none;
+}
+
+.view-grid .search-results__content {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  height: fit-content;
+}
+
+.view-grid .search-results__content .node__details .field:not(:first-child) {
+  display: none;
+}
+
+.view-grid .search-results__content .field-type-image__item {
+  width: 100%;
+}
+
+.view-grid .search-results__content .view__collection-count {
+  font-weight: normal;
+}
