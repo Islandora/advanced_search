@@ -112,7 +112,7 @@
 
 
 /* Kyle added */
-#views-exposed-form-collection-by-solr-page-1 { display:none !important;; }
+.views-exposed-form { display:none !important;; }
 .islandora_advanced_search_result_pager .pager__group > *:first-child {
   display:flex !important;
 }

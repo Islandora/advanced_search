@@ -5,6 +5,8 @@
  */
 (function ($, Drupal) {
   "use strict";
+  // display view as list mode first
+  showByDisplayMode();
 
   // Generate events on push state.
   (function (history) {
