@@ -189,3 +189,36 @@ function islandora_advanced_search_preprocess_facets_result_item(&$variables) {
     }
   }
 }
+
+
+/**
+ * Debug function: display any variable to error log
+ *
+ * @param $thing
+ */
+if (!function_exists('print_log')) {
+    function print_log($thing)
+    {
+        error_log(print_r($thing, true), 0);
+    }
+
+}
+/**
+ * Debug function: display any variable to current webpage
+ * @param $thing
+ */
+if (!function_exists('logging')) {
+    function logging($thing)
+    {
+        echo "<pre>";
+        print_r($thing);
+        echo "</pre>";
+    }
+}
+
+if (!function_exists('drupal_log')) {
+    function drupal_log($msg)
+    {
+        \Drupal::logger(basename(__FILE__, '.module'))->error($msg);
+    }
+}

@@ -15,3 +15,4 @@ advanced.search.pager:
   css:
     component:
       css/islandora_advanced_search.pager.css: {}
+     
