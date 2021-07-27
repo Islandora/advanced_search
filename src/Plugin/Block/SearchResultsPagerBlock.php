@@ -106,7 +106,7 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
                 'display_links' => $this->buildDisplayLinks($query_parameters),
                 'sort_by' => $this->buildSortByForm($view_executable->sort, $query_parameters),
                 //'pager' => array_merge($pager->render($exposed_input), ['#wrapper_attributes' => ['class' => ['container']]]),
-                'pager' => array_merge($pager->render($exposed_input), ['#wrapper_attributes' => ['class' => ['']]]),
+                //'pager' => array_merge($pager->render($exposed_input), ['#wrapper_attributes' => ['class' => ['']]]),
             ],
         ];
         return $build;
@@ -299,6 +299,7 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
                 ];
             }
         }
+        drupal_log(json_encode($options_attributes));
         return [
             '#type' => 'select',
             '#title' => 'Sort',

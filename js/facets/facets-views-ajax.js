@@ -5,7 +5,7 @@
  */
 (function ($, Drupal) {
   "use strict";
-  showByDisplayMode(null);
+
   // Generate events on push state.
   (function (history) {
     var pushState = history.pushState;
@@ -30,13 +30,13 @@
           views_arguments,
           views_parameters
         );
-        var views_ajax_settings =
-          Drupal.views.instances[views_dom_id].element_settings;
+        var views_ajax_settings = Drupal.views.instances[views_dom_id].element_settings;
         views_ajax_settings.submit = views_settings;
-        views_ajax_settings.url =
-          view_path + "?" + $.param(Drupal.Views.parseQueryString(url));
+        views_ajax_settings.url = view_path + "?" + $.param(Drupal.Views.parseQueryString(url));
         Drupal.ajax(views_ajax_settings).execute();
       });
+
+
     }
 
     // Replace filter, pager, summary, and facet blocks.
@@ -62,20 +62,17 @@
 
   // On location change reload all the blocks / ajax view.
   window.addEventListener("pushstate", function (e) {
-    console.log("pushstate....");
-    updatePagerElementsStatus();
     reload(window.location.href);
-
-
+    //  set active style for pager's components by default when url query is empty
+    updatePagerElementsStatus();
   });
 
   window.addEventListener("popstate", function (e) {
-    console.log("popstate....");
-    updatePagerElementsStatus();
     if (e.state != null) {
       reload(window.location.href);
     }
-
+    //  set active style for pager's components by default when url query is empty
+    updatePagerElementsStatus();
   });
 
   window.addEventListener('beforeunload', function (e) {
@@ -85,14 +82,27 @@
     //delete e['returnValue'];
   });
 
+  /**
+   * Kyle added to handler of implement display mode (list or grid) whenever drupal.ajax is finished execute
+   */
+  $(document).once('islandora_advanced_search-ajax').ajaxComplete(function (e, xhr, settings) {
+    // display view as list mode first
+    showByDisplayMode();
+
+  });
+
+  /**
+   * Kyle added: to set active style on pager's components based on url changed
+   */
   function updatePagerElementsStatus () {
+    console.log("updatePagerElementsStatus");
     var urlParams = new URLSearchParams(window.location.search);
 
-    if (typeof urlParams.get('page') !== 'undefined') {
+    if (urlParams.get('page') !== null) {
       // the variable is defined
       $(".pager .pager__item").removeClass("is-active");
       $(".pager .pager__item").each(function() {
-        if ($(this).text() === urlParams.get('page')) {
+        if ((urlParams.get('page') === 0) || $(this).text() === urlParams.get('page')) {
           $(this).addClass("is-active");
         }
       });
@@ -101,14 +111,12 @@
       // the variable is defined
       $(".pager .pager__item").removeClass("is-active");
       $(".pager .pager__item").each(function(index) {
-        console.log(index);
         if (index === 0) {
           $(this).addClass("is-active");
         }
       });
     }
-
-    if (typeof urlParams.get('items_per_page') !== 'undefined') {
+    if (urlParams.get('items_per_page') !== null) {
       // the variable is defined
       $(".pager__results .pager__item").removeClass("is-active");
       $(".pager__results .pager__item").each(function() {
@@ -117,16 +125,32 @@
         }
       });
     }
+    else {
+      console.log("pager__results is empty");
+      $(".pager__results .pager__item").removeClass("is-active");
+      $(".pager__results .pager__item").each(function(index) {
+        if (index === 0) {
+          $(this).addClass("is-active");
+        }
+      });
+    }
 
-    if (typeof urlParams.get('display') !== 'undefined') {
+    if (urlParams.get('display') !== null) {
       // the variable is defined
       $(".pager__display .pager__item").removeClass("is-active");
       $(".pager__display .pager__item").each(function() {
         var displaymode = $(this).text().toLowerCase();
         if (displaymode.includes(urlParams.get('display'))) {
           $(this).addClass("is-active");
-          showByDisplayMode(displaymode);
-
+        }
+      });
+    }
+    else {
+      console.log("pager__display is empty");
+      $(".pager__display .pager__item").removeClass("is-active");
+      $(".pager__display .pager__item").each(function(index) {
+        if (index === 0) {
+          $(this).addClass("is-active");
         }
       });
     }
@@ -134,23 +158,24 @@
 
   }
 
-  function showByDisplayMode(displaymode = null) {
-    if (displaymode === "") {
-      var urlParams = new URLSearchParams(window.location.search);
-      var displaymode = $(this).text().toLowerCase();
+  /**
+   * Kyle added: to have display mode switching from list to grid
+   */
+  function showByDisplayMode() {
+    var urlParams = new URLSearchParams(window.location.search);
+    if (typeof urlParams.get('display') !== 'undefined') {
+      $(document).ready(function (event) {
+        if (urlParams.get('display') === "grid") {
+          $('.views-view-grid .item').removeClass('list-group-item');
+          $('.views-view-grid .item').addClass('grid-group-item');
+        }
+        else {
+          $('.views-view-grid .item').addClass('list-group-item');
+        }
+      });
     }
 
-    $(document).ready(function (event) {
-      if (displaymode !== null && displaymode.includes("grid")) {
-        console.log("show as grid");
-        $('.views-view-grid .item').removeClass('list-group-item');
-        $('.views-view-grid .item').addClass('grid-group-item');
-      }
-      else {
-        console.log("show as list");
-        $('.views-view-grid .item').addClass('list-group-item');
-      }
-    });
+
   }
 
   /**
@@ -209,18 +234,26 @@
           }
           e.preventDefault();
           window.history.pushState(null, document.title, $(this).attr("href"));
+
         });
 
       // Trigger on sort change.
-      $('[data-drupal-pager-id] select[name="order"]')
+      $('.pager__sort select[name="order"]')
         .once()
         .change(function () {
           var href = window.location.href;
           var params = Drupal.Views.parseQueryString(href);
+
           var selection = $(this).val();
-          var option = $('option[value="' + selection + '"]');
-          params.sort_order = option.data("sort_order");
-          params.sort_by = option.data("sort_by");
+          //var option = $('option[value="' + selection + '"]');
+          //params.sort_order = option.data("sort_order");
+          //params.sort_by = option.data("sort_by");
+
+          // kyle added to have decode sort option
+          var option = selection.split('_');
+          params.sort_by = option[0];
+          params.sort_order = option[1].toUpperCase();
+
           href = href.split("?")[0] + "?" + $.param(params);
           window.history.pushState(null, document.title, href);
         });
