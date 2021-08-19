@@ -23,12 +23,13 @@ class SimpleSearchForm extends FormBase {
     $form['search-textfield'] = array(
       '#type' => 'textfield',
       '#title' => t('Search:'),
+        '#attributes' => ['placeholder' => 'Search the collections']
     );
 
     $form['actions']['#type'] = 'actions';
     $form['actions']['submit'] = array(
       '#type' => 'submit',
-      '#value' => $this->t('Search'),
+      '#value' => $this->t('SEARCH'),
       '#button_type' => 'primary',
     );
     return $form;
