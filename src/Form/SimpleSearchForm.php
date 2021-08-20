@@ -32,13 +32,13 @@ class SimpleSearchForm extends FormBase
     $form['search-textfield'] = array(
       '#type' => 'textfield',
       '#title' => (!empty($settings['search_textfield_label']) ? $settings['search_textfield_label'] : ''),
-      '#attributes' => ['placeholder' => 'Search the collections']
+      '#attributes' => ['placeholder' => $settings['search_placeholder']]
     );
 
     $form['actions']['#type'] = 'actions';
     $form['actions']['submit'] = array(
       '#type' => 'submit',
-      '#value' => (!empty($settings['search_submit_label']) ? $settings['search_submit_label'] : ''),
+      '#value' => (!empty($settings['search_submit_label']) ? $settings['search_submit_label'] : 'Search'),
       '#button_type' => 'primary',
     );
     return $form;
