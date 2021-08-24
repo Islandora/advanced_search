@@ -284,11 +284,22 @@ class AdvancedSearchQueryTerm {
     $terms = [];
     $query_helper = \Drupal::service('solarium.query_helper');
     $value = $query_helper->escapePhrase(trim($this->value));
-    foreach ($solr_field_mapping[$this->field] as $field) {
-      $terms[] = "$field:$value";
+    if ($this->field === "*") {
+      return $value;
+      /*foreach ($solr_field_mapping as $key => $field) {
+        foreach ($field as $f => $item) {
+          $terms[] = "$f:$value";
+        }
+      }*/
+    }
+    else {
+      foreach ($solr_field_mapping[$this->field] as $field) {
+        $terms[] = "$field:$value";
+      }
     }
     $terms = implode(' ', $terms);
     return $this->include ? "($terms)" : "-($terms)";
   }
+
 
 }

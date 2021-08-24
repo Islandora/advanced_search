@@ -158,7 +158,23 @@ class AdvancedSearchQuery {
         $q[] = $term->toSolrQuery($field_mapping);
       }
       $q = implode(' ', $q);
+
       /** @var Solarium\QueryType\Select\Query\Query $solarium_query */
+      /** @var Solarium\QueryType\Select\Query\Component\DisMax $dismax */
+      // enable dismax search query option
+      $dismax = $solarium_query->getDisMax();
+      $dismax->setQueryParser('edismax');
+      $query_fields = [];
+      foreach ($field_mapping as $key => $field) {
+        foreach ($field as $f => $item) {
+          if (strpos($item, 'sticky') === false) {
+            array_push($query_fields, $item);
+          }
+
+        }
+      }
+      $query_fields = implode(" ", array_unique($query_fields));
+      $dismax->setQueryFields($query_fields);
       $solarium_query->setQuery($q);
     }
   }

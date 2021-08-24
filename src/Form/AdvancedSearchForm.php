@@ -243,7 +243,7 @@ class AdvancedSearchForm extends FormBase {
       ],
     ];
 
-    $options = $this->fieldOptions($fields);
+    $options = ["*" => "All"] + $this->fieldOptions($fields);
     $term_default_values = $this->defaultTermValues($options);
     list($recursive, $term_values) = $this->processInput($form_state, $term_default_values);
     $i = 0;
