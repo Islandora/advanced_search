@@ -57,7 +57,7 @@ class SimpleSearchForm extends FormBase
 
     global $base_url;
     $url = Url::fromRoute($view_machine_name, [
-      'a[0][f]' => 'title',
+      'a[0][f]' => '*',
       'a[0][i]' => 'IS',
       'a[0][v]' => $form_state->getValues()['search-textfield'],
 
