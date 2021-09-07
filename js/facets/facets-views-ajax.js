@@ -77,13 +77,6 @@
     updatePagerElementsStatus();
   });
 
-  window.addEventListener('beforeunload', function (e) {
-    //e.preventDefault();
-    //e.returnValue = '';
-
-    //delete e['returnValue'];
-  });
-
   /**
    * Kyle added to handler of implement display mode (list or grid) whenever drupal.ajax is finished execute
    */
@@ -235,6 +228,8 @@
             return;
           }
           e.preventDefault();
+	  // Fixed redundant reload when a facet link is clicked
+          e.stopImmediatePropagation();
           window.history.pushState(null, document.title, $(this).attr("href"));
 
         });
