@@ -104,6 +104,26 @@ class AdvancedSearchForm extends FormBase {
   }
 
   /**
+   * Get if Lucene Search checkbox is enabled or disable
+   *
+   * @return boolean
+   *
+   */
+  public static function getLuceneSearch() {
+    return self::getConfig(SettingsForm::LUCENE_SEARCH_FLAG, 0);
+  }
+
+  /**
+   * Get the character to use for removing a facet from the query.
+   *
+   * @return string
+   *   The character to use for removing an facet to the query.
+   */
+  public static function getLuceneSearchLabel() {
+    return self::getConfig(SettingsForm::LUCENE_SEARCH_LABEL, "All");
+  }
+
+  /**
    * Convert the list of fields to select options.
    *
    * @param \Drupal\search_api\Item\FieldInterface[] $fields
@@ -243,7 +263,7 @@ class AdvancedSearchForm extends FormBase {
       ],
     ];
 
-    $options = $this->fieldOptions($fields);
+    $options = (self::getLuceneSearch()) ? ["all" => self::getLuceneSearchLabel()] + $this->fieldOptions($fields)  : $this->fieldOptions($fields);
     $term_default_values = $this->defaultTermValues($options);
     list($recursive, $term_values) = $this->processInput($form_state, $term_default_values);
     $i = 0;

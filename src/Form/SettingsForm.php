@@ -23,6 +23,9 @@ class SettingsForm extends ConfigFormBase {
   const SEARCH_REMOVE_OPERATOR = 'search_remove_operator';
   const FACET_TRUNCATE = 'facet_truncate';
 
+  const LUCENE_SEARCH_FLAG = 'lucene_on_off';
+  const LUCENE_SEARCH_LABEL = 'lucene_label';
+
   /**
    * Constructs a \Drupal\system\ConfigFormBase object.
    *
@@ -101,6 +104,38 @@ class SettingsForm extends ConfigFormBase {
         ],
       ],
     ];
+
+    $form['lucene'] =  [
+      '#type' => 'fieldset',
+      '#title' => $this->t(" Solr's Standard Query parser (also known as 'lucene')"),
+    ];
+
+    $form['lucene'][self::LUCENE_SEARCH_FLAG] = [
+      '#type' => 'checkbox',
+      '#title' => $this
+        ->t('Enable Lucene Search.'),
+      '#default_value' => self::getConfig(self::LUCENE_SEARCH_FLAG, 0),
+      '#ajax' => [
+        'callback' => '::LuceneSearchEnableDisableCallback',
+        'wrapper' => 'lucene-container',
+        'effect' => 'fade',
+      ],
+    ];
+
+    $form['lucene']['textfields_container'] = [
+      '#type' => 'container',
+      '#attributes' => ['id' => 'lucene-container'],
+    ];
+    if (self::getConfig(self::LUCENE_SEARCH_FLAG, "All") === 1
+       || $form_state->getValue(self::LUCENE_SEARCH_FLAG) === 1) {
+      $form['lucene']['textfields_container'][self::LUCENE_SEARCH_LABEL] = [
+        '#type' => 'textfield',
+        '#title' => $this->t('Label'),
+        '#description' => $this->t('This label will be appear in Search Terms dropdown of Advanced Search form block if Lucene Search is enabled.'),
+        '#default_value' => self::getConfig(self::LUCENE_SEARCH_LABEL, "All"),
+      ];
+    }
+
     return parent::buildForm($form, $form_state);
   }
 
@@ -115,8 +150,21 @@ class SettingsForm extends ConfigFormBase {
       ->set(self::SEARCH_ADD_OPERATOR, $form_state->getValue(self::SEARCH_ADD_OPERATOR))
       ->set(self::SEARCH_REMOVE_OPERATOR, $form_state->getValue(self::SEARCH_REMOVE_OPERATOR))
       ->set(self::FACET_TRUNCATE, $form_state->getValue(self::FACET_TRUNCATE))
+
+      ->set(self::LUCENE_SEARCH_FLAG, $form_state->getValue(self::LUCENE_SEARCH_FLAG))
+      ->set(self::LUCENE_SEARCH_LABEL, $form_state->getValue(self::LUCENE_SEARCH_LABEL))
+
       ->save();
     parent::submitForm($form, $form_state);
   }
 
+  /**
+   * Callback for ajax_example_autotextfields.
+   *
+   * Selects the piece of the form we want to use as replacement markup and
+   * returns it as a form (renderable array).
+   */
+  public function LuceneSearchEnableDisableCallback($form, FormStateInterface $form_state) {
+    return $form['lucene']['textfields_container'];
+  }
 }
