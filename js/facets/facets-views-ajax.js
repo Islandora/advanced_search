@@ -126,6 +126,10 @@
             return;
           }
           e.preventDefault();
+
+          // added to prevent page reload if a facet link is clicked (Ajax of view is enabled)
+          e.stopImmediatePropagation();
+
           window.history.pushState(null, document.title, $(this).attr("href"));
         });
 
