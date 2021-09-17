@@ -5,6 +5,7 @@
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Configuring Solr](#configuring-solr)
+- [Lucene Search (New)](#lucene-search)
 - [Configure Collection Search](#configure-collection-search)
 - [Configure Views](#configure-views)
   - [Exposed Form](#exposed-form)
@@ -15,6 +16,7 @@
   - [Include / Exclude Facets](#include--exclude-facets)
 - [Configure Blocks](#configure-blocks)
   - [Advanced Search Block](#advanced-search-block)
+  - [Search Block (NEW)](#simple-search-block)
 - [Documentation](#documentation)
 - [Troubleshooting/Issues](#troubleshootingissues)
 - [Maintainers](#maintainers)
@@ -67,6 +69,16 @@ Please review
 [Islandora Documentation](https://islandora.github.io/documentation/user-documentation/searching/)
 before continuing. The following assumes you already have a working Solr and the
 Drupal Search API setup.
+
+## Lucene Search (New)
+
+Click [here](https://www.drupal.org/docs/contributed-modules/search-api-solr/solr-query-parsers) to find more detail about
+Lucene Search in Drupal.
+
+If this feature is enabled, an option of searching all mapping fields will be added in Advanced Search Form (screenshot below).
+
+![image](./docs/lucene_search_form.png)
+
 
 ## Configure Collection Search
 
@@ -214,6 +226,17 @@ checkbox.
 > affect on the function of the
 > [Advanced Search Block](#advanced-search-block). Please refer to that section
 > to learn more.
+
+### Search Block (NEW)
+
+To associate this simple search block to a Advanced Search Result Page view,
+you can select its machine name in the dropdown list. With that, this form
+will redirect to the view with search parameters.
+
+You can also change the search form's appearance by changing the default label,
+placeholder text for the search text field, and search button.
+
+![image](./docs/simple_search_settings.png)
 
 ## Documentation
 
