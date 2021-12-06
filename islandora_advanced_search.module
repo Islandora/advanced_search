@@ -126,7 +126,7 @@ function islandora_advanced_search_preprocess_views_view(&$variables) {
   // has been created for.
   if (in_array([$view->id(), $view->current_display], $views)) {
     // Toggle between 'list' and 'grid' display depending on url parameter.
-    $format = \Drupal::request()->query->get('display') ?? 'list';
+    $format = \Drupal::request()->query->get('display') ?? 'grid';
     $variables['attributes']['class'][] = "view-{$format}";
     $view->element['#attached']['library'][] = 'islandora_advanced_search/advanced.search.pager';
   }

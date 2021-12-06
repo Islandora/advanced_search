@@ -132,6 +132,22 @@
 
           window.history.pushState(null, document.title, $(this).attr("href"));
         });
+      
+      /* digitalutsc added */
+      $('.pager__sort select[name="order"]')
+        .once()
+        .change(function () {
+          var href = window.location.href;
+          var params = Drupal.Views.parseQueryString(href);
+
+          var selection = $(this).val();
+          var option = selection.split('_');
+          params.sort_by = option[0];
+          params.sort_order = option[1].toUpperCase();
+
+          href = href.split("?")[0] + "?" + $.param(params);
+          window.history.pushState(null, document.title, href);
+        });
 
       // Trigger on sort change.
       $('[data-drupal-pager-id] select[name="order"]')
