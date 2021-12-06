@@ -148,7 +148,10 @@ class AdvancedSearchQuery {
       $backend = $index->getServerInstance()->getBackend();
       $language_ids = $search_api_query->getLanguages();
       $field_mapping = $backend->getSolrFieldNamesKeyedByLanguage($language_ids, $index);
-      $q[] = "{!boost b=boost_document}";
+      
+      // disable for Lucene and wildcard
+      //$q[] = "{!boost b=boost_document}";
+      
       // To support negative queries we must first bring in all documents.
       $q[] = $this->negativeQuery($terms) ? "*:*" : "";
       $term = array_shift($terms);
