@@ -109,3 +109,38 @@
 .pager__link--is-active {
   text-decoration: underline;
 }
+
+
+/* generalizing */
+.islandora_advanced_search_result_pager .pager__group .pager  {
+  display: none;
+}
+
+.islandora_advanced_search_result_pager .pager__group > * {
+  margin: 0.47214rem 2rem 0.47214rem 0;
+  display:flex;
+}
+
+.islandora_advanced_search_result_pager .pager__group > *:last-child {
+  margin-right: 0;
+}
+
+.view-filters {
+  display: none;
+}
+
+.pager__group .container {
+  width: auto !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.islandora_advanced_search_result_pager .pager__group nav  {
+  display: none;
+}
+
+.view-grid .view-content{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin: 0.47214rem 0 0.47214rem 2.61803rem;
+}
