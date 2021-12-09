@@ -184,7 +184,7 @@ class AdvancedSearchQuery {
         // enable dismax search query option
         /** @var Solarium\QueryType\Select\Query\Component\DisMax $dismax */
         $dismax = $solarium_query->getDisMax();
-        $dismax->setQueryParser('edismax');
+        $dismax->setQueryParser('dismax');
         $query_fields = [];
         foreach ($field_mapping as $key => $field) {
           foreach ($field as $f => $item) {
