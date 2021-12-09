@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\islandora_advanced_search\Plugin\Block;
+namespace Drupal\advanced_search\Plugin\Block;
 
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Form\FormBuilderInterface;
@@ -15,8 +15,8 @@ use Symfony\Component\HttpFoundation\Request;
  * Provides an Islandora Advanced Search block.
  *
  * @Block(
- *  id = "islandora_advanced_search_block",
- *  deriver = "Drupal\islandora_advanced_search\Plugin\Block\AdvancedSearchBlockDeriver",
+ *  id = "advanced_search_block",
+ *  deriver = "Drupal\advanced_search\Plugin\Block\AdvancedSearchBlockDeriver",
  *  admin_label = @Translation("Islandora Advanced Search"),
  *  category = @Translation("Islandora"),
  * )
@@ -343,7 +343,7 @@ class AdvancedSearchBlock extends BlockBase implements ContainerFactoryPluginInt
       ];
     }
     $form['#attributes']['class'][] = 'clearfix';
-    $form['#attached']['library'][] = 'islandora_advanced_search/advanced.search.admin';
+    $form['#attached']['library'][] = 'advanced_search/advanced.search.admin';
     return $form;
   }
 
@@ -371,7 +371,7 @@ class AdvancedSearchBlock extends BlockBase implements ContainerFactoryPluginInt
     foreach ($this->configuration[self::SETTING_FIELDS] as $identifier) {
       $configured_fields[$identifier] = $fields[$identifier];
     }
-    return $this->formBuilder->getForm('Drupal\islandora_advanced_search\Form\AdvancedSearchForm', $this->view, $this->display, $configured_fields, $this->configuration[self::SETTING_CONTEXTUAL_FILTER]);
+    return $this->formBuilder->getForm('Drupal\advanced_search\Form\AdvancedSearchForm', $this->view, $this->display, $configured_fields, $this->configuration[self::SETTING_CONTEXTUAL_FILTER]);
   }
 
   /**

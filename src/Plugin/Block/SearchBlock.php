@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\islandora_advanced_search\Plugin\Block;
+namespace Drupal\advanced_search\Plugin\Block;
 
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -84,7 +84,7 @@ class SearchBlock extends BlockBase {
    * {@inheritdoc}
    */
   public function build() {
-    return \Drupal::formBuilder()->getForm('Drupal\islandora_advanced_search\Form\SearchForm');
+    return \Drupal::formBuilder()->getForm('Drupal\advanced_search\Form\SearchForm');
   }
 
 }

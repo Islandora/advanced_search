@@ -1,8 +1,8 @@
 <?php
 
-namespace Drupal\islandora_advanced_search;
+namespace Drupal\advanced_search;
 
-use Drupal\islandora_advanced_search\Form\AdvancedSearchForm;
+use Drupal\advanced_search\Form\AdvancedSearchForm;
 
 /**
  * Defines a single search term.
@@ -17,7 +17,7 @@ class AdvancedSearchQueryTerm {
   const CONJUNCTION_OR = 'OR';
 
   // Used for serializing / deserializing query parameters.
-  // These are also hard-coded in islandora_advanced_search.form.js.
+  // These are also hard-coded in advanced_search.form.js.
   const CONJUNCTION_QUERY_PARAMETER = 'c';
   const FIELD_QUERY_PARAMETER = 'f';
   const INCLUDE_QUERY_PARAMETER = 'i';
@@ -139,7 +139,7 @@ class AdvancedSearchQueryTerm {
    * @param array $params
    *   An array representing the query parameters for a single search term.
    *
-   * @return \Drupal\islandora_advanced_search\AdvancedSearchQueryTerm|null
+   * @return \Drupal\advanced_search\AdvancedSearchQueryTerm|null
    *   An object which represents a valid search term.
    */
   public static function fromQueryParams(array $params) {
@@ -168,7 +168,7 @@ class AdvancedSearchQueryTerm {
    * @param array $input
    *   An array representing the submitted form values for a single search term.
    *
-   * @return \Drupal\islandora_advanced_search\AdvancedSearchQueryTerm|null
+   * @return \Drupal\advanced_search\AdvancedSearchQueryTerm|null
    *   An object which represents a valid search term.
    */
   public static function fromUserInput(array $input) {

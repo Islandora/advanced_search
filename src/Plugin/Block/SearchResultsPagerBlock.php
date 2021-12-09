@@ -1,12 +1,12 @@
 <?php
 
-namespace Drupal\islandora_advanced_search\Plugin\Block;
+namespace Drupal\advanced_search\Plugin\Block;
 
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Render\Markup;
 use Drupal\Core\Url;
-use Drupal\islandora_advanced_search\AdvancedSearchQuery;
+use Drupal\advanced_search\AdvancedSearchQuery;
 use Drupal\views\Entity\View;
 use Drupal\views\Plugin\views\pager\SqlBase;
 use Drupal\views\ViewExecutable;
@@ -17,8 +17,8 @@ use Symfony\Component\HttpFoundation\Request;
  * Provides a 'AjaxViewBlock' block.
  *
  * @Block(
- *  id = "islandora_advanced_search_result_pager",
- *  deriver = "Drupal\islandora_advanced_search\Plugin\Block\SearchResultsPagerBlockDeriver",
+ *  id = "advanced_search_result_pager",
+ *  deriver = "Drupal\advanced_search\Plugin\Block\SearchResultsPagerBlockDeriver",
  *  admin_label = @Translation("Search Results Pager"),
  *  category = @Translation("Islandora"),
  * )
@@ -81,7 +81,7 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
     $build = [
       '#attached' => [
         'drupalSettings' => [
-          'islandora_advanced_search_pager_views_ajax' => [
+          'advanced_search_pager_views_ajax' => [
             $id => [
               'view_id' => $view_id,
               'current_display_id' => $display_id,
@@ -91,7 +91,7 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
         ],
       ],
       '#attributes' => [
-        'class' => ['islandora_advanced_search_result_pager'],
+        'class' => ['advanced_search_result_pager'],
         'data-drupal-pager-id' => $id,
       ],
       'result_summary' => $this->buildResultsSummary($view_executable),

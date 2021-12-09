@@ -1,8 +1,8 @@
-//# sourceURL=modules/contrib/islandora_advanced_search/js/islandora-advanced-search.admin.js
+//# sourceURL=modules/contrib/advanced_search/js/islandora-advanced-search.admin.js
 /**
  * @file
  * Largely based on core/modules/blocks/js/blocks.js
- * 
+ *
  * This file allows for moving rows between two regions in a table and have the
  * 'region' field update appropriately.
  */

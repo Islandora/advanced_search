@@ -1,13 +1,13 @@
 <?php
 
-namespace Drupal\islandora_advanced_search;
+namespace Drupal\advanced_search;
 
 use Drupal\block\Entity\Block;
 use Drupal\Core\EventSubscriber\MainContentViewSubscriber;
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Url;
-use Drupal\islandora_advanced_search\Form\SettingsForm;
-use Drupal\islandora_advanced_search\Plugin\Block\AdvancedSearchBlock;
+use Drupal\advanced_search\Form\SettingsForm;
+use Drupal\advanced_search\Plugin\Block\AdvancedSearchBlock;
 use Drupal\search_api\Query\QueryInterface as DrupalQueryInterface;
 use Drupal\views\ViewExecutable;
 use Solarium\Core\Query\QueryInterface as SolariumQueryInterface;
@@ -78,7 +78,7 @@ class AdvancedSearchQuery {
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   The request to parse terms from.
    *
-   * @return \Drupal\islandora_advanced_search\AdvancedSearchQueryTerm[]
+   * @return \Drupal\advanced_search\AdvancedSearchQueryTerm[]
    *   A list of search terms.
    */
   public function getTerms(Request $request) {
@@ -114,7 +114,7 @@ class AdvancedSearchQuery {
   /**
    * Checks if the all of the given terms are negations or not.
    *
-   * @param \Drupal\islandora_advanced_search\AdvancedSearchQueryTerm[] $terms
+   * @param \Drupal\advanced_search\AdvancedSearchQueryTerm[] $terms
    *   The terms to search for.
    *
    * @return bool
@@ -148,10 +148,10 @@ class AdvancedSearchQuery {
       $backend = $index->getServerInstance()->getBackend();
       $language_ids = $search_api_query->getLanguages();
       $field_mapping = $backend->getSolrFieldNamesKeyedByLanguage($language_ids, $index);
-      
+
       // disable for Lucene and wildcard
       //$q[] = "{!boost b=boost_document}";
-      
+
       // To support negative queries we must first bring in all documents.
       $q[] = $this->negativeQuery($terms) ? "*:*" : "";
       $term = array_shift($terms);
@@ -197,7 +197,7 @@ class AdvancedSearchQuery {
         $dismax->setQueryFields($query_fields);
       }
       $solarium_query->setQuery($q);
-    } 
+    }
   }
 
   /**

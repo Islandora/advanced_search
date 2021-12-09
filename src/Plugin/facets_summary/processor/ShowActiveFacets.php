@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\islandora_advanced_search\Plugin\facets_summary\processor;
+namespace Drupal\advanced_search\Plugin\facets_summary\processor;
 
 use Drupal\Core\Link;
 use Drupal\facets_summary\FacetsSummaryInterface;

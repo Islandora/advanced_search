@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\islandora_advanced_search\Plugin\facets\widget;
+namespace Drupal\advanced_search\Plugin\facets\widget;
 
 use Drupal\facets\Plugin\facets\widget\LinksWidget;
 use Drupal\Core\Link;

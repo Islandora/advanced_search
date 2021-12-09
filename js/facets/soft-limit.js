@@ -1,4 +1,4 @@
-//# sourceURL=modules/contrib/islandora/modules/islandora_advanced_search/js/facets/soft-limit.js
+//# sourceURL=modules/contrib/islandora/modules/advanced_search/js/facets/soft-limit.js
 /**
  * @file
  * Overrides the soft-limit.js behavior from the 'facets' module.

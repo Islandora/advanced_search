@@ -1,8 +1,8 @@
-.islandora_advanced_search_result_pager .pager__summary {
+.advanced_search_result_pager .pager__summary {
   font-weight: 700;
 }
 
-.islandora_advanced_search_result_pager .pager__group {
+.advanced_search_result_pager .pager__group {
   margin: 1.25rem 0;
   padding: 1rem 0;
   border-top: 1px solid;
@@ -15,32 +15,32 @@
 }
 
 @media all and (min-width: 45.063em) {
-  .islandora_advanced_search_result_pager .pager__group {
+  .advanced_search_result_pager .pager__group {
     justify-content: flex-end;
   }
-  .islandora_advanced_search_result_pager .pager__group > * {
+  .advanced_search_result_pager .pager__group > * {
     margin: 0.47214rem 0 0.47214rem 2.61803rem;
   }
-  .islandora_advanced_search_result_pager .pager__group > *:first-child {
+  .advanced_search_result_pager .pager__group > *:first-child {
     margin-left: 0;
   }
 }
 
-.islandora_advanced_search_result_pager .pager__group > * {
+.advanced_search_result_pager .pager__group > * {
   margin: 0.47214rem 2rem 0.47214rem 0;
 }
 
-.islandora_advanced_search_result_pager .pager__group > *:last-child {
+.advanced_search_result_pager .pager__group > *:last-child {
   margin-right: 0;
 }
 
-.islandora_advanced_search_result_pager .pager__group .item-list__list,
-.islandora_advanced_search_result_pager .pager__group .item-list__title,
-.islandora_advanced_search_result_pager .pager__group .item-list__item {
+.advanced_search_result_pager .pager__group .item-list__list,
+.advanced_search_result_pager .pager__group .item-list__title,
+.advanced_search_result_pager .pager__group .item-list__item {
   display: inline;
 }
 
-.islandora_advanced_search_result_pager .pager__group .item-list__title {
+.advanced_search_result_pager .pager__group .item-list__title {
   font-size: initial;
   margin: 0.25rem;
 }
@@ -112,16 +112,16 @@
 
 
 /* generalizing */
-.islandora_advanced_search_result_pager .pager__group .pager  {
+.advanced_search_result_pager .pager__group .pager  {
   display: none;
 }
 
-.islandora_advanced_search_result_pager .pager__group > * {
+.advanced_search_result_pager .pager__group > * {
   margin: 0.47214rem 2rem 0.47214rem 0;
   display:flex;
 }
 
-.islandora_advanced_search_result_pager .pager__group > *:last-child {
+.advanced_search_result_pager .pager__group > *:last-child {
   margin-right: 0;
 }
 
@@ -135,7 +135,7 @@
   padding-right: 0 !important;
 }
 
-.islandora_advanced_search_result_pager .pager__group nav  {
+.advanced_search_result_pager .pager__group nav  {
   display: none;
 }
 

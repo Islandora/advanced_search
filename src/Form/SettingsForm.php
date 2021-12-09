@@ -1,12 +1,12 @@
 <?php
 
-namespace Drupal\islandora_advanced_search\Form;
+namespace Drupal\advanced_search\Form;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\islandora_advanced_search\AdvancedSearchQuery;
-use Drupal\islandora_advanced_search\GetConfigTrait;
+use Drupal\advanced_search\AdvancedSearchQuery;
+use Drupal\advanced_search\GetConfigTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -16,7 +16,7 @@ class SettingsForm extends ConfigFormBase {
 
   use GetConfigTrait;
 
-  const CONFIG_NAME = 'islandora_advanced_search.settings';
+  const CONFIG_NAME = 'advanced_search.settings';
   const SEARCH_QUERY_PARAMETER = 'search_query_parameter';
   const SEARCH_RECURSIVE_PARAMETER = 'search_recursive_parameter';
   const SEARCH_ADD_OPERATOR = 'search_add_operator';
@@ -47,7 +47,7 @@ class SettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function getFormId() {
-    return 'islandora_advanced_search_settings_form';
+    return 'advanced_search_settings_form';
   }
 
   /**

@@ -1,15 +1,15 @@
 <?php
 
-namespace Drupal\islandora_advanced_search\Form;
+namespace Drupal\advanced_search\Form;
 
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
-use Drupal\islandora_advanced_search\AdvancedSearchQuery;
-use Drupal\islandora_advanced_search\AdvancedSearchQueryTerm;
-use Drupal\islandora_advanced_search\GetConfigTrait;
+use Drupal\advanced_search\AdvancedSearchQuery;
+use Drupal\advanced_search\AdvancedSearchQueryTerm;
+use Drupal\advanced_search\GetConfigTrait;
 use Drupal\views\DisplayPluginCollection;
 use Drupal\views\Entity\View;
 use Drupal\views\Plugin\views\display\PathPluginBase;
@@ -36,7 +36,7 @@ class AdvancedSearchForm extends FormBase {
   const NOT_OP = 'NOT';
   const OR_OP = 'OR';
 
-  // These are also hard-coded in islandora_advanced_search.form.js.
+  // These are also hard-coded in advanced_search.form.js.
   const CONJUNCTION_FORM_FIELD = 'conjunction';
   const SEARCH_FORM_FIELD = 'search';
   const INCLUDE_FORM_FIELD = 'include';
@@ -80,7 +80,7 @@ class AdvancedSearchForm extends FormBase {
    * {@inheritdoc}
    */
   public function getFormId() {
-    return 'islandora_advanced_search_form';
+    return 'advanced_search_form';
   }
 
   /**
@@ -249,8 +249,8 @@ class AdvancedSearchForm extends FormBase {
     $route_name = $this->getRouteName($form_state);
     $requires_redirect = $route_name ? $this->currentRouteMatch->getRouteName() !== $route_name : FALSE;
 
-    $form['#attached']['library'][] = 'islandora_advanced_search/advanced.search.form';
-    $form['#attached']['drupalSettings']['islandora_advanced_search_form'] = [
+    $form['#attached']['library'][] = 'advanced_search/advanced.search.form';
+    $form['#attached']['drupalSettings']['advanced_search_form'] = [
       'id' => Html::getId($this->getFormId()),
       'redirect' => $requires_redirect,
       'query_parameter' => AdvancedSearchQuery::getQueryParameter(),

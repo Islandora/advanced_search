@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\islandora_advanced_search\Plugin\Block;
+namespace Drupal\advanced_search\Plugin\Block;
 
 /**
  * Deriver for AdvancedSearchBlock.

@@ -1,9 +1,9 @@
 <?php
 
-namespace Drupal\islandora_advanced_search;
+namespace Drupal\advanced_search;
 
-use Drupal\islandora_advanced_search\Plugin\Block\AdvancedSearchBlock;
-use Drupal\islandora_advanced_search\Plugin\Block\SearchResultsPagerBlock;
+use Drupal\advanced_search\Plugin\Block\AdvancedSearchBlock;
+use Drupal\advanced_search\Plugin\Block\SearchResultsPagerBlock;
 
 /**
  * Helper functions.

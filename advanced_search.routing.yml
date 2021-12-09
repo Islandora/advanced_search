@@ -1,15 +1,15 @@
-islandora_advanced_search.ajax.blocks:
+advanced_search.ajax.blocks:
   path: '/islandora-advanced-search-ajax-blocks'
   defaults:
-    _controller: '\Drupal\islandora_advanced_search\Controller\AjaxBlocksController::respond'
+    _controller: '\Drupal\advanced_search\Controller\AjaxBlocksController::respond'
   requirements:
     # Allow public access to search blocks.
     _access: 'TRUE'
 
-islandora_advanced_search.settings:
+advanced_search.settings:
   path: '/admin/config/search/advanced'
   defaults:
-    _form: '\Drupal\islandora_advanced_search\Form\SettingsForm'
+    _form: '\Drupal\advanced_search\Form\SettingsForm'
     _title: 'Islandora Advanced Search Settings'
   requirements:
     _permission: 'administer site configuration'

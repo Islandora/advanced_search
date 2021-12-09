@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\islandora_advanced_search\Form;
+namespace Drupal\advanced_search\Form;
 
 
 use Drupal\Core\Form\FormBase;

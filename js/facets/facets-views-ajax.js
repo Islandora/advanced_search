@@ -1,4 +1,4 @@
-//# sourceURL=modules/contrib/islandora/modules/islandora_advanced_search/js/facets/facets-view.ajax.js
+//# sourceURL=modules/contrib/islandora/modules/advanced_search/js/facets/facets-view.ajax.js
 /**
  * @file
  * Overrides the facets-view-ajax.js behavior from the 'facets' module.
@@ -132,7 +132,7 @@
 
           window.history.pushState(null, document.title, $(this).attr("href"));
         });
-      
+
       /* digitalutsc added */
       $('.pager__sort select[name="order"]')
         .once()

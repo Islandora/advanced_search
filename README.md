@@ -41,7 +41,7 @@ composer require drupal/search_api_solr "^4.1"
 composer require drupal/search_api "^1.5"
 ```
 
-However, for reference, `islandora_advanced_search` requires the following
+However, for reference, `advanced_search` requires the following
 drupal modules:
 
 - [facets](https://www.drupal.org/project/facets)
@@ -53,7 +53,7 @@ To download/enable just this module, use the following from the command line:
 
 ```bash
 composer require islandora/islandora
-drush en islandora_advanced_search
+drush en advanced_search
 ```
 
 ## Configuration
@@ -61,7 +61,7 @@ drush en islandora_advanced_search
 You can set the following configuration at
 `admin/config/islandora/advanced_search`:
 
-![image](./docs/islandora_advanced_search_settings.png)
+![image](./docs/advanced_search_settings.png)
 
 ## Configuring Solr
 

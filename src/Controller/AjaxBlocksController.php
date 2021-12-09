@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\islandora_advanced_search\Controller;
+namespace Drupal\advanced_search\Controller;
 
 use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\ReplaceCommand;

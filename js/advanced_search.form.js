@@ -1,4 +1,4 @@
-//# sourceURL=modules/contrib/islandora/modules/islandora_advanced_search/js/islandora-advanced-search.form.js
+//# sourceURL=modules/contrib/islandora/modules/advanced_search/js/islandora-advanced-search.form.js
 /**
  * @file
  * Handles Ajax submission / updating form action on url change, etc.
@@ -81,10 +81,10 @@
     return window.location.href.split("?")[0] + "?" + $.param(params);
   }
 
-  Drupal.behaviors.islandora_advanced_search_form = {
+  Drupal.behaviors.advanced_search_form = {
     attach: function (context, settings) {
-      if (settings.islandora_advanced_search_form.id !== 'undefined') {
-        const $form = $('form#' + settings.islandora_advanced_search_form.id).once();
+      if (settings.advanced_search_form.id !== 'undefined') {
+        const $form = $('form#' + settings.advanced_search_form.id).once();
         if ($form.length > 0) {
           window.addEventListener("pushstate", function (e) {
             $form.attr('action', window.location.pathname + window.location.search);
@@ -96,25 +96,25 @@
           });
           // Prevent form submission and push state instead.
           //
-          // Logic server side / client side should match to generate the 
+          // Logic server side / client side should match to generate the
           // appropriate URL with javascript enabled or disable.
           //
           // If a route is set for the view display that this form is derived
           // from, and we are not on the same page as that route, rely on the
-          // normal submit which will redirect to the appropriate page. 
-          if (!settings.islandora_advanced_search_form.redirect) {
+          // normal submit which will redirect to the appropriate page.
+          if (!settings.advanced_search_form.redirect) {
             $form.submit(function (e) {
               e.preventDefault();
               e.stopPropagation();
               const inputs = $form.serializeArray();
-              const href = url(inputs, settings.islandora_advanced_search_form);
+              const href = url(inputs, settings.advanced_search_form);
               window.history.pushState(null, document.title, href);
             });
           }
           // Reset should trigger refresh of AJAX Blocks / Views.
           $form.find('input[data-drupal-selector = "edit-reset"]').mousedown(function (e) {
             const inputs = [];
-            const href = url(inputs, settings.islandora_advanced_search_form);
+            const href = url(inputs, settings.advanced_search_form);
             window.history.pushState(null, document.title, href);
           });
         }
