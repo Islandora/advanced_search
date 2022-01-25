@@ -162,9 +162,11 @@ class AdvancedSearchQuery {
       }
       $q = implode(' ', $q);
 
+
+
       /** @var Solarium\QueryType\Select\Query\Query $solarium_query */
-      if ((strpos($q, "*") !== false || strpos($q, "?") !== false)) {
-        // enable wildcard
+      if ((strpos($q, "*") !== false || strpos($q, "?") !== false) || (strpos(trim($q), ' ') === false) ) {
+        // if the query string contain '*', '?', OR is a single world, enable wildcard
         $tmp = str_replace('"', "", trim($q));
         $query_fields = [];
         foreach ($field_mapping as $key => $field) {
