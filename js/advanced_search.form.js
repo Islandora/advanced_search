@@ -114,7 +114,7 @@
               if (e.keyCode == 13) {
                 // Cancel the default action on keypress event
                 e.preventDefault();
-                $('form#advanced-search-form').submit();
+                $form.submit();
               }
             });
           });
