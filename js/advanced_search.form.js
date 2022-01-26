@@ -81,16 +81,7 @@
     return window.location.href.split("?")[0] + "?" + $.param(params);
   }
 
-  $.urlParam = function(url, name){
-    var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(url);
-    if (results !== null)
-      return results[1] || 0;
-    else {
-      return null;
-    }
-  }
-
-  $.updateParam = function(urlstring, param, value) {
+  function updateParam(urlstring, param, value) {
     var url = new URL(urlstring);
     var search_params = url.searchParams;
 
@@ -114,6 +105,21 @@
               $form.attr('action', window.location.pathname + window.location.search);
             }
           });
+
+          /* digitalutsc added */
+          $("input[name*='[value]']").each(function () {
+            // enable enter key trigger submit searching
+            $(this).on("keypress", function (e) {
+
+              if (e.keyCode == 13) {
+                // Cancel the default action on keypress event
+                e.preventDefault();
+                $('form#advanced-search-form').submit();
+              }
+            });
+          });
+
+
           // Prevent form submission and push state instead.
           //
           // Logic server side / client side should match to generate the
@@ -134,13 +140,12 @@
                 // update pager links - items per page
                 var new_link = href;
                 if (href.includes("items_per_page=") === false) {
-                  console.log("url has items_per_page");
-                  new_link = new_link + '&items_per_page=' + $(this).text();
+                  new_link = new_link + '&items_per_page=' + $(this).text().trim().toLowerCase();
                   $( this ).attr("href", new_link);
                 }
                 else {
                   // replace with new param
-                  new_link = updateParam(new_link, "items_per_page", $(this).text());
+                  new_link = updateParam(new_link, "items_per_page", $(this).text().trim().toLowerCase());
                   $( this ).attr("href", new_link);
                 }
               });
@@ -149,13 +154,12 @@
                 // update pager links - display
                 var new_link = href;
                 if (href.includes("display=") === false) {
-                  console.log("url has display");
-                  new_link = new_link + '&display=' + $(this).text();
+                  new_link = new_link + '&display=' + $(this).text().trim().toLowerCase();
                   $( this ).attr("href", new_link);
                 }
                 else {
                   // replace with new param
-                  new_link = updateParam(new_link, "display", $(this).text());
+                  new_link = updateParam(new_link, "display", $(this).text().trim().toLowerCase());
                   $( this ).attr("href", new_link);
                 }
               });
@@ -169,7 +173,7 @@
             const href = url(inputs, settings.advanced_search_form);
             window.history.pushState(null, document.title, href.split('?')[0] );
 
-
+            /* reset the url after reset button clicked */
             window.location.replace(href.split('?')[0]);
           });
         }
