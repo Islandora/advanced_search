@@ -185,7 +185,7 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
         '#url' => $url,
         '#title' => $items_per_page,
         '#attributes' => [
-          'class' => $active ? ['pager__link', 'pager__link--is-active'] : ['pager__link'],
+          'class' => $active ? ['pager__link', 'pager__link--is-active', 'pager__itemsperpage'] : ['pager__link', 'pager__itemsperpage'],
         ],
         '#wrapper_attributes' => [
           'class' => $active ? ['pager__item', 'is-active'] : ['pager__item'],
@@ -236,7 +236,7 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
         '#url' => $url,
         '#title' => Markup::create($text),
         '#attributes' => [
-          'class' => $active ? ['pager__link', 'pager__link--is-active'] : ['pager__link'],
+          'class' => $active ? ['pager__link', 'pager__link--is-active', 'pager__display'] : ['pager__link', 'pager__display'],
         ],
         '#wrapper_attributes' => [
           'class' => $active ? ['pager__item', 'is-active'] : ['pager__item'],

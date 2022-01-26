@@ -81,6 +81,26 @@
     return window.location.href.split("?")[0] + "?" + $.param(params);
   }
 
+  $.urlParam = function(url, name){
+    var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(url);
+    if (results !== null)
+      return results[1] || 0;
+    else {
+      return null;
+    }
+  }
+
+  $.updateParam = function(urlstring, param, value) {
+    var url = new URL(urlstring);
+    var search_params = url.searchParams;
+
+    search_params.set(param, value);
+
+    url.search = search_params.toString();
+
+    return url.toString();
+  }
+
   Drupal.behaviors.advanced_search_form = {
     attach: function (context, settings) {
       if (settings.advanced_search_form.id !== 'undefined') {
@@ -108,6 +128,38 @@
               e.stopPropagation();
               const inputs = $form.serializeArray();
               const href = url(inputs, settings.advanced_search_form);
+
+              /* digitalutsc added*/
+              $("li.pager__item a.pager__itemsperpage").each(function( index ) {
+                // update pager links - items per page
+                var new_link = href;
+                if (href.includes("items_per_page=") === false) {
+                  console.log("url has items_per_page");
+                  new_link = new_link + '&items_per_page=' + $(this).text();
+                  $( this ).attr("href", new_link);
+                }
+                else {
+                  // replace with new param
+                  new_link = updateParam(new_link, "items_per_page", $(this).text());
+                  $( this ).attr("href", new_link);
+                }
+              });
+
+              $("li.pager__item a.pager__display").each(function( index ) {
+                // update pager links - display
+                var new_link = href;
+                if (href.includes("display=") === false) {
+                  console.log("url has display");
+                  new_link = new_link + '&display=' + $(this).text();
+                  $( this ).attr("href", new_link);
+                }
+                else {
+                  // replace with new param
+                  new_link = updateParam(new_link, "display", $(this).text());
+                  $( this ).attr("href", new_link);
+                }
+              });
+
               window.history.pushState(null, document.title, href);
             });
           }
@@ -115,7 +167,10 @@
           $form.find('input[data-drupal-selector = "edit-reset"]').mousedown(function (e) {
             const inputs = [];
             const href = url(inputs, settings.advanced_search_form);
-            window.history.pushState(null, document.title, href);
+            window.history.pushState(null, document.title, href.split('?')[0] );
+
+
+            window.location.replace(href.split('?')[0]);
           });
         }
       }
