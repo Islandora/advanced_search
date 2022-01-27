@@ -107,9 +107,13 @@
 }
 
 .pager__link--is-active {
-  text-decoration: underline;
+  text-decoration: underline !important;
+  border: solid 2px #0d77b5;
 }
 
+.view-grid .view-content .views-row {
+  padding: 0px 20px 20px 0px !important;
+}
 
 /* generalizing */
 .advanced_search_result_pager .pager__group .pager  {
@@ -142,5 +146,5 @@
 .view-grid .view-content{
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  margin: 0.47214rem 0 0.47214rem 2.61803rem;
+  /*margin: 0.47214rem 0 0.47214rem 2.61803rem;*/
 }

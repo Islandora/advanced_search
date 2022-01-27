@@ -77,7 +77,6 @@
   Drupal.behaviors.islandoraAdvancedSearchViewsAjax = {
     attach: function (context, settings) {
       window.historyInitiated = true;
-
       // Remove existing behavior from form.
       if (settings && settings.views && settings.views.ajaxViews) {
         $.each(settings.views.ajaxViews, function (index, settings) {
@@ -114,7 +113,34 @@
               });
             });
         });
+
+          if (window.location.search.includes("display=") === true) {
+
+              $("li.pager__item a.pager__display").each(function () {
+                  $(this).parent().removeClass("is-active");
+                  $(this).removeClass("pager__link--is-active");
+                  if ($(this).text().trim().toLowerCase() === getParam(window.location.search, "display").trim().toLowerCase()) {
+                      $(this).addClass("pager__link--is-active");
+                  }
+              });
+          }
+
+          if (window.location.search.includes("items_per_page=") === true) {
+              $("li.pager__item a.pager__itemsperpage").each(function() {
+                  $(this).parent().removeClass("is-active");
+                  $(this).removeClass("pager__link--is-active");
+                  if ($(this).text().trim().toLowerCase() === getParam(window.location.search, "items_per_page").trim().toLowerCase()) {
+                      $(this).addClass("pager__link--is-active");
+                  }
+              });
+          }
+
+
       }
+        function getParam(urlstring, param) {
+            var searchparam = new URLSearchParams(urlstring);
+            return searchparam.get(param);
+        }
 
       // Attach behavior to pager, summary, facet links.
       $("[data-drupal-pager-id], [data-drupal-facets-summary-id], [data-drupal-facet-id]")

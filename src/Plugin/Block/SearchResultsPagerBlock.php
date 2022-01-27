@@ -212,7 +212,7 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
    *   A renderable array representing the display links portion of pager.
    */
   protected function buildDisplayLinks(array $query_parameters) {
-    $active_display = $query_parameters['display'] ?? 'list';
+    $active_display = $query_parameters['display'] ?? 'grid';
     $display_options = [
       'list' => [
         'icon' => 'fa-list',
