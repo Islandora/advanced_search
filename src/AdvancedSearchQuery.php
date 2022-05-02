@@ -162,20 +162,31 @@ class AdvancedSearchQuery {
       }
       $q = implode(' ', $q);
 
-
+      $case_insensitive_field = $this::getConfig(SettingsForm::SOLR_CASE_INSENSITIVE_FIELD_PREFIX, '');
 
       /** @var Solarium\QueryType\Select\Query\Query $solarium_query */
-      if ((strpos($q, "*") !== false || strpos($q, "?") !== false) || (strpos(trim($q), ' ') === false) ) {
+      if ((strpos($q, "*") !== false || strpos($q, "?") !== false)) {
         // if the query string contain '*', '?', OR is a single world, enable wildcard
         $tmp = str_replace('"', "", trim($q));
         $query_fields = [];
         foreach ($field_mapping as $key => $field) {
           foreach ($field as $f => $item) {
-            if (strpos($item, 'sticky') === false && !in_array($item, ['score', 'random', 'boost_document'])
+            // bs_ are boolean fields, do not work well with text search
+            if (substr($item, 0, 3) !== "bs_" && !in_array($item, ['score', 'random', 'boost_document'])
               && ((strpos( $item, "sm_" ) === 0) || (strpos( $item, "tm_" ) === 0) || (strpos($item, "sort_ss_") === 0) || (strpos($item, "ts_") === 0)
                 || (strpos($item, "ss_") === 0)
               )){
               array_push($query_fields, '('.$item. ':'. $tmp .')');
+
+              // Add case insensitive fields in the query search fields
+              if ($case_insensitive_field !== '') {
+                $item_prefix = substr($item, 0, 3);
+                if ($item_prefix == "ss_" || $item_prefix == "sm_") {
+                  $case_insensitive_item = str_replace($item_prefix,$case_insensitive_field, $item);
+                  array_push($query_fields, '('.$case_insensitive_item. ':'. $tmp .')');
+                }
+              }
+
             }
           }
         }
@@ -190,14 +201,30 @@ class AdvancedSearchQuery {
         $query_fields = [];
         foreach ($field_mapping as $key => $field) {
           foreach ($field as $f => $item) {
-            if (strpos($item, 'sticky') === false) {
+            // bs_ are boolean fields, do not work well with text search
+            if (substr($item, 0, 3) !== "bs_") {
               array_push($query_fields, $item);
+
+              if ($case_insensitive_field !== '') {
+                $item_prefix = substr($item, 0, 3);
+                if ($item_prefix == "ss_" || $item_prefix == "sm_") {
+                  $case_insensitive_item = str_replace($item_prefix,$case_insensitive_field, $item);
+                  array_push($query_fields, $case_insensitive_item);
+                }
+              }
             }
           }
         }
         $query_fields = implode(" ", array_unique($query_fields));
         $dismax->setQueryFields($query_fields);
+
+        // Looks like, somewhere in the previous steps, double quotes get added, we are removing them!
+        // ToDo: Look into where the original quotes are being added, and remove it there!
+        $q = trim($q);
+        $q = substr($q, 1);
+        $q = substr($q, 0, -1);
       }
+
       $solarium_query->setQuery($q);
     }
   }
