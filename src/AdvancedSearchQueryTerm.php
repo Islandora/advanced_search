@@ -284,6 +284,13 @@ class AdvancedSearchQueryTerm {
     $terms = [];
     $query_helper = \Drupal::service('solarium.query_helper');
     $value = $query_helper->escapePhrase(trim($this->value));
+
+    // Added to handle exact matches keyword (surrounded by "")
+    if (preg_match('#^(\'|").+\1$#', $value) == 1) {
+      trim($value);
+      $value =  str_replace('"\\', '', $value);
+      $value =  str_replace('\\"', '', $value);
+    }
     if ($this->field === "all") {
       return $value;
     }
@@ -295,5 +302,12 @@ class AdvancedSearchQueryTerm {
     $terms = implode(' ', $terms);
     return $this->include ? "($terms)" : "-($terms)";
   }
+  /**
+   * Get Field search
+   */
+  public function getField() {
+    return $this->field;
+  }
+
 
 }
