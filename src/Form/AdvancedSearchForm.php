@@ -113,6 +113,10 @@ class AdvancedSearchForm extends FormBase {
     return self::getConfig(SettingsForm::LUCENE_SEARCH_FLAG, 0);
   }
 
+  public static function getShowLuceneSearch() {
+    return self::getConfig(SettingsForm::LUCENE_SEARCH_VISIBILITY, 0);
+  }
+
   /**
    * Get if Lucene Search checkbox is enabled or disable
    *
@@ -283,7 +287,7 @@ class AdvancedSearchForm extends FormBase {
     ];
 
     $options = [];
-    if (self::getLuceneSearch()) {
+    if (self::getLuceneSearch() && !self::getShowLuceneSearch()) {
       $options['all'] = self::getLuceneSearchLabel();
     }
     if (self::getCopyFieldSearch()) {

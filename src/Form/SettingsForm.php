@@ -24,6 +24,7 @@ class SettingsForm extends ConfigFormBase {
   const FACET_TRUNCATE = 'facet_truncate';
   const SOLR_CASE_INSENSITIVE_FIELD_PREFIX = "case_insensitive_solr_field_prefix";
   const LUCENE_SEARCH_FLAG = 'lucene_on_off';
+  const LUCENE_SEARCH_VISIBILITY = 'show_lucene_option';
   const COPY_FIELD_FLAG = 'copyfield_on_off';
   const LUCENE_SEARCH_LABEL = 'lucene_label';
   const COPY_FIELD_LABEL = 'copyfiled_label';
@@ -147,6 +148,12 @@ class SettingsForm extends ConfigFormBase {
         '#description' => $this->t('This label will be appear in Search Terms dropdown of Advanced Search form block if Lucene Search is enabled.'),
         '#default_value' => self::getConfig(self::LUCENE_SEARCH_LABEL, "All"),
       ];
+      $form['lucene']['textfields_container'][self::LUCENE_SEARCH_VISIBILITY] = [
+        '#type' => 'checkbox',
+        '#title' => $this
+          ->t('Hide in Advanced Search Form'),
+        '#default_value' => self::getConfig(self::LUCENE_SEARCH_VISIBILITY, 0),
+      ];
     }
 
 
@@ -177,13 +184,13 @@ class SettingsForm extends ConfigFormBase {
       $form['copyfield']['textfields_container'][self::COPY_FIELD_LABEL] = [
         '#type' => 'textfield',
         '#title' => $this->t('Label'),
-        '#description' => $this->t('This label will be appear in Search Terms dropdown of Advanced Search form block if Lucene Search is enabled.'),
+        '#description' => $this->t('This label will be appear in Search Terms dropdown of Advanced Search form block if CopyField is enabled.'),
         '#default_value' => self::getConfig(self::COPY_FIELD_LABEL, "Keyword"),
       ];
       $form['copyfield']['textfields_container'][self::COPY_FIELD_NAME] = [
         '#type' => 'textfield',
         '#title' => $this->t('Copyfield Name in Solr'),
-        '#default_value' => self::getConfig(self::COPY_FIELD_NAME, "default"),
+        '#default_value' => self::getConfig(self::COPY_FIELD_NAME, "catch_all_fields_mt"),
       ];
     }
 
@@ -205,6 +212,7 @@ class SettingsForm extends ConfigFormBase {
       ->set(self::FACET_TRUNCATE, $form_state->getValue(self::FACET_TRUNCATE))
       ->set(self::SOLR_CASE_INSENSITIVE_FIELD_PREFIX, $form_state->getValue(self::SOLR_CASE_INSENSITIVE_FIELD_PREFIX))
       ->set(self::LUCENE_SEARCH_FLAG, $form_state->getValue(self::LUCENE_SEARCH_FLAG))
+      ->set(self::LUCENE_SEARCH_VISIBILITY, $form_state->getValue(self::LUCENE_SEARCH_VISIBILITY))
       ->set(self::LUCENE_SEARCH_LABEL, $form_state->getValue(self::LUCENE_SEARCH_LABEL))
 
       ->set(self::COPY_FIELD_FLAG, $form_state->getValue(self::COPY_FIELD_FLAG))
