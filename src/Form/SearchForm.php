@@ -28,11 +28,11 @@ class SearchForm  extends FormBase
     if ($block) {
       $settings = $block->get('settings');
       $view_machine_name = $settings['search_view_machine_name'];
-
     }
+
     $form['search-textfield'] = array(
       '#type' => 'textfield',
-      '#title' => (!empty($settings['search_textfield_label']) ? $settings['search_textfield_label'] : ''),
+      '#title' => (!empty($settings['search_textfield_label']) ? $settings['search_textfield_label'] : '&nbsp;'),
       '#attributes' => ['placeholder' => $settings['search_placeholder']]
     );
 
@@ -56,10 +56,10 @@ class SearchForm  extends FormBase
       $view_machine_name = $settings['search_view_machine_name'];
     }
     $url = Url::fromRoute($view_machine_name, [
+      'type' => "dismax",
       'a[0][f]' => 'all',
       'a[0][i]' => 'IS',
       'a[0][v]' => $form_state->getValues()['search-textfield'],
-
     ]);
     $form_state->setRedirectUrl($url);
   }

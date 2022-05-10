@@ -114,6 +114,15 @@ class AdvancedSearchForm extends FormBase {
   }
 
   /**
+   * Get if Lucene Search checkbox is enabled or disable
+   *
+   * @return boolean
+   *
+   */
+  public static function getCopyFieldSearch() {
+    return self::getConfig(SettingsForm::COPY_FIELD_FLAG, 0);
+  }
+  /**
    * Get the character to use for removing a facet from the query.
    *
    * @return string
@@ -121,6 +130,16 @@ class AdvancedSearchForm extends FormBase {
    */
   public static function getLuceneSearchLabel() {
     return self::getConfig(SettingsForm::LUCENE_SEARCH_LABEL, "All");
+  }
+
+  /**
+   * Get the character to use for removing a facet from the query.
+   *
+   * @return string
+   *   The character to use for removing an facet to the query.
+   */
+  public static function getCopyFieldLabel() {
+    return self::getConfig(SettingsForm::COPY_FIELD_LABEL, "Keyword");
   }
 
   /**
@@ -263,13 +282,56 @@ class AdvancedSearchForm extends FormBase {
       ],
     ];
 
-    $options = (self::getLuceneSearch()) ? ["all" => self::getLuceneSearchLabel()] + $this->fieldOptions($fields)  : $this->fieldOptions($fields);
+    $options = [];
+    if (self::getLuceneSearch()) {
+      $options['all'] = self::getLuceneSearchLabel();
+    }
+    if (self::getCopyFieldSearch()) {
+      $options['copyfield'] = self::getCopyFieldLabel();
+    }
+    $options = $options + $this->fieldOptions($fields);
+    //$options = (self::getLuceneSearch()) ? ["all" => self::getLuceneSearchLabel()] + $this->fieldOptions($fields)  : $this->fieldOptions($fields);
+    
     $term_default_values = $this->defaultTermValues($options);
     list($recursive, $term_values) = $this->processInput($form_state, $term_default_values);
     $i = 0;
     $term_elements = [];
     $total_terms = count($term_values);
     $block_class_prefix = str_replace('_', '-', $this->getFormId());
+
+    // for search dismax only
+    if (isset($_GET['type']) && $_GET['type'] === 'dismax') {
+      $term_value = !empty($term_values) ? array_shift($term_values) : $term_default_values;
+      $form['ajax'] = [
+        '#type' => 'container',
+        '#attributes' => ['id' => self::AJAX_WRAPPER, 'style' => "padding-bottom: 50px;"],
+        'terms' => array_merge([
+          '#tree' => TRUE,
+          '#type' => 'container',
+        ], $term_elements),
+      ];
+      $form['ajax'][self::SEARCH_FORM_FIELD] = [
+        '#type' => 'hidden',
+        '#value' => 'all'
+      ];
+      $form['ajax'][self::VALUE_FORM_FIELD] = [
+        '#type' => 'textfield',
+        '#default_value' => $term_value[self::VALUE_FORM_FIELD],
+        '#attributes' => ['placeholder' => $this->t('Search the collection')]
+      ];
+      $form['reset'] = [
+        '#markup' => new \Drupal\Component\Render\FormattableMarkup('<a href="/advanced-search" class="advanced-search-form__reset button js-form-submit form-submit form-control" style="text-align: center;text-decoration: none;color: #333;">Reset</a>', []),
+      ];
+      $form['submit'] = [
+        '#type' => 'submit',
+        '#value' => $this->t('Search'),
+        '#id' => 'dismax-search',
+        '#name' => 'dismax-search',
+        '#submit' => array(array($this, 'submitDismaxSearch')),
+        '#attributes' => [ 'style' => "display:none"],
+      ];
+      return $form;
+    }
     do {
       // Either specified by the user in the request or use the default.
       $first = $i == 0;
@@ -429,6 +491,7 @@ class AdvancedSearchForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
+
     $trigger = (string) $form_state->getTriggeringElement()['#value'];
     switch ($trigger) {
       case $this->t('Search'):
@@ -438,6 +501,10 @@ class AdvancedSearchForm extends FormBase {
       default:
         $form_state->setRebuild();
     }
+  }
+
+  public function submitDismaxSearch(array &$form, FormStateInterface $form_state) {
+    drupal_log("Advanced Search submit");
   }
 
 }

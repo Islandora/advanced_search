@@ -21,6 +21,9 @@ use Drupal\advanced_search\Utilities;
 use Drupal\search_api\Query\QueryInterface as DrupalQueryInterface;
 use Drupal\views\ViewExecutable;
 use Solarium\Core\Query\QueryInterface as SolariumQueryInterface;
+use Drupal\Core\Breadcrumb\Breadcrumb;
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Link;
 
 /**
  * Implements hook_theme().
@@ -191,3 +194,4 @@ function advanced_search_preprocess_facets_result_item(&$variables) {
     }
   }
 }
+

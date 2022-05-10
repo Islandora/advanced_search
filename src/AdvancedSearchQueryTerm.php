@@ -3,6 +3,7 @@
 namespace Drupal\advanced_search;
 
 use Drupal\advanced_search\Form\AdvancedSearchForm;
+use Drupal\advanced_search\Form\SettingsForm;
 
 /**
  * Defines a single search term.
@@ -295,6 +296,10 @@ class AdvancedSearchQueryTerm {
       return $value;
     }
     else {
+      if ($this->field === "copyfield") {
+        $copyfield = \Drupal::config(SettingsForm::CONFIG_NAME)->get(SettingsForm::COPY_FIELD_NAME);
+        $terms[] = "$copyfield:$value";
+      }
       foreach ($solr_field_mapping[$this->field] as $field) {
         $terms[] = "$field:$value";
       }

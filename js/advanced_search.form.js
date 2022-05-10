@@ -174,8 +174,11 @@
             window.history.pushState(null, document.title, href.split('?')[0] );
 
             /* reset the url after reset button clicked */
-            window.location.replace(href.split('?')[0]);
+            //window.location.replace(href.split('?')[0]);
+             window.location.replace("/advanced-search");
           });
+
+
         }
       }
     }
