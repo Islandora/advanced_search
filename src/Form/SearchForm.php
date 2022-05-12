@@ -32,7 +32,7 @@ class SearchForm  extends FormBase
 
     $form['search-textfield'] = array(
       '#type' => 'textfield',
-      '#title' => (!empty($settings['search_textfield_label']) ? $settings['search_textfield_label'] : '&nbsp;'),
+      '#title' => (!empty($settings['search_textfield_label']) ? $settings['search_textfield_label'] : 'Enter Keyword'),
       '#attributes' => ['placeholder' => $settings['search_placeholder']]
     );
 
@@ -55,12 +55,22 @@ class SearchForm  extends FormBase
       $settings = $block->get('settings');
       $view_machine_name = $settings['search_view_machine_name'];
     }
-    $url = Url::fromRoute($view_machine_name, [
-      'type' => "dismax",
-      'a[0][f]' => 'all',
-      'a[0][i]' => 'IS',
-      'a[0][v]' => $form_state->getValues()['search-textfield'],
-    ]);
+    if (empty($form_state->getValues()['search-textfield'])) {
+      $url = Url::fromRoute($view_machine_name, [
+        'a[0][f]' => 'all',
+        'a[0][i]' => 'IS',
+        'a[0][v]' => $form_state->getValues()['search-textfield'],
+      ]);
+    }
+    else {
+      $url = Url::fromRoute($view_machine_name, [
+        'type' => "dismax",
+        'a[0][f]' => 'all',
+        'a[0][i]' => 'IS',
+        'a[0][v]' => $form_state->getValues()['search-textfield'],
+      ]);
+    }
+
     $form_state->setRedirectUrl($url);
   }
 }

@@ -306,7 +306,7 @@ class AdvancedSearchForm extends FormBase {
     // for search dismax only
     if (isset($_GET['type']) && $_GET['type'] === 'dismax') {
       $term_value = !empty($term_values) ? array_shift($term_values) : $term_default_values;
-      $form['ajax'] = [
+      /*$form['ajax'] = [
         '#type' => 'container',
         '#attributes' => ['id' => self::AJAX_WRAPPER, 'style' => "padding-bottom: 50px;"],
         'terms' => array_merge([
@@ -322,9 +322,12 @@ class AdvancedSearchForm extends FormBase {
         '#type' => 'textfield',
         '#default_value' => $term_value[self::VALUE_FORM_FIELD],
         '#attributes' => ['placeholder' => $this->t('Search the collection')]
+      ];*/
+      $form['searched-term'] = [
+        '#markup' => new \Drupal\Component\Render\FormattableMarkup('<p>'.$term_value[self::VALUE_FORM_FIELD].' <a href="/search-results">(x)</a></p>',[]),
       ];
       $form['reset'] = [
-        '#markup' => new \Drupal\Component\Render\FormattableMarkup('<a href="/advanced-search" class="advanced-search-form__reset button js-form-submit form-submit form-control" style="text-align: center;text-decoration: none;color: #333;">Reset</a>', []),
+        '#markup' => new \Drupal\Component\Render\FormattableMarkup('<a href="/advanced-search" class="advanced-search-form__reset button js-form-submit form-submit form-control" style="text-align: center;text-decoration: none;color: #333;"><i class="fa-solid fa-magnifying-glass"></i> Advanced Search</a>', []),
       ];
       $form['submit'] = [
         '#type' => 'submit',

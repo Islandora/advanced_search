@@ -297,6 +297,9 @@ class AdvancedSearchQueryTerm {
     }
     else {
       if ($this->field === "copyfield") {
+        if (preg_match('#^(\'|").+\1$#', $value) == 1) {
+          $value =  str_replace('"', '', $value);
+        }
         $copyfield = \Drupal::config(SettingsForm::CONFIG_NAME)->get(SettingsForm::COPY_FIELD_NAME);
         $terms[] = "$copyfield:$value";
       }
