@@ -293,6 +293,16 @@ class AdvancedSearchQueryTerm {
       $value =  str_replace('\\"', '', $value);
     }
     if ($this->field === "all") {
+      // Case 1:  if keyword contains one word or a phrase
+      if(strpos(trim($value), ' ') !== false) {
+        // phrase
+        $value = str_replace('"', "", trim($value));
+      }
+      else {
+        // one word
+        $value = str_replace('"', "", trim($value)) . '~';
+      }
+
       return $value;
     }
     else {

@@ -2,6 +2,7 @@
 
 namespace Drupal\advanced_search\Plugin\Block;
 
+use Drupal\advanced_search\Form\SettingsForm;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Form\FormStateInterface;
 
@@ -60,13 +61,39 @@ class SearchBlock extends BlockBase {
       '#maxlength' => 255,
     ];
 
+    $copyfield = \Drupal::config(SettingsForm::CONFIG_NAME)->get(SettingsForm::COPY_FIELD_FLAG);
+    $dismax = \Drupal::config(SettingsForm::CONFIG_NAME)->get(SettingsForm::LUCENE_SEARCH_FLAG);
+
+    if ($dismax && $copyfield) {
+      $form['search-attributes']['method'] = [
+        '#type' => 'radios',
+        '#title' => $this->t('Select method of search:'),
+        '#default_value' => $this->configuration['search_method'],
+        '#options' => [
+          'dismax' => 'Dismax',
+          'copyfield' => 'Copying Fields'
+        ]
+      ];
+    }
+    else {
+      $method = 'none';
+      if ($dismax) {
+        $method = 'dismax';
+      }
+      else if ($copyfield) {
+        $method = 'copyfield';
+      }
+      $form['search-attributes']['method'] = [
+        '#type' => 'hidden',
+        '#value' => $method
+      ];
+    }
     $form['search-attributes']['search_submit'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Search Button Label:'),
       '#default_value' => $this->configuration['search_submit_label'],
       '#maxlength' => 255,
     ];
-
     return $form;
   }
 
@@ -78,6 +105,9 @@ class SearchBlock extends BlockBase {
     $this->configuration['search_textfield_label'] = $form_state->getValues()['search-attributes']['search_textfield'];
     $this->configuration['search_placeholder'] = $form_state->getValues()['search-attributes']['search_placeholder_textfield'];
     $this->configuration['search_submit_label'] = $form_state->getValues()['search-attributes']['search_submit'];
+    if ($form_state->getValues()['search-attributes']['method'] !== "none") {
+      $this->configuration['search_method'] = $form_state->getValues()['search-attributes']['method'];
+    }
   }
 
   /**

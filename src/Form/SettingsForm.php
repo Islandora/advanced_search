@@ -124,6 +124,10 @@ class SettingsForm extends ConfigFormBase {
       '#title' => $this->t(" Solr's Standard Query parser (also known as 'lucene')"),
     ];
 
+    $form['lucene']['read-more'] = [
+      "#markup" => $this->t('<p>For more information, <a href="https://solr.apache.org/guide/6_6/the-standard-query-parser.html" target="_blank">read here</a>.</p>')
+    ];
+
     $form['lucene'][self::LUCENE_SEARCH_FLAG] = [
       '#type' => 'checkbox',
       '#title' => $this
@@ -145,7 +149,7 @@ class SettingsForm extends ConfigFormBase {
       $form['lucene']['textfields_container'][self::LUCENE_SEARCH_LABEL] = [
         '#type' => 'textfield',
         '#title' => $this->t('Label'),
-        '#description' => $this->t('This label will be appear in Search Terms dropdown of Advanced Search form block if Lucene Search is enabled.'),
+        '#description' => $this->t('This label will be appear in Search Terms dropdown of Advanced Search form block if Dismax Search is enabled.'),
         '#default_value' => self::getConfig(self::LUCENE_SEARCH_LABEL, "All"),
       ];
       $form['lucene']['textfields_container'][self::LUCENE_SEARCH_VISIBILITY] = [
@@ -156,12 +160,15 @@ class SettingsForm extends ConfigFormBase {
       ];
     }
 
-
-
     $form['copyfield'] =  [
       '#type' => 'fieldset',
       '#title' => $this->t("Use Copy field"),
     ];
+
+    $form['copyfield']['read-more'] = [
+       "#markup" => $this->t('<p>For more information, <a href="https://solr.apache.org/guide/6_6/copying-fields.html" target="_blank">read here</a>.</p>')
+    ];
+
 
     $form['copyfield'][self::COPY_FIELD_FLAG] = [
       '#type' => 'checkbox',
@@ -193,9 +200,6 @@ class SettingsForm extends ConfigFormBase {
         '#default_value' => self::getConfig(self::COPY_FIELD_NAME, "catch_all_fields_mt"),
       ];
     }
-
-
-
     return parent::buildForm($form, $form_state);
   }
 

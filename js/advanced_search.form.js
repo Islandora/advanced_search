@@ -88,7 +88,6 @@
     search_params.set(param, value);
 
     url.search = search_params.toString();
-
     return url.toString();
   }
 

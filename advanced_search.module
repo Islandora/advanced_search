@@ -159,13 +159,17 @@ function advanced_search_preprocess_facets_summary_item_list(&$variables) {
  */
 function advanced_search_preprocess_facets_item_list(&$variables) {
   $widget = $variables['facet']->getWidget();
-  $soft_limit = $widget['config']['soft_limit'];
-  // Break into two groups less / more which can display be toggled as a single
-  // element change rather than showing / hiding all <li> elements individually.
-  // As its slow and causes the page to snap when loading.
-  $variables['less'] = array_slice($variables['items'], 0, $soft_limit);
-  $variables['more'] = array_slice($variables['items'], $soft_limit);
-  $variables['show_more_label'] = $widget['config']['soft_limit_settings']['show_more_label'];
+  if (isset($widget['config']['soft_limit'])) {
+    $soft_limit = $widget['config']['soft_limit'];
+    // Break into two groups less / more which can display be toggled as a single
+    // element change rather than showing / hiding all <li> elements individually.
+    // As its slow and causes the page to snap when loading.
+    $variables['less'] = array_slice($variables['items'], 0, $soft_limit);
+    $variables['more'] = array_slice($variables['items'], $soft_limit);
+  }
+  if (isset($widget['config']['soft_limit_settings']['show_more_label'])) {
+    $variables['show_more_label'] = $widget['config']['soft_limit_settings']['show_more_label'];
+  }
 }
 
 /**

@@ -304,25 +304,8 @@ class AdvancedSearchForm extends FormBase {
     $block_class_prefix = str_replace('_', '-', $this->getFormId());
 
     // for search dismax only
-    if (isset($_GET['type']) && $_GET['type'] === 'dismax') {
+    /*if (isset($_GET['type']) && $_GET['type'] === 'dismax') {
       $term_value = !empty($term_values) ? array_shift($term_values) : $term_default_values;
-      /*$form['ajax'] = [
-        '#type' => 'container',
-        '#attributes' => ['id' => self::AJAX_WRAPPER, 'style' => "padding-bottom: 50px;"],
-        'terms' => array_merge([
-          '#tree' => TRUE,
-          '#type' => 'container',
-        ], $term_elements),
-      ];
-      $form['ajax'][self::SEARCH_FORM_FIELD] = [
-        '#type' => 'hidden',
-        '#value' => 'all'
-      ];
-      $form['ajax'][self::VALUE_FORM_FIELD] = [
-        '#type' => 'textfield',
-        '#default_value' => $term_value[self::VALUE_FORM_FIELD],
-        '#attributes' => ['placeholder' => $this->t('Search the collection')]
-      ];*/
       $form['searched-term'] = [
         '#markup' => new \Drupal\Component\Render\FormattableMarkup('<p>'.$term_value[self::VALUE_FORM_FIELD].' <a href="/search-results">(x)</a></p>',[]),
       ];
@@ -338,7 +321,7 @@ class AdvancedSearchForm extends FormBase {
         '#attributes' => [ 'style' => "display:none"],
       ];
       return $form;
-    }
+    }*/
     do {
       // Either specified by the user in the request or use the default.
       $first = $i == 0;

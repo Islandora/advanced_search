@@ -134,7 +134,7 @@ class AjaxBlocksController extends ControllerBase {
     if (empty($path) || empty($blocks)) {
       throw new NotFoundHttpException('No facet link or facet blocks found.');
     }
-
+    drupal_log($path);
     $new_request = Request::create($path);
     $request_stack = new RequestStack();
     $processed = $this->pathProcessor->processInbound($new_request->getPathInfo(), $new_request);
