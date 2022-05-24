@@ -48,12 +48,9 @@
 
         // Add "Show more" / "Show less" links.
         facetsList.filter(function () {
-            console.log('---- loop -----');
-
             //return $(this).find('li').length > limit;
             return $(this).parent().find('a.facets-soft-limit-link').length < 1;
         }).each(function () {
-            console.log("looop through list");
             var facet = $(this);
             var showLessLabel = settings.facets.softLimitSettings[facet_id].showLessLabel;
             var showMoreLabel = settings.facets.softLimitSettings[facet_id].showMoreLabel;
