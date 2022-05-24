@@ -373,6 +373,7 @@ class AdvancedSearchForm extends FormBase {
         ],
         self::VALUE_FORM_FIELD => [
           '#type' => 'textfield',
+          '#title' => $this->t('Field Value'),
           '#default_value' => $term_value[self::VALUE_FORM_FIELD],
         ],
         'actions' => [

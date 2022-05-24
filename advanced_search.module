@@ -194,8 +194,7 @@ function advanced_search_preprocess_facets_result_item(&$variables) {
         $length,
         TRUE,
         TRUE
-          );
+      );
     }
   }
 }
-

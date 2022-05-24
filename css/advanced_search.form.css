@@ -35,3 +35,4 @@ input.islandora-advanced-search-form__reset,
 input.islandora-advanced-search-form__search {
   display: inline-block;
 }
+#advanced-search-ajax fieldset.js-form-type-textfield label { display: none;}

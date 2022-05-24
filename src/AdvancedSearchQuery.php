@@ -218,7 +218,7 @@ class AdvancedSearchQuery {
         $dismax->setQueryFields($query_fields);
         //drupal_log($query_fields);
       }
-      //drupal_log($q);
+      drupal_log($q);
       $solarium_query->setQuery($q);
     }
   }
