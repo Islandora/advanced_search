@@ -46,10 +46,10 @@
             $(this).children('li:gt(' + zero_based_limit + ')').once('applysoftlimit').hide();
         });
 
+
         // Add "Show more" / "Show less" links.
         facetsList.filter(function () {
-            //return $(this).find('li').length > limit;
-            return $(this).parent().find('a.facets-soft-limit-link').length < 1;
+            return ($(this).find('li').length > limit && $(this).parent().find('a.facets-soft-limit-link').length < 1);
         }).each(function () {
             var facet = $(this);
             var showLessLabel = settings.facets.softLimitSettings[facet_id].showLessLabel;
