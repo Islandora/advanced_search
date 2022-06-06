@@ -148,3 +148,128 @@
   grid-template-columns: repeat(3, 1fr);
   /*margin: 0.47214rem 0 0.47214rem 2.61803rem;*/
 }
+
+/* Display toggle */
+.view-grid .view-display-id-attachment_1 .view-content {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr) !important;
+  margin: 0.47214rem 0 0.47214rem 0rem !important;
+  padding: 0 !important;
+}
+
+.view-grid .view-display-id-attachment_1 .view-content img {
+  object-fit: cover;
+  width: 350px !important;
+  height: 350px;
+}
+
+.view-grid .custom-col {
+  -ms-flex-preferred-size: 0;
+  flex-basis: 0;
+  -webkit-box-flex: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+  max-width: 100%;
+}
+
+.view-grid .view-content div {
+  padding: 1rem 1rem 0rem 1rem;
+}
+
+.view-grid .view-content div .views-field-view {
+  padding-bottom: 0 !important;
+}
+
+.view-display-id-attachment_1 {
+  padding: 0 !important;
+}
+
+.media-subview {
+  padding: 0 !important;
+}
+
+.view-grid .views-field-field-resource-type,
+.view-grid .views-field-field-description {
+  display: none !important;
+}
+
+.view-collection-metadata .views-field-field-description {
+  display:block !important;
+}
+
+.view-grid .advanced-search-results-title a {
+  text-decoration: none !important;
+  font-size: 1.1em;
+  line-height: initial;
+}
+
+.view-grid .views-label-title {
+  display: none;
+}
+
+
+.view-id-collection_metadata .view-content {
+  display: block !important;
+}
+
+.view-grid .list-item-row {
+  display: none;
+}
+
+.view-grid .grid-item-row {
+  display: block;
+}
+
+.view-list .grid-item-row {
+  display: none;
+}
+
+.view-list .list-item-row {
+  display: block;
+}
+
+.view-list .custom-col:not(:last-child) {
+  border-bottom: 1px solid #999999;
+}
+
+.list-item {
+  padding-top: 15px;
+  padding-bottom: 15px;
+}
+
+.view-list .advanced-search-results-title {
+  color: #001228;
+  font-weight: bold;
+}
+
+.view-list .view-display-id-attachment_1 .view-content img {
+  object-fit: cover;
+  width: 350px !important;
+  height: 350px;
+}
+
+.view-list .views-field-view {
+  float: left;
+  padding-right: 50px !important;
+}
+
+.view-list .views-label {
+  font-weight: bold;
+  color: #0a6eb4;
+}
+.view-list .custom-col .list-item-row .list-item  .row {
+  margin-left: 0px !important;
+  margin-right: 0px !important;
+}
+.view-list .custom-col .list-item-row .list-item .row .col-4 {
+  padding-left: 0 !important;;
+  padding-right: 0 !important;
+}
+.view-list .custom-col {
+  width: 100%;
+}
+.view-list .view-content.row {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
