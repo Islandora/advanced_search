@@ -105,9 +105,7 @@ class SearchBlock extends BlockBase {
     $this->configuration['search_textfield_label'] = $form_state->getValues()['search-attributes']['search_textfield'];
     $this->configuration['search_placeholder'] = $form_state->getValues()['search-attributes']['search_placeholder_textfield'];
     $this->configuration['search_submit_label'] = $form_state->getValues()['search-attributes']['search_submit'];
-    if ($form_state->getValues()['search-attributes']['method'] !== "none") {
-      $this->configuration['search_method'] = $form_state->getValues()['search-attributes']['method'];
-    }
+    $this->configuration['search_method'] = $form_state->getValues()['search-attributes']['method'];
   }
 
   /**
