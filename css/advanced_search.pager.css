@@ -160,7 +160,7 @@
 .view-grid .view-display-id-attachment_1 .view-content img {
   object-fit: cover;
   width: 350px !important;
-  height: 350px;
+  height: auto;
 }
 
 .view-grid .custom-col {
@@ -245,7 +245,7 @@
 .view-list .view-display-id-attachment_1 .view-content img {
   object-fit: cover;
   width: 350px !important;
-  height: 350px;
+  height: auto;
 }
 
 .view-list .views-field-view {
