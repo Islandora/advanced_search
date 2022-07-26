@@ -303,7 +303,8 @@ class AdvancedSearchQueryTerm {
       }
       else {
         // one word
-        $value = str_replace('"', "", trim($value)) . '~';
+        $value = str_replace('"', "", trim($value));
+        $value .= " OR " . str_replace('"', "", trim($value)) . '~';
       }
 
       return $value;
