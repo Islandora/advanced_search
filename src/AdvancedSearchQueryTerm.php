@@ -298,6 +298,9 @@ class AdvancedSearchQueryTerm {
         // phrase
         $value = str_replace('"', "", trim($value));
       }
+      else if (!$this->getInclude()) {
+        $value = "!" . str_replace('"', "", trim($value));
+      }
       else {
         // one word
         $value = str_replace('"', "", trim($value)) . '~';
