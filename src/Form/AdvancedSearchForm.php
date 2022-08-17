@@ -330,19 +330,24 @@ class AdvancedSearchForm extends FormBase {
       $term_elements[] = [
         // Only show on terms after the first.
         self::CONJUNCTION_FORM_FIELD => $first ? NULL : [
+          '#title' => $this->t('Combination:'),
           '#type' => 'select',
           '#options' => [
             self::AND_OP => $this->t('and'),
             self::OR_OP => $this->t('or'),
           ],
           '#default_value' => $conjunction,
+          '#theme_wrappers' => []
         ],
         self::SEARCH_FORM_FIELD => [
+          '#title' => $this->t('Select search criteria:'),
           '#type' => 'select',
           '#options' => $options,
           '#default_value' => $term_value[self::SEARCH_FORM_FIELD],
+          '#theme_wrappers' => []
         ],
         self::INCLUDE_FORM_FIELD => [
+          '#title' => $this->t('Condition:'),
           '#type' => 'select',
           '#options' => [
             self::IS_OP => $this->t('is'),
@@ -356,6 +361,7 @@ class AdvancedSearchForm extends FormBase {
               ':input[name="terms[' . $i . '][' . self::CONJUNCTION_FORM_FIELD . ']"]' => ['value' => self::AND_OP],
             ],
           ],
+          '#theme_wrappers' => []
         ],
         // Just markup to show when 'include' is not alterable due to the
         // selected 'conjunction'. Hide for the first term.
@@ -373,8 +379,9 @@ class AdvancedSearchForm extends FormBase {
         ],
         self::VALUE_FORM_FIELD => [
           '#type' => 'textfield',
-          //'#title' => $this->t('Field Value'),
+          '#title' => $this->t('Enter keyword to search:'),
           '#default_value' => $term_value[self::VALUE_FORM_FIELD],
+          '#theme_wrappers' => []
         ],
         'actions' => [
           '#type' => 'container',

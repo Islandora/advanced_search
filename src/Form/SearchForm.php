@@ -10,6 +10,30 @@ use \Drupal\Core\Url;
 
 class SearchForm  extends FormBase
 {
+  protected $block_id;
+
+  /**
+   * @param $block_id
+   */
+  public function __construct($block_id) {
+    $this->block_id = $block_id;
+  }
+
+  /**
+   * @return mixed
+   */
+  public function getBlockId() {
+    return $this->block_id;
+  }
+
+  /**
+   * @param mixed $block_id
+   */
+  public function setBlockId($block_id): void {
+    $this->block_id = $block_id;
+  }
+
+  
   /**
    * {@inheritdoc}
    */
@@ -23,19 +47,17 @@ class SearchForm  extends FormBase
    */
   public function buildForm(array $form, FormStateInterface $form_state)
   {
-    $block = \Drupal\block\Entity\Block::load("search");
-
+    $block = \Drupal\block\Entity\Block::load($this->block_id);
     if ($block) {
       $settings = $block->get('settings');
       $view_machine_name = $settings['search_view_machine_name'];
     }
-
     $form['search-textfield'] = array(
       '#type' => 'textfield',
       '#title' => (!empty($settings['search_textfield_label']) ? $settings['search_textfield_label'] : 'Enter Keyword'),
-      '#attributes' => ['placeholder' => $settings['search_placeholder']]
+      '#attributes' => ['placeholder' => $settings['search_placeholder']],
+      '#theme_wrappers' => []
     );
-
     $form['actions']['#type'] = 'actions';
     $form['actions']['submit'] = array(
       '#type' => 'submit',
@@ -50,7 +72,7 @@ class SearchForm  extends FormBase
    */
   public function submitForm(array &$form, FormStateInterface $form_state)
   {
-    $block = \Drupal\block\Entity\Block::load("search");
+    $block = \Drupal\block\Entity\Block::load($this->block_id);
     if ($block) {
       $settings = $block->get('settings');
       $view_machine_name = $settings['search_view_machine_name'];
