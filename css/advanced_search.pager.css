@@ -82,7 +82,7 @@
 
 .pager .pager__link,
 .pager__results .pager__link {
-  display: inline-block;
+  display: inherit;
   border-radius: 0.125em;
   border: 1px solid;
   transition: all, 0.2s, ease-in-out;
