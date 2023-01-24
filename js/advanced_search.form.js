@@ -176,6 +176,13 @@
             /* reset the url after reset button clicked */
             window.location.replace(href.split('?')[0]);
           });
+          
+           $("#ajax-page-summary").hide();
+            $( document ).ajaxComplete(function( event, request, settings ) {
+                $(".pager__summary").html($("#ajax-page-summary").html());
+                $("#ajax-page-summary").hide();
+            });
+          
         }
       }
     }
