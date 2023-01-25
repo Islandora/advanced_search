@@ -271,7 +271,7 @@ class AdvancedSearchQueryTerm {
     return $this->conjunction;
   }
 
-  /**
+    /**
    * Using the provided field mapping create a Solr Query string.
    *
    * @param array $solr_field_mapping
@@ -285,19 +285,69 @@ class AdvancedSearchQueryTerm {
     $query_helper = \Drupal::service('solarium.query_helper');
     $value = $query_helper->escapePhrase(trim($this->value));
 
-    // Added to handle exact matches keyword (surrounded by "")
-    if (preg_match('#^(\'|").+\1$#', $value) == 1) {
-      trim($value);
-      $value =  str_replace('"\\', '', $value);
-      $value =  str_replace('\\"', '', $value);
-    }
     if ($this->field === "all") {
+
+      // Case 1:  if keyword contains one word or a phrase
+      if(strpos(trim($value), ' ') !== false) {
+        // phrase
+        // add Or for the search case "scarborough bulletin" show no results
+        if (substr_count($value, '\"') == 2) {
+          $value = str_replace('\"', "", trim($value));
+          return $value;
+        }
+        else {
+          return $value . " OR " . str_replace('"', "", trim($value));
+        }
+      }
+      if (!$this->getInclude()) {
+        $value = "!" . str_replace('"', "", trim($value));
+      }
+      else {
+        // one word
+        $value = str_replace('"', "", trim($value));
+      }
       return $value;
     }
     else {
+      $isTitleSearch = false;
       foreach ($solr_field_mapping[$this->field] as $field) {
-        $terms[] = "$field:$value";
+        // if field fulltext title is selected
+        if (strpos($field, "fulltext_title") !== false) {
+          $isTitleSearch = true;
+          if (strpos(trim($value), " AND " ) !== false)  {
+            //When you type 'Orientation AND games' into the title search, you get one result.
+            // When you do the same search but add a search box, you get a lot more results.
+            // (Recreation: Add a search box, set both search criteria to 'Title' and keep the operator to 'and'.
+            // Type 'orientation' in one box and 'games' in the second box and click seach.)
+            $keyword =  str_replace('"', '', $value);
+            $keys = explode(" AND ", $keyword);
+            $str = "(";
+            $i = 0;
+            foreach ($keys as $key) {
+
+                if ($i != count($keys)-1)
+                  $str .= $field . ':"' .$key . '"  AND ';
+                else
+                  $str .= $field . ':"' .$key . '")';
+                $i++;
+            }
+            $terms[] = $str;
+          }
+          else {
+            if ($isTitleSearch) {
+              $terms[] = 'tm_lowercase_title:'. $value;
+            }
+            else {
+              $terms[] = "$field:$value";
+            }
+
+          }
+        }
+        else {
+          $terms[] = "$field:$value";
+        }
       }
+
     }
     $terms = implode(' ', $terms);
     return $this->include ? "($terms)" : "-($terms)";
