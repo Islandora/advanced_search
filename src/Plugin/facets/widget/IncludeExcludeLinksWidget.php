@@ -6,7 +6,9 @@ use Drupal\facets\Plugin\facets\widget\LinksWidget;
 use Drupal\Core\Link;
 use Drupal\facets\Result\ResultInterface;
 
-/**
+// This widget doesn't currently work, need more reviews. 
+// Remove "*" to hide the registry of this widget to prevent it show up in Facets configuration
+/*
  * The links widget.
  *
  * @FacetsWidget(
