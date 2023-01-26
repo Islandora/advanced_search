@@ -146,9 +146,9 @@ function advanced_search_views_pre_view(ViewExecutable $view, $display_id, array
  * Implements hook_preprocess_facets_summary_item_list().
  */
 function advanced_search_preprocess_facets_summary_item_list(&$variables) {
-  foreach ($variables['items'] as &$item) {
+  /*foreach ($variables['items'] as &$item) {
     $item['attributes']['class'][] = 'facet-summary-item';
-  }
+  }*/
 }
 
 /**
