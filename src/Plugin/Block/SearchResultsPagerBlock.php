@@ -58,7 +58,7 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('request_stack')->getMasterRequest()
+      $container->get('request_stack')->getMainRequest()
     );
   }
 

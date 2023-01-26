@@ -108,7 +108,7 @@ class AdvancedSearchBlock extends BlockBase implements ContainerFactoryPluginInt
       $plugin_definition,
       $container->get('plugin.manager.search_api.display'),
       $container->get('form_builder'),
-      $container->get('request_stack')->getMasterRequest()
+      $container->get('request_stack')->getMainRequest()
     );
   }
 

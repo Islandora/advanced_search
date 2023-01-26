@@ -71,7 +71,7 @@ class AdvancedSearchForm extends FormBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('request_stack')->getMasterRequest(),
+      $container->get('request_stack')->getMainRequest(),
       $container->get('current_route_match')
     );
   }

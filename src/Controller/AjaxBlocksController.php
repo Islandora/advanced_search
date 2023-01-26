@@ -11,7 +11,6 @@ use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Routing\CurrentRouteMatch;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\RouterInterface;
 
@@ -136,7 +135,7 @@ class AjaxBlocksController extends ControllerBase {
     }
 
     $new_request = Request::create($path);
-    $request_stack = new RequestStack();
+    $request_stack = \Drupal::requestStack();
     $processed = $this->pathProcessor->processInbound($new_request->getPathInfo(), $new_request);
 
     $this->currentPath->setPath($processed);
