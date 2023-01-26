@@ -12,8 +12,8 @@
   - [Collection Search](#collection-search)
   - [Paging](#paging)
   - [Sorting](#sorting)
-- [Configure Facets](#configure-facets)
-  - [Include / Exclude Facets](#include--exclude-facets)
+<!--- - [Configure Facets](#configure-facets)
+  - [Include / Exclude Facets](#include--exclude-facets) --->
 - [Configure Blocks](#configure-blocks)
   - [Advanced Search Block](#advanced-search-block)
   - [Search Block (NEW)](#search-block-new)
@@ -159,7 +159,7 @@ available in the pager block (*documented below*).
 
 ![image](./docs/sort_criteria.png)
 
-## Configure Facets
+<!--- ## Configure Facets
 
 The facets can be configured at `admin/config/search/facets`. Facets are linked
 to a **Source** which is a **Search API View Display** so it will be typically
@@ -192,7 +192,7 @@ And it must also explicitly be set to exclude:
 
 You may also want to enable `Hide active items` and `Hide non-narrowing results`
 for a cleaner presentation of facets.
-
+--->
 ## Configure Blocks
 
 For each block type:
