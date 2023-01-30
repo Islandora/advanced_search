@@ -229,7 +229,7 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
         'query' => array_merge($query_parameters, ['display' => $display]),
         'absolute' => TRUE,
       ]);
-      $text = "<i class='fa {$options['icon']}' aria-hidden='true'>&nbsp;</i>{$options['title']}";
+      $text = "<i class='fa {$options['icon']}' aria-hidden='true'>&nbsp;</i><span class='display-mode'>{$options['title']}</span>";
       $active = $active_display == $display;
       $items[] = [
         '#type' => 'link',
