@@ -17,6 +17,21 @@
     };
   })(window.history);
 
+  function parseQueryString( queryString ) {
+        var params = {}, queries, temp, i, l;
+
+        // Split into key/value pairs
+        queries = queryString.split("&");
+
+        // Convert the array of strings into an object
+        for ( i = 0, l = queries.length; i < l; i++ ) {
+            temp = queries[i].split('=');
+            params[temp[0]] = temp[1];
+        }
+
+        return params;
+    };
+
   function reload(url) {
     // Update View.
     if (drupalSettings && drupalSettings.views && drupalSettings.views.ajaxViews) {
@@ -39,6 +54,76 @@
       });
     }
 
+    // Update items_per_page links in pager 
+    if (url.indexOf("items_per_page=") == -1) { 
+      // append items_per_page
+      $("a.pager__itemsperpage").each(function( index ) {
+        var newUrl = url + "&items_per_page=" + $(this).html();
+        $(this).attr("href", newUrl);
+      });
+    } 
+    else { 
+      // replace existed items_per_page
+      var params = parseQueryString(url.split("?")[1]);
+      var newParams = [];
+      var existingDateQuery = false; // true if a date query already exists
+
+      var links = {};
+      // update publication date in url if previously queried
+      for (var key in params) {
+        if (!params[key]) { // no search parameters in url
+          break;
+        }
+
+        // check for items_per_page query
+        if (!key.startsWith("items_per_page")) { 
+          newParams.push(key + "=" + params[key]);
+        }
+      }
+      var newParamsUrl = newParams.join('&');
+      $("a.pager__itemsperpage").each(function( index ) {
+        $(this).attr("href", url.split("?")[0] + '?' + newParamsUrl + "&items_per_page=" + $(this).html());
+      });
+    }
+
+
+
+    // Update display mode links in pager 
+    if (url.indexOf("display=") == -1) { 
+      // append items_per_page
+      $("a.pager__display").each(function( index ) {
+        var newUrl = url + "&display=" + $(this).find(".display-mode").html().toLowerCase();
+        $(this).attr("href", newUrl);
+      });
+    } 
+    else { 
+      // replace existed display
+      var params = parseQueryString(url.split("?")[1]);
+      var newParams = [];
+      var existingDateQuery = false; // true if a date query already exists
+
+      var links = {};
+      // update publication date in url if previously queried
+      for (var key in params) {
+        if (!params[key]) { // no search parameters in url
+          break;
+        }
+
+        // check for display query
+        if (!key.startsWith("display")) { 
+          newParams.push(key + "=" + params[key]);
+        }
+      }
+      var newParamsUrl = newParams.join('&');
+      $("a.pager__display").each(function( index ) {
+
+        var value = $(this).find(".display-mode").html().toLowerCase();
+        $(this).attr("href", url.split("?")[0] + '?' + newParamsUrl + "&display=" + value);
+      });
+    }
+
+
+    
     // Replace filter, pager, summary, and facet blocks.
     var blocks = {};
     $(
