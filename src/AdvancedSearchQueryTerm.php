@@ -3,7 +3,7 @@
 namespace Drupal\advanced_search;
 
 use Drupal\advanced_search\Form\AdvancedSearchForm;
-
+use Drupal\advanced_search\Form\SettingsForm;
 /**
  * Defines a single search term.
  *
@@ -285,7 +285,10 @@ class AdvancedSearchQueryTerm {
     $query_helper = \Drupal::service('solarium.query_helper');
     $value = $query_helper->escapePhrase(trim($this->value));
 
-    if ($this->field === "all") {
+    $config = \Drupal::config(SettingsForm::CONFIG_NAME);
+    $isDismax = $config->get(SettingsForm::EDISMAX_SEARCH_FLAG);
+
+    if ($isDismax || $this->field === "all") {
 
       // Case 1:  if keyword contains one word or a phrase
       if(strpos(trim($value), ' ') !== false) {
@@ -352,6 +355,30 @@ class AdvancedSearchQueryTerm {
     $terms = implode(' ', $terms);
     return $this->include ? "($terms)" : "-($terms)";
   }
+
+
+   /**
+   * Using the provided field mapping create a Solr Fields string.
+   *
+   * @param array $solr_field_mapping
+   *   An array that maps search api fields to one or more solr fields.
+   *
+   * @return string
+   *   The conjunction to use for this term conjunction.
+   */
+  public function toSolrFields(array $solr_field_mapping) {
+    $terms = [];
+    $query_helper = \Drupal::service('solarium.query_helper');
+
+    if ($this->field !== "all") {
+      foreach ($solr_field_mapping[$this->field] as $field) {      
+        $terms[] = "$field";
+      }
+    }
+    $terms = implode(' ', $terms);
+    return $terms;
+  }
+
   /**
    * Get Field search
    */
