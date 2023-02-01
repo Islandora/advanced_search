@@ -23,8 +23,9 @@ class SettingsForm extends ConfigFormBase {
   const SEARCH_REMOVE_OPERATOR = 'search_remove_operator';
   const FACET_TRUNCATE = 'facet_truncate';
   const SOLR_CASE_INSENSITIVE_FIELD_PREFIX = "case_insensitive_solr_field_prefix";
-  const LUCENE_SEARCH_FLAG = 'lucene_on_off';
-  const LUCENE_SEARCH_LABEL = 'lucene_label';
+  const EDISMAX_SEARCH_FLAG = 'lucene_on_off';
+  const EDISMAX_SEARCH_LABEL = 'lucene_label';
+  const SEARCH_ALL_FIELDS_FLAG = 'all_fields_on_off';
 
   /**
    * Constructs a \Drupal\system\ConfigFormBase object.
@@ -115,34 +116,42 @@ class SettingsForm extends ConfigFormBase {
       ],
     ];
 
-    $form['lucene'] =  [
+    $form['edismax'] =  [
       '#type' => 'fieldset',
-      '#title' => $this->t(" Solr's Standard Query parser (also known as 'lucene')"),
+      '#title' => $this->t("Extended DisMax Query"),
     ];
 
-    $form['lucene'][self::LUCENE_SEARCH_FLAG] = [
+    $form['edismax'][self::EDISMAX_SEARCH_FLAG] = [
       '#type' => 'checkbox',
       '#title' => $this
-        ->t('Enable Lucene Search.'),
-      '#default_value' => self::getConfig(self::LUCENE_SEARCH_FLAG, 0),
+        ->t('Enable Extended DisMax Query.'),
+      '#default_value' => self::getConfig(self::EDISMAX_SEARCH_FLAG, 0),
       '#ajax' => [
         'callback' => '::LuceneSearchEnableDisableCallback',
-        'wrapper' => 'lucene-container',
+        'wrapper' => 'edismax-container',
         'effect' => 'fade',
       ],
     ];
 
-    $form['lucene']['textfields_container'] = [
+    $form['edismax']['textfields_container'] = [
       '#type' => 'container',
-      '#attributes' => ['id' => 'lucene-container'],
+      '#attributes' => ['id' => 'edismax-container'],
     ];
-    if (self::getConfig(self::LUCENE_SEARCH_FLAG, "All") === 1
-       || $form_state->getValue(self::LUCENE_SEARCH_FLAG) === 1) {
-      $form['lucene']['textfields_container'][self::LUCENE_SEARCH_LABEL] = [
+
+    
+    if (self::getConfig(self::EDISMAX_SEARCH_FLAG, "All") === 1
+       || $form_state->getValue(self::EDISMAX_SEARCH_FLAG) === 1) {
+      $form['edismax']['textfields_container'][self::SEARCH_ALL_FIELDS_FLAG] = [
+        '#type' => 'checkbox',
+        '#title' => $this
+          ->t('Enable searching all fields'),
+        '#default_value' => self::getConfig(self::SEARCH_ALL_FIELDS_FLAG, 0),
+      ];
+      $form['edismax']['textfields_container'][self::EDISMAX_SEARCH_LABEL] = [
         '#type' => 'textfield',
-        '#title' => $this->t('Label'),
+        '#title' => $this->t('If enabled, set the label for the option of searching all fields'),
         '#description' => $this->t('This label will be appear in Search Terms dropdown of Advanced Search form block if Lucene Search is enabled.'),
-        '#default_value' => self::getConfig(self::LUCENE_SEARCH_LABEL, "All"),
+        '#default_value' => self::getConfig(self::EDISMAX_SEARCH_LABEL, "All"),
       ];
     }
 
@@ -161,9 +170,9 @@ class SettingsForm extends ConfigFormBase {
       ->set(self::SEARCH_REMOVE_OPERATOR, $form_state->getValue(self::SEARCH_REMOVE_OPERATOR))
       ->set(self::FACET_TRUNCATE, $form_state->getValue(self::FACET_TRUNCATE))
       ->set(self::SOLR_CASE_INSENSITIVE_FIELD_PREFIX, $form_state->getValue(self::SOLR_CASE_INSENSITIVE_FIELD_PREFIX))
-      ->set(self::LUCENE_SEARCH_FLAG, $form_state->getValue(self::LUCENE_SEARCH_FLAG))
-      ->set(self::LUCENE_SEARCH_LABEL, $form_state->getValue(self::LUCENE_SEARCH_LABEL))
-
+      ->set(self::EDISMAX_SEARCH_FLAG, $form_state->getValue(self::EDISMAX_SEARCH_FLAG))
+      ->set(self::EDISMAX_SEARCH_LABEL, $form_state->getValue(self::EDISMAX_SEARCH_LABEL))
+      ->set(self::SEARCH_ALL_FIELDS_FLAG, $form_state->getValue(self::SEARCH_ALL_FIELDS_FLAG))
       ->save();
     parent::submitForm($form, $form_state);
   }
@@ -175,6 +184,6 @@ class SettingsForm extends ConfigFormBase {
    * returns it as a form (renderable array).
    */
   public function LuceneSearchEnableDisableCallback($form, FormStateInterface $form_state) {
-    return $form['lucene']['textfields_container'];
+    return $form['edismax']['textfields_container'];
   }
 }

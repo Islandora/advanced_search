@@ -103,14 +103,24 @@ class AdvancedSearchForm extends FormBase {
     return self::getConfig(SettingsForm::SEARCH_REMOVE_OPERATOR, self::DEFAULT_REMOVE_OP);
   }
 
-  /**
-   * Get if Lucene Search checkbox is enabled or disable
+ /**
+   * Get if Edismax Search checkbox is enabled or disable
    *
    * @return boolean
    *
    */
-  public static function getLuceneSearch() {
-    return self::getConfig(SettingsForm::LUCENE_SEARCH_FLAG, 0);
+  public static function getSearchAllFields() {
+    return self::getConfig(SettingsForm::SEARCH_ALL_FIELDS_FLAG, 0);
+  }
+
+  /**
+   * Get if Edismax Search checkbox is enabled or disable
+   *
+   * @return boolean
+   *
+   */
+  public static function getEdismaxSearch() {
+    return self::getConfig(SettingsForm::EDISMAX_SEARCH_FLAG, 0);
   }
 
   /**
@@ -119,8 +129,8 @@ class AdvancedSearchForm extends FormBase {
    * @return string
    *   The character to use for removing an facet to the query.
    */
-  public static function getLuceneSearchLabel() {
-    return self::getConfig(SettingsForm::LUCENE_SEARCH_LABEL, "All");
+  public static function getEdismaxSearchLabel() {
+    return self::getConfig(SettingsForm::EDISMAX_SEARCH_LABEL, "All");
   }
 
   /**
@@ -263,7 +273,7 @@ class AdvancedSearchForm extends FormBase {
       ],
     ];
 
-    $options = (self::getLuceneSearch()) ? ["all" => self::getLuceneSearchLabel()] + $this->fieldOptions($fields)  : $this->fieldOptions($fields);
+    $options = (self::getEdismaxSearch() && self::getSearchAllFields()) ? ["all" => self::getEdismaxSearchLabel()] + $this->fieldOptions($fields)  : $this->fieldOptions($fields);
     $term_default_values = $this->defaultTermValues($options);
     list($recursive, $term_values) = $this->processInput($form_state, $term_default_values);
     $i = 0;

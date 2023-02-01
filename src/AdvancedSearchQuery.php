@@ -154,57 +154,73 @@ class AdvancedSearchQuery {
 
       // create a flag for active/inactive dismax
       $isDismax = false;
+      $isSearchAllFields = false;
+      $fields_list = [];
+
+      $config = \Drupal::config(SettingsForm::CONFIG_NAME);
+      $isDismax = $config->get(SettingsForm::EDISMAX_SEARCH_FLAG);
 
       // To support negative queries we must first bring in all documents.
       $q[] = $this->negativeQuery($terms) ? "*:*" : "";
       $term = array_shift($terms);
       $q[] = $term->toSolrQuery($field_mapping);
 
-      // set dismax is enabled if the field set to "all"
+      // new
+      $fields_list[] = $term->toSolrFields($field_mapping);
+      
+      // set edismax is enabled if the field set to "all"
       if ($term->getField() === "all") {
-        $isDismax = true;
-      }
+        $isSearchAllFields = true;
 
+      }
+      
       // for multiple conditions
       foreach ($terms as $term) {
         $q[] = $term->getConjunction();
         $q[] = $term->toSolrQuery($field_mapping);
 
+        // new
+        $fields_list[] = $term->toSolrFields($field_mapping);
+
         // set dismax is enabled if the field set to "all"
         if ($term->getField() === "all") {
-          $isDismax = true;
+          $isSearchAllFields = true;
+          
         }
+        
       }
-
       $q = implode(' ', $q);
 
+      
       // Limit extra processing if Luncene Search is enable
       if ($isDismax) {
         $case_insensitive_field = $this::getConfig(SettingsForm::SOLR_CASE_INSENSITIVE_FIELD_PREFIX, '');
 
-        /** @var Solarium\QueryType\Select\Query\Query $solarium_query */
         if ((strpos($q, "*") !== false || strpos($q, "?") !== false)) {
           // if the query string contain '*', '?', OR is a single world, enable wildcard
           $tmp = str_replace('"', "", trim($q));
           $query_fields = [];
-          foreach ($field_mapping as $key => $field) {
-            foreach ($field as $f => $item) {
-              // bs_ are boolean fields, do not work well with text search
-              if (substr($item, 0, 3) !== "bs_" && !in_array($item, ['score', 'random', 'boost_document'])
-                && ((strpos( $item, "sm_" ) === 0) || (strpos( $item, "tm_" ) === 0) || (strpos($item, "sort_ss_") === 0) || (strpos($item, "ts_") === 0)
-                  || (strpos($item, "ss_") === 0)
-                )){
-                array_push($query_fields, '('.$item. ':'. $tmp .')');
+          
+          if ($isSearchAllFields) {
+            foreach ($field_mapping as $key => $field) {
+              foreach ($field as $f => $item) {
+                // bs_ are boolean fields, do not work well with text search
+                if (substr($item, 0, 3) !== "bs_" && !in_array($item, ['score', 'random', 'boost_document'])
+                  && ((strpos( $item, "sm_" ) === 0) || (strpos( $item, "tm_" ) === 0) || (strpos($item, "sort_ss_") === 0) || (strpos($item, "ts_") === 0)
+                    || (strpos($item, "ss_") === 0)
+                  )){
+                  array_push($query_fields, '('.$item. ':'. $tmp .')');
 
-                // Add case insensitive fields in the query search fields
-                if ($case_insensitive_field !== '') {
-                  $item_prefix = substr($item, 0, 3);
-                  if ($item_prefix == "ss_" || $item_prefix == "sm_") {
-                    $case_insensitive_item = str_replace($item_prefix,$case_insensitive_field, $item);
-                    array_push($query_fields, '('.$case_insensitive_item. ':'. $tmp .')');
+                  // Add case insensitive fields in the query search fields
+                  if ($case_insensitive_field !== '') {
+                    $item_prefix = substr($item, 0, 3);
+                    if ($item_prefix == "ss_" || $item_prefix == "sm_") {
+                      $case_insensitive_item = str_replace($item_prefix,$case_insensitive_field, $item);
+                      array_push($query_fields, '('.$case_insensitive_item. ':'. $tmp .')');
+                    }
                   }
-                }
 
+                }
               }
             }
           }
@@ -217,21 +233,28 @@ class AdvancedSearchQuery {
           $dismax = $solarium_query->getEDisMax();
           $dismax->setQueryParser('edismax');
           $query_fields = [];
-          foreach ($field_mapping as $key => $field) {
-            foreach ($field as $f => $item) {
-              // bs_ are boolean fields, do not work well with text search
-              if (substr($item, 0, 3) !== "bs_") {
-                array_push($query_fields, $item);
 
-                if ($case_insensitive_field !== '') {
-                  $item_prefix = substr($item, 0, 3);
-                  if ($item_prefix == "ss_" || $item_prefix == "sm_") {
-                    $case_insensitive_item = str_replace($item_prefix,$case_insensitive_field, $item);
-                    array_push($query_fields, $case_insensitive_item);
+          if ($isSearchAllFields) {
+            foreach ($field_mapping as $key => $field) {
+              foreach ($field as $f => $item) {
+                // bs_ are boolean fields, do not work well with text search
+                if (substr($item, 0, 3) !== "bs_") {
+                  array_push($query_fields, $item);
+
+                  if ($case_insensitive_field !== '') {
+                    $item_prefix = substr($item, 0, 3);
+                    if ($item_prefix == "ss_" || $item_prefix == "sm_") {
+                      $case_insensitive_item = str_replace($item_prefix,$case_insensitive_field, $item);
+                      array_push($query_fields, $case_insensitive_item);
+                    }
                   }
                 }
               }
             }
+          }
+          else {
+            $query_fields = $fields_list;
+            
           }
           $query_fields = implode(" ", array_unique($query_fields));
           $dismax->setQueryFields($query_fields);
