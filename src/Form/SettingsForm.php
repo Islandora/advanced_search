@@ -22,7 +22,6 @@ class SettingsForm extends ConfigFormBase {
   const SEARCH_ADD_OPERATOR = 'search_add_operator';
   const SEARCH_REMOVE_OPERATOR = 'search_remove_operator';
   const FACET_TRUNCATE = 'facet_truncate';
-  const SOLR_CASE_INSENSITIVE_FIELD_PREFIX = "case_insensitive_solr_field_prefix";
   const EDISMAX_SEARCH_FLAG = 'lucene_on_off';
   const EDISMAX_SEARCH_LABEL = 'lucene_label';
   const SEARCH_ALL_FIELDS_FLAG = 'all_fields_on_off';
@@ -104,16 +103,6 @@ class SettingsForm extends ConfigFormBase {
           '#min' => 1,
         ],
       ],
-      'solr_case_insensitive_field_prefix' => [
-        '#type' => 'fieldset',
-        '#title' => $this->t('Case Insensitive Search'),
-        self::SOLR_CASE_INSENSITIVE_FIELD_PREFIX => [
-          '#type' => 'textfield',
-          '#title' => $this->t('Prefix for Solr Case Insensitive Field'),
-          '#description' => $this->t('If you have configured case insenstive fields, please specify the prefix here (i.e sss_lowercase_)'),
-          '#default_value' => self::getConfig(self::SOLR_CASE_INSENSITIVE_FIELD_PREFIX, ""),
-        ],
-      ],
     ];
 
     $form['edismax'] =  [
@@ -125,7 +114,7 @@ class SettingsForm extends ConfigFormBase {
       '#type' => 'checkbox',
       '#title' => $this
         ->t('Enable Extended DisMax Query.'),
-      '#default_value' => self::getConfig(self::EDISMAX_SEARCH_FLAG, 0),
+      '#default_value' => self::getConfig(self::EDISMAX_SEARCH_FLAG, 1),
       '#ajax' => [
         'callback' => '::LuceneSearchEnableDisableCallback',
         'wrapper' => 'edismax-container',
@@ -138,7 +127,6 @@ class SettingsForm extends ConfigFormBase {
       '#attributes' => ['id' => 'edismax-container'],
     ];
 
-    
     if (self::getConfig(self::EDISMAX_SEARCH_FLAG, "All") === 1
        || $form_state->getValue(self::EDISMAX_SEARCH_FLAG) === 1) {
       $form['edismax']['textfields_container'][self::SEARCH_ALL_FIELDS_FLAG] = [
@@ -169,7 +157,6 @@ class SettingsForm extends ConfigFormBase {
       ->set(self::SEARCH_ADD_OPERATOR, $form_state->getValue(self::SEARCH_ADD_OPERATOR))
       ->set(self::SEARCH_REMOVE_OPERATOR, $form_state->getValue(self::SEARCH_REMOVE_OPERATOR))
       ->set(self::FACET_TRUNCATE, $form_state->getValue(self::FACET_TRUNCATE))
-      ->set(self::SOLR_CASE_INSENSITIVE_FIELD_PREFIX, $form_state->getValue(self::SOLR_CASE_INSENSITIVE_FIELD_PREFIX))
       ->set(self::EDISMAX_SEARCH_FLAG, $form_state->getValue(self::EDISMAX_SEARCH_FLAG))
       ->set(self::EDISMAX_SEARCH_LABEL, $form_state->getValue(self::EDISMAX_SEARCH_LABEL))
       ->set(self::SEARCH_ALL_FIELDS_FLAG, $form_state->getValue(self::SEARCH_ALL_FIELDS_FLAG))

@@ -287,6 +287,9 @@ class AdvancedSearchQueryTerm {
 
     $config = \Drupal::config(SettingsForm::CONFIG_NAME);
     $isDismax = $config->get(SettingsForm::EDISMAX_SEARCH_FLAG);
+    if (!isset($isDismax)){
+      $isDismax = true;
+    }
 
     if ($isDismax || $this->field === "all") {
 

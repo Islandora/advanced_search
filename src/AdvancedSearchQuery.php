@@ -153,13 +153,14 @@ class AdvancedSearchQuery {
       //$q[] = "{!boost b=boost_document}";
 
       // create a flag for active/inactive dismax
-      $isDismax = false;
+      $config = \Drupal::config(SettingsForm::CONFIG_NAME);
+      $isDismax = $config->get(SettingsForm::EDISMAX_SEARCH_FLAG);
+      if (!isset($isDismax))
+        $isDismax = true;
       $isSearchAllFields = false;
       $fields_list = [];
 
-      $config = \Drupal::config(SettingsForm::CONFIG_NAME);
-      $isDismax = $config->get(SettingsForm::EDISMAX_SEARCH_FLAG);
-
+      
       // To support negative queries we must first bring in all documents.
       $q[] = $this->negativeQuery($terms) ? "*:*" : "";
       $term = array_shift($terms);
@@ -194,7 +195,6 @@ class AdvancedSearchQuery {
       
       // Limit extra processing if Luncene Search is enable
       if ($isDismax) {
-        $case_insensitive_field = $this::getConfig(SettingsForm::SOLR_CASE_INSENSITIVE_FIELD_PREFIX, '');
 
         if ((strpos($q, "*") !== false || strpos($q, "?") !== false)) {
           // if the query string contain '*', '?', OR is a single world, enable wildcard
@@ -210,16 +210,6 @@ class AdvancedSearchQuery {
                     || (strpos($item, "ss_") === 0)
                   )){
                   array_push($query_fields, '('.$item. ':'. $tmp .')');
-
-                  // Add case insensitive fields in the query search fields
-                  if ($case_insensitive_field !== '') {
-                    $item_prefix = substr($item, 0, 3);
-                    if ($item_prefix == "ss_" || $item_prefix == "sm_") {
-                      $case_insensitive_item = str_replace($item_prefix,$case_insensitive_field, $item);
-                      array_push($query_fields, '('.$case_insensitive_item. ':'. $tmp .')');
-                    }
-                  }
-
                 }
               }
             }
@@ -240,14 +230,6 @@ class AdvancedSearchQuery {
                 // bs_ are boolean fields, do not work well with text search
                 if (substr($item, 0, 3) !== "bs_") {
                   array_push($query_fields, $item);
-
-                  if ($case_insensitive_field !== '') {
-                    $item_prefix = substr($item, 0, 3);
-                    if ($item_prefix == "ss_" || $item_prefix == "sm_") {
-                      $case_insensitive_item = str_replace($item_prefix,$case_insensitive_field, $item);
-                      array_push($query_fields, $case_insensitive_item);
-                    }
-                  }
                 }
               }
             }
