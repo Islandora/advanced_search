@@ -23,6 +23,7 @@
 - [Sponsors](#sponsors)
 - [Development](#development)
 - [License](#license)
+- [Edismax](#EdismaxandAdvancedSearch)
 
 ## Introduction
 
@@ -282,3 +283,13 @@ get started.
 ## License
 
 [GPLv2](http://www.gnu.org/licenses/gpl-2.0.txt)
+
+## Edismax and Advanced Search
+
+This section explains some of the different behaviours you may see when using options in the advanced search module. The Advanced Search module provides Boolean search, and enables you to configure fields for advanced searching. These fields can be ‘string’ fields (which require an exact phrase) and are case sensitive or can be ‘full-text’ searches. 
+
+Out of the box  https://www.drupal.org/project/search_api_solr full-text fieldsutilize the [extended dismax parser provided by Solr](https://solr.apache.org/guide/8_11/the-extended-dismax-query-parser.html). 
+
+If you use ‘string’ fields you will experience the standard query behaviour from Apache Solr, requiring an exact field match and it is case sensitive. If you use ‘full-text’ fields you will be able to search single words or phrases, and it is case insensitive. If, however, you turn on the edismax in advanced search, you will enable support for case insensitive searching, support for any word search (“bounded” searches can still be used for phrase matches), and be able to use specific syntax for wildcards etc. This syntax is provided below:
+![Screen Shot 2023-02-01 at 12 50 26 PM](https://user-images.githubusercontent.com/467898/216122899-2b468cc3-246f-4bc7-af54-dc02c87a9060.png)
+
