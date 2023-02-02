@@ -214,6 +214,14 @@ class AdvancedSearchQuery {
               }
             }
           }
+          else {
+            foreach ($fields_list as $f) { 
+              $parts = explode(" ", $f);
+              foreach ($parts as $p) { 
+                array_push($query_fields, '(' . $p . ':' . $tmp .')');
+              }
+            }
+          }
           $q = implode(" ", array_unique($query_fields));
         }
         else {
