@@ -27,14 +27,6 @@ use Solarium\Core\Query\QueryInterface as SolariumQueryInterface;
  */
 function advanced_search_theme() {
   return [
-    'facets_item_list__include_exclude_links' => [
-      'template' => 'facets/facets-item-list--include-exclude-links',
-      'base hook' => 'facets_item_list',
-    ],
-    'facets_result_item__include_exclude_links' => [
-      'template' => 'facets/facets-result-item--include-exclude-links',
-      'base hook' => 'facets_result_item',
-    ],
     'facets_result_item__summary' => [
       'template' => 'facets/facets-result-item--summary',
       'base hook' => 'facets_result_item',
@@ -140,29 +132,6 @@ function advanced_search_views_pre_view(ViewExecutable $view, $display_id, array
   // Allow for recursive searches by disabling contextual filter.
   $advanced_search_query = new AdvancedSearchQuery();
   $advanced_search_query->alterView(\Drupal::request(), $view, $display_id);
-}
-
-/**
- * Implements hook_preprocess_facets_summary_item_list().
- */
-function advanced_search_preprocess_facets_summary_item_list(&$variables) {
-  /*foreach ($variables['items'] as &$item) {
-    $item['attributes']['class'][] = 'facet-summary-item';
-  }*/
-}
-
-/**
- * Implements hook_preprocess_facets_item_list().
- */
-function advanced_search_preprocess_facets_item_list(&$variables) {
-  $widget = $variables['facet']->getWidget();
-  $soft_limit = $widget['config']['soft_limit'];
-  // Break into two groups less / more which can display be toggled as a single
-  // element change rather than showing / hiding all <li> elements individually.
-  // As its slow and causes the page to snap when loading.
-  $variables['less'] = array_slice($variables['items'], 0, $soft_limit);
-  $variables['more'] = array_slice($variables['items'], $soft_limit);
-  $variables['show_more_label'] = $widget['config']['soft_limit_settings']['show_more_label'];
 }
 
 /**
