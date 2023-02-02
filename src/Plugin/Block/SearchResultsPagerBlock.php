@@ -245,6 +245,7 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
         '#title' => Markup::create($text),
         '#attributes' => [
           'class' => $active ? ['pager__link', 'pager__link--is-active', 'pager__display'] : ['pager__link', 'pager__display'],
+          'aria-label' => $this->t("Display as " . Markup::create($text))
         ],
         '#wrapper_attributes' => [
           'class' => $active ? ['pager__item', 'is-active'] : ['pager__item'],
@@ -303,7 +304,7 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
       '#title_display' => 'invisible',
       '#options' => $options,
       '#options_attributes' => $options_attributes,
-      '#attributes' => ['autocomplete' => 'off'],
+      '#attributes' => ['autocomplete' => 'off', "aria-label"=>"Sort By"],
       '#wrapper_attributes' => ['class' => ['pager__sort', 'container']],
       '#name' => 'order',
       '#value' => $default_value,

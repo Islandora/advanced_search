@@ -4,6 +4,11 @@
  * Handles Ajax submission / updating form action on url change, etc.
  */
 (function ($, Drupal, drupalSettings) {
+  // Replace Results per page html h3 tag with strong tag
+  jQuery('h3:contains("Results per page")').replaceWith(function(){
+      return jQuery("<strong />", {html: jQuery(this).html()});
+  });
+
 
   // Gets current parameters minus ones provided by the form.
   function getParams(query_parameter, recurse_parameter) {

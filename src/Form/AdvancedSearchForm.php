@@ -289,6 +289,9 @@ class AdvancedSearchForm extends FormBase {
         // Only show on terms after the first.
         self::CONJUNCTION_FORM_FIELD => $first ? NULL : [
           '#type' => 'select',
+          '#attributes' => [
+            'aria-label' => $this->t("Select search condition")
+          ],
           '#options' => [
             self::AND_OP => $this->t('and'),
             self::OR_OP => $this->t('or'),
@@ -297,11 +300,17 @@ class AdvancedSearchForm extends FormBase {
         ],
         self::SEARCH_FORM_FIELD => [
           '#type' => 'select',
+          '#attributes' => [
+            'aria-label' => $this->t("Select search field"),
+          ],
           '#options' => $options,
           '#default_value' => $term_value[self::SEARCH_FORM_FIELD],
         ],
         self::INCLUDE_FORM_FIELD => [
           '#type' => 'select',
+          '#attributes' => [
+            'aria-label' => $this->t("Select search operator"),
+          ],
           '#options' => [
             self::IS_OP => $this->t('is'),
             self::NOT_OP => $this->t('is not'),
@@ -331,6 +340,9 @@ class AdvancedSearchForm extends FormBase {
         ],
         self::VALUE_FORM_FIELD => [
           '#type' => 'textfield',
+          '#attributes' => [
+            'aria-label' => $this->t("Enter a search term")
+          ],
           '#default_value' => $term_value[self::VALUE_FORM_FIELD],
         ],
         'actions' => [
@@ -357,7 +369,8 @@ class AdvancedSearchForm extends FormBase {
             '#name' => 'remove-term-' . $i,
             '#term_index' => $i,
             '#attributes' => [
-              'class' => [$block_class_prefix . '__remove', 'fa'],
+              'class' => [$block_class_prefix . '__remove', 'fa' ],
+              'aria-label' => $this->t("Remove"),
             ],
             '#ajax' => [
               'callback' => [$this, 'ajaxCallback'],
