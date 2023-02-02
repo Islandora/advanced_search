@@ -118,7 +118,9 @@ function advanced_search_preprocess_views_view(&$variables) {
   // has been created for.
   if (in_array([$view->id(), $view->current_display], $views)) {
     // Toggle between 'list' and 'grid' display depending on url parameter.
-    $format = \Drupal::request()->query->get('display') ?? 'grid';
+    $config = \Drupal::config(SettingsForm::CONFIG_NAME);
+    
+    $format = \Drupal::request()->query->get('display') ?? $config->get(SettingsForm::DISPLAY_DEFAULT);
     $variables['attributes']['class'][] = "view-{$format}";
     $view->element['#attached']['library'][] = 'advanced_search/advanced.search.pager';
   }

@@ -12,6 +12,7 @@ use Drupal\views\Plugin\views\pager\SqlBase;
 use Drupal\views\ViewExecutable;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Drupal\advanced_search\Form\SettingsForm;
 
 /**
  * Provides a 'AjaxViewBlock' block.
@@ -212,17 +213,24 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
    *   A renderable array representing the display links portion of pager.
    */
   protected function buildDisplayLinks(array $query_parameters) {
-    $active_display = $query_parameters['display'] ?? 'grid';
-    $display_options = [
-      'list' => [
+    $config = \Drupal::config(SettingsForm::CONFIG_NAME);
+    $display_options = [];
+    
+    if ($config->get(SettingsForm::DISPLAY_LIST_FLAG) == 1) { 
+      $display_options['list'] = [
         'icon' => 'fa-list',
         'title' => $this->t('List'),
-      ],
-      'grid' => [
+      ];
+    }
+
+    if ($config->get(SettingsForm::DISPLAY_GRID_FLAG) ==1) { 
+      $display_options['grid'] = [
         'icon' => 'fa-th',
-        'title' => $this->t('Grid'),
-      ],
-    ];
+        'title' => $this->t('Grid')
+      ];
+    }
+
+    $active_display = $query_parameters['display'] ?? $config->get(SettingsForm::DISPLAY_DEFAULT);
     $items = [];
     foreach ($display_options as $display => $options) {
       $url = Url::fromRoute('<current>', [], [

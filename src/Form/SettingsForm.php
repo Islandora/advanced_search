@@ -25,7 +25,10 @@ class SettingsForm extends ConfigFormBase {
   const EDISMAX_SEARCH_FLAG = 'lucene_on_off';
   const EDISMAX_SEARCH_LABEL = 'lucene_label';
   const SEARCH_ALL_FIELDS_FLAG = 'all_fields_on_off';
-
+  const DISPLAY_LIST_FLAG = 'list_on_off';
+  const DISPLAY_GRID_FLAG = 'grid_on_off';
+  const DISPLAY_DEFAULT = 'default-display-mode';
+  
   /**
    * Constructs a \Drupal\system\ConfigFormBase object.
    *
@@ -105,6 +108,36 @@ class SettingsForm extends ConfigFormBase {
       ],
     ];
 
+    $form['display-mode'] =  [
+      '#type' => 'fieldset',
+      '#title' => $this->t("Display Mode"),
+    ];
+    
+    $form['display-mode'][self::DISPLAY_LIST_FLAG] = [
+      '#type' => 'checkbox',
+      '#title' => $this
+        ->t('Enable List View.'),
+      '#default_value' => self::getConfig(self::DISPLAY_LIST_FLAG, 0),
+    ];
+
+    $form['display-mode'][self::DISPLAY_GRID_FLAG] = [
+      '#type' => 'checkbox',
+      '#title' => $this
+        ->t('Enable Grid View.'),
+      '#default_value' => self::getConfig(self::DISPLAY_GRID_FLAG, 0),
+    ];
+
+    $form['display-mode'][self::DISPLAY_DEFAULT] = [
+      '#type' => 'select',
+      '#title' => $this
+        ->t('Default display mode:'),
+      '#options' => [
+        'list' => 'List',
+        'grid' => 'Grid'
+      ],
+      '#default_value' => self::getConfig(self::DISPLAY_DEFAULT, 'grid'),
+    ];
+
     $form['edismax'] =  [
       '#type' => 'fieldset',
       '#title' => $this->t("Extended DisMax Query"),
@@ -160,6 +193,9 @@ class SettingsForm extends ConfigFormBase {
       ->set(self::EDISMAX_SEARCH_FLAG, $form_state->getValue(self::EDISMAX_SEARCH_FLAG))
       ->set(self::EDISMAX_SEARCH_LABEL, $form_state->getValue(self::EDISMAX_SEARCH_LABEL))
       ->set(self::SEARCH_ALL_FIELDS_FLAG, $form_state->getValue(self::SEARCH_ALL_FIELDS_FLAG))
+      ->set(self::DISPLAY_LIST_FLAG, $form_state->getValue(self::DISPLAY_LIST_FLAG))
+      ->set(self::DISPLAY_GRID_FLAG, $form_state->getValue(self::DISPLAY_GRID_FLAG))
+      ->set(self::DISPLAY_DEFAULT, $form_state->getValue(self::DISPLAY_DEFAULT))
       ->save();
     parent::submitForm($form, $form_state);
   }
