@@ -1,6 +1,7 @@
 # Islandora Advanced Search <!-- omit in toc -->
 
 - [Introduction](#introduction)
+- [Feature and Advantages](#features-and-advantages)
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Configuration](#configuration)
@@ -23,14 +24,25 @@
 - [Sponsors](#sponsors)
 - [Development](#development)
 - [License](#license)
-- [Edismax](#EdismaxandAdvancedSearch)
+
 
 ## Introduction
 
-This module creates several blocks to support searching. It also enables the use
-of Ajax with search blocks, facets, and search results.
+The Advanced Search module creates several blocks to support searching. It also enables the use
+of Ajax with views (powered by Solr), search blocks, facets, and search results.
 
-![image](./docs/demo.gif)
+![image](https://user-images.githubusercontent.com/7862086/216648547-7715951a-4484-4ab5-9b83-5a09e4161342.png)
+
+## Features and Advantages
+
+The module provides Boolean search, enables you to use AND, OR or NOT options to helps expanding or narrowing your search parameters.
+
+![image](https://user-images.githubusercontent.com/7862086/216671865-6cfb7285-dfc1-4d76-8f3a-89e97adf02e1.png)
+
+Use the following syntaxes (eDismax ONLY) to increase Search acuracy is provided below:
+
+![image](https://user-images.githubusercontent.com/7862086/216650782-6ed65aad-2389-4e1e-b38f-e96d41278634.png)
+
 
 ## Requirements
 
@@ -62,7 +74,7 @@ drush en advanced_search
 You can set the following configuration at
 `admin/config/islandora/advanced_search`:
 
-![image](./docs/advanced_search_settings.png)
+![image](https://user-images.githubusercontent.com/7862086/216649283-4c2866b0-aa29-4bc8-ae80-d7fcdead6e73.png)
 
 ## Configuring Solr
 
@@ -71,14 +83,13 @@ Please review
 before continuing. The following assumes you already have a working Solr and the
 Drupal Search API setup.
 
-## Lucene Search (New)
+## eDismax Search (New)
 
 Click [here](https://www.drupal.org/docs/contributed-modules/search-api-solr/solr-query-parsers) to find more detail about
-Lucene Search in Drupal.
+eDismax Search in Drupal.
 
-If this feature is enabled, an option of searching all mapping fields will be added in Advanced Search Form (screenshot below).
 
-![image](./docs/lucene_search_form.png)
+![image](https://user-images.githubusercontent.com/7862086/216676786-4ce95af4-ee97-443c-84f1-370fb7e765ce.png)
 
 
 ## Configure Collection Search
@@ -283,13 +294,4 @@ get started.
 ## License
 
 [GPLv2](http://www.gnu.org/licenses/gpl-2.0.txt)
-
-## Edismax and Advanced Search
-
-This section explains some of the different behaviours you may see when using options in the advanced search module. The Advanced Search module provides Boolean search, and enables you to configure fields for advanced searching. These fields can be ‘string’ fields (which require an exact phrase) and are case sensitive or can be ‘full-text’ searches. 
-
-Out of the box  https://www.drupal.org/project/search_api_solr full-text fieldsutilize the [extended dismax parser provided by Solr](https://solr.apache.org/guide/8_11/the-extended-dismax-query-parser.html). 
-
-If you use ‘string’ fields you will experience the standard query behaviour from Apache Solr, requiring an exact field match and it is case sensitive. If you use ‘full-text’ fields you will be able to search single words or phrases, and it is case insensitive. If, however, you turn on the edismax in advanced search, you will enable support for case insensitive searching, support for any word search (“bounded” searches can still be used for phrase matches), and be able to use specific syntax for wildcards etc. This syntax is provided below:
-![Screen Shot 2023-02-01 at 12 50 26 PM](https://user-images.githubusercontent.com/467898/216122899-2b468cc3-246f-4bc7-af54-dc02c87a9060.png)
 
