@@ -273,7 +273,7 @@ class AdvancedSearchForm extends FormBase {
       ],
     ];
 
-    $options = (self::getEdismaxSearch() && self::getSearchAllFields()) ? ["all" => self::getEdismaxSearchLabel()] + $this->fieldOptions($fields)  : $this->fieldOptions($fields);
+    $options = (self::getEdismaxSearch() && self::getSearchAllFields()) ? ["all" => $this->t(self::getEdismaxSearchLabel())] + $this->fieldOptions($fields)  : $this->fieldOptions($fields);
     $term_default_values = $this->defaultTermValues($options);
     list($recursive, $term_values) = $this->processInput($form_state, $term_default_values);
     $i = 0;
