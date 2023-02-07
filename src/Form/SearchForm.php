@@ -23,25 +23,38 @@ class SearchForm  extends FormBase
    */
   public function buildForm(array $form, FormStateInterface $form_state)
   {
-    $block = \Drupal\block\Entity\Block::load("search");
+    $config = \Drupal::config(SettingsForm::CONFIG_NAME);
 
-    if ($block) {
-      $settings = $block->get('settings');
-      $view_machine_name = $settings['search_view_machine_name'];
-
+    if (!$config->get(SettingsForm::SEARCH_ALL_FIELDS_FLAG)) { 
+      $form['search-attributes'][SettingsForm::SEARCH_ALL_FIELDS_FLAG] = [
+        '#markup' => $this
+          ->t('<strong>This block is required to enable searching all fields for the Advanced Search.
+            To proceed, please enable the Search All fields in 
+            <a href="/admin/config/search/advanced" target="_blank">Advanced Seach Configuration</a></strong>.'),
+      ];
     }
-    $form['search-textfield'] = array(
-      '#type' => 'textfield',
-      '#title' => (!empty($settings['search_textfield_label']) ? $settings['search_textfield_label'] : ''),
-      '#attributes' => ['placeholder' => $settings['search_placeholder']]
-    );
+    else {
+      $block = \Drupal\block\Entity\Block::load("search");
 
-    $form['actions']['#type'] = 'actions';
-    $form['actions']['submit'] = array(
-      '#type' => 'submit',
-      '#value' => (!empty($settings['search_submit_label']) ? $settings['search_submit_label'] : 'Search'),
-      '#button_type' => 'primary',
-    );
+      if ($block) {
+        $settings = $block->get('settings');
+        $view_machine_name = $settings['search_view_machine_name'];
+
+      }
+      $form['search-textfield'] = array(
+        '#type' => 'textfield',
+        '#title' => (!empty($settings['search_textfield_label']) ? $settings['search_textfield_label'] : ''),
+        '#attributes' => ['placeholder' => $settings['search_placeholder']]
+      );
+
+      $form['actions']['#type'] = 'actions';
+      $form['actions']['submit'] = array(
+        '#type' => 'submit',
+        '#value' => (!empty($settings['search_submit_label']) ? $settings['search_submit_label'] : 'Search'),
+        '#button_type' => 'primary',
+      );
+    }
+    
     return $form;
   }
 
