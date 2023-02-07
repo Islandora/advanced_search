@@ -147,6 +147,7 @@ class SettingsForm extends ConfigFormBase {
       '#type' => 'checkbox',
       '#title' => $this
         ->t('Enable Extended DisMax Query.'),
+      '#description' => $this->t('If enabled, this applies to all fields searching in the Advanced Search Block.'),
       '#default_value' => self::getConfig(self::EDISMAX_SEARCH_FLAG, 1),
       '#ajax' => [
         'callback' => '::LuceneSearchEnableDisableCallback',
@@ -166,12 +167,13 @@ class SettingsForm extends ConfigFormBase {
         '#type' => 'checkbox',
         '#title' => $this
           ->t('Enable searching all fields'),
+        '#description' => $this->t('This will add an additional option (which label can be configured below) in Advanced Search block.'),
         '#default_value' => self::getConfig(self::SEARCH_ALL_FIELDS_FLAG, 0),
       ];
       $form['edismax']['textfields_container'][self::EDISMAX_SEARCH_LABEL] = [
         '#type' => 'textfield',
         '#title' => $this->t('If enabled, set the label for the option of searching all fields'),
-        '#description' => $this->t('This label will be appear in Search Terms dropdown of Advanced Search form block if Lucene Search is enabled.'),
+        '#description' => $this->t('This will apply for the additional option above in Advanced Search block.'),
         '#default_value' => self::getConfig(self::EDISMAX_SEARCH_LABEL, "All"),
       ];
     }
