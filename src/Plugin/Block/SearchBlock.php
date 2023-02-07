@@ -38,7 +38,7 @@ class SearchBlock extends BlockBase {
       $form['search-attributes'][SettingsForm::SEARCH_ALL_FIELDS_FLAG] = [
         '#markup' => $this
           ->t('<strong>This block is required to enable searching all fields for the Advanced Search.
-            To proceed, please enable the Search All fields in 
+            To proceed, please enable "Enable searching all fields" in 
             <a href="/admin/config/search/advanced" target="_blank">Advanced Seach Configuration</a></strong>.'),
       ];
     }

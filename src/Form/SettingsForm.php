@@ -66,6 +66,88 @@ class SettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
+    $form['eDisMax'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Advanced Search Block'),
+      '#weight' => -1,
+    ];
+    $form['eDisMax']['advanced-search-block-description'] = [
+      '#markup' => $this->t("Advanced Search Blocks are available in the Blocks interface for each Search API view. When placing an Advanced Search Block, you can configure the fields that are used for field-based search and whether a “recursive” search is available.  The following settings apply to all Advanced Search blocks."),
+      '#weight' => -2,
+    ];
+    $form['eDisMax'][self::EDISMAX_SEARCH_FLAG] = [
+      '#type' => 'checkbox',
+      '#title' => $this
+        ->t('Enable Extended DisMax Query.'),
+      '#description' => $this->t('<ul> <li>When enabled, all queries using an Advanced Search Block use the Extended Dismax (eDisMax) query processor.</li>
+        <li>This setting must be enabled for the “Simple Search Block” to function. </li>
+        <li>If enabled, the “Simple Search Block”/”Advanced Search Blocks” support:
+           <ul> 
+            <li>queries that include AND, OR, NOT, -, and + (user documentation needed)</li>
+            <li>Wildcard operator *</li>
+            <li>Words in query are treated as distinct words. They are combined using OR unless the user specifies using AND/NOT in their query.</li>
+           </ul>
+          </li>
+        </ul>'),
+      '#default_value' => self::getConfig(self::EDISMAX_SEARCH_FLAG, 1),
+    ];
+
+    $form['eDisMax']['textfields_container'] = [
+      '#type' => 'container',
+      '#attributes' => ['id' => 'edismax-container'],
+    ];
+
+    $form['eDisMax']['textfields_container'][self::SEARCH_ALL_FIELDS_FLAG] = [
+      '#type' => 'checkbox',
+      '#title' => $this
+        ->t('Enable searching all fields'),
+      '#description' => $this->t('<ul>
+          <li>This makes an additional option visible in all Advanced Search Blocks, which searches across all fields. Its label is configured below.</li>
+          <li>This setting must be enabled for the “Simple Search Block” to function.</li>
+        </ul>'),
+      '#default_value' => self::getConfig(self::SEARCH_ALL_FIELDS_FLAG, 0),
+    ];
+    $form['eDisMax']['textfields_container'][self::EDISMAX_SEARCH_LABEL] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('If enabled, set the label for the option of searching all fields'),
+      '#description' => $this->t('E.g. keyword.'),
+      '#default_value' => self::getConfig(self::EDISMAX_SEARCH_LABEL, "Keyword"),
+    ];
+
+
+    $form['display-mode'] =  [
+      '#type' => 'fieldset',
+      '#title' => $this->t("Pager Block"),
+    ];
+    $form['display-mode']['pager-block-description'] = [
+      '#markup' => $this->t("Pager blocks are available in the Blocks interface for each Search API view.  The following settings apply for all Pager blocks."),
+    ];
+    
+    $form['display-mode'][self::DISPLAY_LIST_FLAG] = [
+      '#type' => 'checkbox',
+      '#title' => $this
+        ->t('Expose "List view" option.'),
+      '#default_value' => self::getConfig(self::DISPLAY_LIST_FLAG, 0),
+    ];
+
+    $form['display-mode'][self::DISPLAY_GRID_FLAG] = [
+      '#type' => 'checkbox',
+      '#title' => $this
+        ->t('Expose "Grid view" option.'),
+      '#default_value' => self::getConfig(self::DISPLAY_GRID_FLAG, 0),
+    ];
+
+    $form['display-mode'][self::DISPLAY_DEFAULT] = [
+      '#type' => 'select',
+      '#title' => $this
+        ->t('Default view mode:'),
+      '#options' => [
+        'list' => 'List',
+        'grid' => 'Grid'
+      ],
+      '#default_value' => self::getConfig(self::DISPLAY_DEFAULT, 'grid'),
+    ];
+
     $form += [
       'search' => [
         '#type' => 'fieldset',
@@ -107,68 +189,7 @@ class SettingsForm extends ConfigFormBase {
         ],
       ],
     ];
-
-    $form['display-mode'] =  [
-      '#type' => 'fieldset',
-      '#title' => $this->t("Display Mode"),
-    ];
     
-    $form['display-mode'][self::DISPLAY_LIST_FLAG] = [
-      '#type' => 'checkbox',
-      '#title' => $this
-        ->t('Enable List View.'),
-      '#default_value' => self::getConfig(self::DISPLAY_LIST_FLAG, 0),
-    ];
-
-    $form['display-mode'][self::DISPLAY_GRID_FLAG] = [
-      '#type' => 'checkbox',
-      '#title' => $this
-        ->t('Enable Grid View.'),
-      '#default_value' => self::getConfig(self::DISPLAY_GRID_FLAG, 0),
-    ];
-
-    $form['display-mode'][self::DISPLAY_DEFAULT] = [
-      '#type' => 'select',
-      '#title' => $this
-        ->t('Default display mode:'),
-      '#options' => [
-        'list' => 'List',
-        'grid' => 'Grid'
-      ],
-      '#default_value' => self::getConfig(self::DISPLAY_DEFAULT, 'grid'),
-    ];
-
-    $form['edismax'] =  [
-      '#type' => 'fieldset',
-      '#title' => $this->t("Extended DisMax Query"),
-    ];
-
-    $form['edismax'][self::EDISMAX_SEARCH_FLAG] = [
-      '#type' => 'checkbox',
-      '#title' => $this
-        ->t('Enable Extended DisMax Query.'),
-      '#description' => $this->t('If enabled, this applies to all fields searching in the Advanced Search Block.'),
-      '#default_value' => self::getConfig(self::EDISMAX_SEARCH_FLAG, 1),
-    ];
-
-    $form['edismax']['textfields_container'] = [
-      '#type' => 'container',
-      '#attributes' => ['id' => 'edismax-container'],
-    ];
-
-    $form['edismax']['textfields_container'][self::SEARCH_ALL_FIELDS_FLAG] = [
-      '#type' => 'checkbox',
-      '#title' => $this
-        ->t('Enable searching all fields'),
-      '#description' => $this->t('This will add an additional option (which label can be configured below) in Advanced Search block.'),
-      '#default_value' => self::getConfig(self::SEARCH_ALL_FIELDS_FLAG, 0),
-    ];
-    $form['edismax']['textfields_container'][self::EDISMAX_SEARCH_LABEL] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('If enabled, set the label for the option of searching all fields'),
-      '#description' => $this->t('This will apply for the additional option above in Advanced Search block.'),
-      '#default_value' => self::getConfig(self::EDISMAX_SEARCH_LABEL, "All"),
-    ];
 
     return parent::buildForm($form, $form_state);
   }
