@@ -37,11 +37,200 @@ of Ajax with views (powered by Solr), search blocks, facets, and search results.
 
 The module provides Boolean search, enables you to use AND, OR or NOT options to helps expanding or narrowing your search parameters.
 
-![image](https://user-images.githubusercontent.com/7862086/216671865-6cfb7285-dfc1-4d76-8f3a-89e97adf02e1.png)
+<table>
+<tbody>
+<tr>
+<td>&nbsp;</td>
+<td>
+<p><strong>Standard Query Parser</strong></p>
+</td>
+<td>
+<p><strong>The Extended DisMax (eDismax) Query Parser&nbsp;</strong></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><span style="font-weight: 400;">Use</span></p>
+</td>
+<td>
+<p><span style="font-weight: 400;">If&nbsp; Edimax is turned off in configuration, the &ldquo;Standard Query Parser&rdquo; is used.</span></p>
+</td>
+<td>
+<p><span style="font-weight: 400;">Edismax is enabled by default, but can be turned off in configuration (/admin/config/search/advanced).&nbsp;</span></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><span style="font-weight: 400;">Capacity</span></p>
+</td>
+<td>
+<ul>
+<li style="font-weight: 400;"><span style="font-weight: 400;">Search a content field</span></li>
+</ul>
+</td>
+<td>
+<ul>
+<li style="font-weight: 400;"><span style="font-weight: 400;">Search a content field</span></li>
+<li style="font-weight: 400;"><span style="font-weight: 400;">Search across all of the fields which are indexed to Solr in Search API configuration.&nbsp;</span></li>
+</ul>
+</td>
+</tr>
+<tr>
+<td>
+<p><span style="font-weight: 400;">Search</span></p>
+</td>
+<td>
+<p><span style="font-weight: 400;">Content indexed into a string field</span></p>
+<ul>
+<li style="font-weight: 400;"><span style="font-weight: 400;">Search returns on an exact field match (case sensitive)</span></li>
+</ul>
+<br />
+<p><span style="font-weight: 400;">Content indexed into a full-text field</span></p>
+<ul>
+<li style="font-weight: 400;"><span style="font-weight: 400;">Search returns on single words or phrases (words in order), and is case insensitive.&nbsp;</span></li>
+</ul>
+</td>
+<td>
+<p><span style="font-weight: 400;">Content indexed into a string field</span></p>
+<ul>
+<li style="font-weight: 400;"><span style="font-weight: 400;">Search returns on an exact field match (case sensitive)</span></li>
+</ul>
+<br />
+<p><span style="font-weight: 400;">Content indexed into a full-text field</span></p>
+<ul>
+<li style="font-weight: 400;"><span style="font-weight: 400;">&ldquo;Bounded&rdquo; searches return exact phrase matches, replicating the standard query parser features.</span></li>
+<li style="font-weight: 400;"><span style="font-weight: 400;">Case insensitive</span></li>
+<li style="font-weight: 400;"><span style="font-weight: 400;">Support for word searching in any order.</span></li>
+<li style="font-weight: 400;"><span style="font-weight: 400;">Syntax for wildcards and other search features available (described in table below)</span></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 
 Use the following syntaxes (eDismax ONLY) to increase Search acuracy is provided below:
 
-![image](https://user-images.githubusercontent.com/7862086/216650782-6ed65aad-2389-4e1e-b38f-e96d41278634.png)
+<table>
+<tbody>
+<tr>
+<td>
+<p><strong>Operator</strong></p>
+</td>
+<td>
+<p><strong>Usage</strong></p>
+</td>
+<td>
+<p><strong>Example</strong></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><span style="font-weight: 400;">AND</span></p>
+</td>
+<td>
+<p><span style="font-weight: 400;">Narrow down your search to include results that contain both search terms</span></p>
+</td>
+<td>
+<p><span style="font-weight: 400;">orientation AND games</span></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><span style="font-weight: 400;">OR</span></p>
+</td>
+<td>
+<p><span style="font-weight: 400;">Broaden your search to include results that contain either search term</span></p>
+</td>
+<td>
+<p><span style="font-weight: 400;">students OR undergraduates</span></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><span style="font-weight: 400;">NOT</span></p>
+</td>
+<td>
+<p><span style="font-weight: 400;">Narrow your search by excluding certain words or phrases</span></p>
+</td>
+<td>
+<p><span style="font-weight: 400;">orientation NOT games</span></p>
+</td>
+</tr>
+<tr>
+<td>
+<p><span style="font-weight: 400;">Asterisk (*)</span></p>
+</td>
+<td>
+<p><span style="font-weight: 400;">Replaces the asterisk with multiple characters. Use to search for multiple beginnings, middles, and endings of words.</span></p>
+</td>
+<td>
+<p><span style="font-weight: 400;">librar*&nbsp;</span></p>
+<br />
+<p><span style="font-weight: 400;">will include results like:</span></p>
+<ul>
+<li style="font-weight: 400;"><span style="font-weight: 400;">librar</span><strong>y</strong></li>
+<li style="font-weight: 400;"><span style="font-weight: 400;">librar</span><strong>ies</strong></li>
+<li style="font-weight: 400;"><span style="font-weight: 400;">librar</span><strong>ian</strong></li>
+</ul>
+</td>
+</tr>
+<tr>
+<td>
+<p><span style="font-weight: 400;">Question Mark (?)</span></p>
+</td>
+<td>
+<p><span style="font-weight: 400;">Replaces the question mark with a single character. Use to search for multiple beginnings, middles, and endings of words.</span></p>
+</td>
+<td>
+<p><span style="font-weight: 400;">?est</span></p>
+<br />
+<p><span style="font-weight: 400;">will include results like:</span></p>
+<ul>
+<li style="font-weight: 400;"><strong>T</strong><span style="font-weight: 400;">est</span></li>
+<li style="font-weight: 400;"><strong>P</strong><span style="font-weight: 400;">est</span></li>
+<li style="font-weight: 400;"><strong>W</strong><span style="font-weight: 400;">est</span></li>
+</ul>
+<br />
+<p><span style="font-weight: 400;">Will not include:</span></p>
+<ul>
+<li><strong>Cont</strong><span style="font-weight: 400;">est</span></li>
+</ul>
+</td>
+</tr>
+<tr>
+<td>
+<p><span style="font-weight: 400;">Tilde (~)</span></p>
+</td>
+<td>
+<p><span style="font-weight: 400;">Use to make your search &lsquo;fuzzy&rsquo; or search for synonyms and alternate spellings.&nbsp;</span></p>
+<br />
+<p><span style="font-weight: 400;">Only works for Keyword search.</span></p>
+</td>
+<td>
+<p><span style="font-weight: 400;">Shaun~</span></p>
+<br />
+<p><span style="font-weight: 400;">will include results like:</span></p>
+<ul>
+<li style="font-weight: 400;"><span style="font-weight: 400;">Shaun</span></li>
+<li style="font-weight: 400;"><span style="font-weight: 400;">Sean</span></li>
+<li style="font-weight: 400;"><span style="font-weight: 400;">Shawn</span></li>
+</ul>
+</td>
+</tr>
+<tr>
+<td>
+<p><span style="font-weight: 400;">Quotation Marks (&ldquo;&rdquo;)</span></p>
+</td>
+<td>
+<p><span style="font-weight: 400;">Use quotation marks to search for a specific word or phrase.</span></p>
+</td>
+<td>
+<p><span style="font-weight: 400;">&ldquo;alumni golf tournament&rdquo;</span></p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
 
 
 ## Requirements
