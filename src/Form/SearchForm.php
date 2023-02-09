@@ -44,7 +44,11 @@ class SearchForm  extends FormBase
       $form['search-textfield'] = array(
         '#type' => 'textfield',
         '#title' => (!empty($settings['search_textfield_label']) ? $settings['search_textfield_label'] : ''),
-        '#attributes' => ['placeholder' => $settings['search_placeholder']]
+        '#attributes' => [
+          'placeholder' => $this->t($settings['search_placeholder']),
+          'aria-label' => $this->t($settings['search_placeholder']),
+        ],
+        '#theme_wrappers' => []
       );
 
       $form['actions']['#type'] = 'actions';
