@@ -297,6 +297,7 @@ class AdvancedSearchForm extends FormBase {
             self::OR_OP => $this->t('or'),
           ],
           '#default_value' => $conjunction,
+          '#theme_wrappers' => []
         ],
         self::SEARCH_FORM_FIELD => [
           '#type' => 'select',
@@ -305,6 +306,7 @@ class AdvancedSearchForm extends FormBase {
           ],
           '#options' => $options,
           '#default_value' => $term_value[self::SEARCH_FORM_FIELD],
+          '#theme_wrappers' => []
         ],
         self::INCLUDE_FORM_FIELD => [
           '#type' => 'select',
@@ -323,6 +325,7 @@ class AdvancedSearchForm extends FormBase {
               ':input[name="terms[' . $i . '][' . self::CONJUNCTION_FORM_FIELD . ']"]' => ['value' => self::AND_OP],
             ],
           ],
+          '#theme_wrappers' => []
         ],
         // Just markup to show when 'include' is not alterable due to the
         // selected 'conjunction'. Hide for the first term.
@@ -334,9 +337,10 @@ class AdvancedSearchForm extends FormBase {
               ':input[name="terms[' . $i . '][' . self::CONJUNCTION_FORM_FIELD . ']"]' => ['value' => self::OR_OP],
             ],
           ],
-          'content' => [
+          /*'content' => [
             '#markup' => $this->t('is'),
-          ],
+          ],*/
+          '#theme_wrappers' => []
         ],
         self::VALUE_FORM_FIELD => [
           '#type' => 'textfield',
@@ -344,6 +348,7 @@ class AdvancedSearchForm extends FormBase {
             'aria-label' => $this->t("Enter a search term")
           ],
           '#default_value' => $term_value[self::VALUE_FORM_FIELD],
+          '#theme_wrappers' => []
         ],
         'actions' => [
           '#type' => 'container',

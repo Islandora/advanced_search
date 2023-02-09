@@ -35,3 +35,7 @@ input.islandora-advanced-search-form__reset,
 input.islandora-advanced-search-form__search {
   display: inline-block;
 }
+
+.form-wrapper select {
+  margin-bottom: 1.125rem;
+}
