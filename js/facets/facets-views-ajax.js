@@ -245,7 +245,7 @@
         });
 
       /* digitalutsc added */
-      $('.pager__sort select[name="order"]')
+     $('.pager__sort select[name="order"]')
         .once()
         .change(function () {
           var href = window.location.href;
@@ -253,12 +253,14 @@
 
           var selection = $(this).val();
           var option = selection.split('_');
-          params.sort_by = option[0];
-          params.sort_order = option[1].toUpperCase();
+          //params.sort_by = option[0];
+          params.sort_order = option[option.length - 1].toUpperCase();
+          params.sort_by = selection.replace("_" + option[option.length - 1], "");
 
           href = href.split("?")[0] + "?" + $.param(params);
           window.history.pushState(null, document.title, href);
         });
+
 
       // Trigger on sort change.
       $('[data-drupal-pager-id] select[name="order"]')
