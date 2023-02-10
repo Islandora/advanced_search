@@ -10,6 +10,29 @@ use \Drupal\Core\Url;
 
 class SearchForm  extends FormBase
 {
+  protected $block_id;
+
+  /**
+   * @param $block_id
+   */
+  public function __construct($block_id) {
+    $this->block_id = $block_id;
+  }
+
+  /**
+   * @return mixed
+   */
+  public function getBlockId() {
+    return $this->block_id;
+  }
+
+  /**
+   * @param mixed $block_id
+   */
+  public function setBlockId($block_id): void {
+    $this->block_id = $block_id;
+  }
+
   /**
    * {@inheritdoc}
    */
