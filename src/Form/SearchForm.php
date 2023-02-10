@@ -34,7 +34,7 @@ class SearchForm  extends FormBase
       ];
     }
     else {
-      $block = \Drupal\block\Entity\Block::load("search");
+      $block = \Drupal\block\Entity\Block::load($this->block_id);
 
       if ($block) {
         $settings = $block->get('settings');
@@ -45,8 +45,8 @@ class SearchForm  extends FormBase
         '#type' => 'textfield',
         '#title' => (!empty($settings['search_textfield_label']) ? $settings['search_textfield_label'] : ''),
         '#attributes' => [
-          'placeholder' => $this->t($settings['search_placeholder']),
-          'aria-label' => $this->t($settings['search_placeholder']),
+          'placeholder' => isset($settings['search_placeholder']) ? $this->t($settings['search_placeholder']) : $this->t("Search collections"),
+          'aria-label' => (isset($settings['search_textfield_label']) ? $this->t($settings['search_textfield_label']) : $this->t('Enter Keyword'))
         ],
         '#theme_wrappers' => []
       );
@@ -67,7 +67,7 @@ class SearchForm  extends FormBase
    */
   public function submitForm(array &$form, FormStateInterface $form_state)
   {
-    $block = \Drupal\block\Entity\Block::load("search");
+    $block = \Drupal\block\Entity\Block::load($this->block_id);
     if ($block) {
       $settings = $block->get('settings');
       $view_machine_name = $settings['search_view_machine_name'];
