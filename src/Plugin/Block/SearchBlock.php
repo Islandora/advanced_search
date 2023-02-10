@@ -87,6 +87,7 @@ class SearchBlock extends BlockBase {
    * {@inheritdoc}
    */
   public function blockSubmit($form, FormStateInterface $form_state) {
+    $this->configuration['block_id'] = $form_state->getBuildInfo()['callback_object']->getEntity()->id();
     $this->configuration['search_view_machine_name'] = $form_state->getValues()['search-attributes']['view_machine_name'];
     $this->configuration['search_textfield_label'] = $form_state->getValues()['search-attributes']['search_textfield'];
     $this->configuration['search_placeholder'] = $form_state->getValues()['search-attributes']['search_placeholder_textfield'];
@@ -97,7 +98,10 @@ class SearchBlock extends BlockBase {
    * {@inheritdoc}
    */
   public function build() {
-    return \Drupal::formBuilder()->getForm('Drupal\advanced_search\Form\SearchForm');
+    $config = $this->getConfiguration();
+    $blockId = $config['block_id'];
+    $searchForm = new \Drupal\advanced_search\Form\SearchForm($blockId);
+    return \Drupal::formBuilder()->getForm($searchForm);
   }
 
 }
