@@ -338,7 +338,7 @@ class AdvancedSearchBlock extends BlockBase implements ContainerFactoryPluginInt
         '#options' => $options,
         '#default_value' => $this->configuration[self::SETTING_CONTEXTUAL_FILTER],
         '#multiple' => FALSE,
-        '#required' => TRUE,
+        '#required' => FALSE,
         '#size' => count($options) + 1,
       ];
     }
