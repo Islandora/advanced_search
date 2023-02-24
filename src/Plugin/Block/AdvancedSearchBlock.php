@@ -330,7 +330,7 @@ class AdvancedSearchBlock extends BlockBase implements ContainerFactoryPluginInt
         }
       }
     }
-    if (count($options) > 1) {
+    if (count($options) > 0) {
       $form[self::SETTING_CONTEXTUAL_FILTER] = [
         '#type' => 'select',
         '#title' => $this->t('Context Filter'),
