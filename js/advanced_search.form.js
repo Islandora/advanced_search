@@ -182,12 +182,18 @@
             window.location.replace(href.split('?')[0]);
           });
           
-           $("#ajax-page-summary").hide();
-            $( document ).ajaxComplete(function( event, request, settings ) {
+          // Handle the page summary
+          $("#ajax-page-summary").hide();
+          $( document ).ajaxComplete(function( event, request, settings ) {
+              
+              $("#ajax-page-summary").hide();
+              if (jQuery("#ajax-page-summary").length >0) { 
                 $(".pager__summary").html($("#ajax-page-summary").html());
-                $("#ajax-page-summary").hide();
-            });
-          
+              }
+              else {
+                $(".pager__summary").html("");
+              }
+          });
         }
       }
     }
