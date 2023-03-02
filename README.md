@@ -6,13 +6,14 @@
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Configuring Solr](#configuring-solr)
-- [Lucene Search (New)](#lucene-search-new)
+- [eDismax Search](#edismax-search)
 - [Configure Collection Search](#configure-collection-search)
 - [Configure Views](#configure-views)
   - [Exposed Form](#exposed-form)
   - [Collection Search](#collection-search)
   - [Paging](#paging)
   - [Sorting](#sorting)
+  - [Result Summary](#result-summary)
 <!--- - [Configure Facets](#configure-facets)
   - [Include / Exclude Facets](#include--exclude-facets) --->
 - [Configure Blocks](#configure-blocks)
@@ -272,7 +273,7 @@ Please review
 before continuing. The following assumes you already have a working Solr and the
 Drupal Search API setup.
 
-## eDismax Search (New)
+## eDismax Search
 
 Click [here](https://www.drupal.org/docs/contributed-modules/search-api-solr/solr-query-parsers) to find more detail about
 eDismax Search in Drupal.
@@ -359,6 +360,22 @@ Additional the fields listed as `Sort Criteria` as `Exposed` will be made
 available in the pager block (*documented below*).
 
 ![image](./docs/sort_criteria.png)
+
+### Result Summary
+
+In your view, in the `Header` section, clikc `Add`, then search and select for "Result summary".
+
+![image](https://user-images.githubusercontent.com/7862086/222479508-7fd97c65-11d5-496d-8e5a-9e019c82f097.png)
+
+Then, paste the following code to `Display` textarea in `Configure Header: Global: Result summary`
+
+````
+<div id="ajax-page-summary" class="pager__summary">Displaying @start - @end of @total</div>
+````
+
+![image](https://user-images.githubusercontent.com/7862086/222480250-ddedb959-1c0b-4558-8f9f-f1d2ec1107ec.png)
+
+
 
 <!--- ## Configure Facets
 
