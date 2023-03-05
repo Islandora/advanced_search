@@ -28,9 +28,7 @@
 
 
 ## Introduction
-
-The Advanced Search module creates several blocks to support searching. It also enables the use
-of Ajax with views (powered by Solr), search blocks, facets, and search results.
+The Advanced Search module provides keyword search, field search, boolean search, and search within collections and sub collections. It provides a pager UI component that allows the user to set the number of items to show, select sort criteria and display style (grid or list). It provides a global search block, which redirects the search query to a search page. It also enables the use of Ajax with views (powered by Solr), search blocks, facets, and search results.
 
 ![image](https://user-images.githubusercontent.com/7862086/216648547-7715951a-4484-4ab5-9b83-5a09e4161342.png)
 
