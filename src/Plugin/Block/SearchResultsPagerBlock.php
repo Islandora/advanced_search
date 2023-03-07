@@ -274,7 +274,7 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
    *   A renderable array representing the sort by portion of pager.
    */
   protected function buildSortByForm(array $sort_criteria, array $query_parameters) {
-    $default_order = $query_parameters['sort_order'] ?? 'ASC';
+    $default_order = $query_parameters['sort_order'] ?? 'DESC';
     $default_sort_by = $query_parameters['sort_by'] ?? 'search_api_relevance';
     $default_value = $default_sort_by . '_' . strtolower($default_order);
     $options = [];
