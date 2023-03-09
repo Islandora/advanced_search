@@ -302,7 +302,7 @@ class AdvancedSearchQueryTerm {
           return $value;
         }
         else {
-          return $value . " OR " . str_replace('"', "", trim($value));
+          return "(" .$value . " OR " . str_replace('"', "", trim($value)) . ")";
         }
       }
       if (!$this->getInclude()) {
