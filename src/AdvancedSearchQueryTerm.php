@@ -309,8 +309,15 @@ class AdvancedSearchQueryTerm {
         $value = "!" . str_replace('"', "", trim($value));
       }
       else {
-        // one word
-        $value = str_replace('"', "", trim($value));
+        // Case 2: keywords is one word
+        // if there is quotation (with backslash) surrounded, 
+        if (strpos(trim($value), '\"' ) !== false)  {
+           $value = str_replace('\"', "", trim($value));        
+        }
+        else { 
+           // if there is quotation (without backslash) surrounded
+           $value = str_replace('"', "", trim($value));
+        }
       }
       return $value;
     }
