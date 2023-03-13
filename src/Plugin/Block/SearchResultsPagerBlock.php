@@ -287,8 +287,8 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
         $label = $sort->options['expose']['label'];
         $asc = "{$id}_asc";
         $desc = "{$id}_desc";
-        $options[$asc] = "{$label} ↑";
-        $options[$desc] = "{$label} ↓";
+        $options[$asc] = "{$label} ↓";
+        $options[$desc] = "{$label} ↑";
         $options_attributes[$asc] = [
           'data-sort_by' => $id,
           'data-sort_order' => 'ASC',
