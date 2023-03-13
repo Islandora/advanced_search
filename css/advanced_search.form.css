@@ -39,3 +39,7 @@ input.islandora-advanced-search-form__search {
 .form-wrapper select {
   margin-bottom: 1.125rem;
 }
+
+[id^="edit-terms"] {
+  display:initial !important;
+}
