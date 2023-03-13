@@ -266,14 +266,14 @@ class AdvancedSearchQuery {
         
         $this->setHighlighting($solarium_query, $search_api_query, $highlighted_fields);
         
-        // We need to set the 'keys' field of the Search API Query to the 
-        // advanced search input since the Search API Highlight processor checks
-        // this field to know which keywords to highlight in the excerpt.
-
-        // logging($q);
-        // $search_api_query->keys($q);
+        // The Search API Highlight processor checks if the 'keys' field of
+        // the Search API Query is non-empty before creating an excerpt.
+        // Since we are getting the highlighting result from Solr instead
+        // of using the Search API processor to create one, we just need
+        // make this field non-empty.
+        $search_api_query->keys("advanced search");
       }
-
+     
       $solarium_query->setQuery($q);
     }
   }
