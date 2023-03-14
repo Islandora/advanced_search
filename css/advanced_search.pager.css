@@ -148,3 +148,10 @@
   grid-template-columns: repeat(3, 1fr);
   /*margin: 0.47214rem 0 0.47214rem 2.61803rem;*/
 }
+
+@media only screen and (min-width: 600px) {
+  .view-grid > .view-content{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
