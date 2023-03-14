@@ -302,7 +302,8 @@ class AdvancedSearchQueryTerm {
           return $value;
         }
         else {
-          return "(" .$value . " OR " . str_replace('"', "", trim($value)) . ")";
+          $isNot = $this->getInclude() ? "" : "!";
+          return $isNot . "(" .$value . " OR " . str_replace('"', "", trim($value)) . ")";
         }
       }
       if (!$this->getInclude()) {
