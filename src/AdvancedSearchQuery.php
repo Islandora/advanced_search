@@ -160,9 +160,11 @@ class AdvancedSearchQuery {
       $isSearchAllFields = false;
       $fields_list = [];
 
+      if (!$isDismax) {
+        // To support negative queries we must first bring in all documents.
+        $q[] = $this->negativeQuery($terms) ? "*:*" : "";
+      }
       
-      // To support negative queries we must first bring in all documents.
-      $q[] = $this->negativeQuery($terms) ? "*:*" : "";
       $term = array_shift($terms);
       $q[] = $term->toSolrQuery($field_mapping);
 
