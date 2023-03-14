@@ -13,6 +13,7 @@
   - [Collection Search](#collection-search)
   - [Paging](#paging)
   - [Sorting](#sorting)
+  - [Search Highlighting](#search-highlighting)
   - [Result Summary](#result-summary)
 <!--- - [Configure Facets](#configure-facets)
   - [Include / Exclude Facets](#include--exclude-facets) --->
@@ -358,6 +359,27 @@ Additional the fields listed as `Sort Criteria` as `Exposed` will be made
 available in the pager block (*documented below*).
 
 ![image](./docs/sort_criteria.png)
+
+### Search Highlighting
+
+1. Add Search Excerpt to the Advanced Search View.
+    - Navigate to `/admin/structure/views/view/advanced_search`. In the `Fields` section, click `Add`, then select `Search Excerpt`.'
+    
+    ![image](https://user-images.githubusercontent.com/106131209/225054405-122b2d9d-1aec-4ac9-9e72-8a99a679f8e6.png)
+    
+2. Turn on Search API highlight processor
+    - Navigate to `/admin/config/search/search-api` > Edit Index > Processors > Enable Highlight processor. 
+    
+    ![image](https://user-images.githubusercontent.com/106131209/225055386-8c2d279c-e4c6-4123-8e89-f139ac4862d9.png)
+    
+    - At the bottom of the form, under Processor Settings > Highlight > Select `Create excerpt`.
+    
+    ![image](https://user-images.githubusercontent.com/106131209/225055763-33e9c122-e2aa-452e-9158-ebf24076f0f8.png)
+    
+3. Configure Solr Server.
+    - Navigate to `/admin/config/search/search-api` > Edit Server > Configure Solr backend > Advanced > Select `Retrieve highlighted snippets`.
+    
+    ![image](https://user-images.githubusercontent.com/106131209/225056275-d6f34ff8-c517-4761-a092-2e6a5ae6f5b4.png)
 
 ### Result Summary
 
