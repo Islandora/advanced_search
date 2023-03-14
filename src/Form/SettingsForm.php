@@ -75,6 +75,8 @@ class SettingsForm extends ConfigFormBase {
       '#markup' => $this->t("Advanced Search Blocks are available in the Blocks interface for each Search API view. When placing an Advanced Search Block, you can configure the fields that are used for field-based search and whether a “recursive” search is available.  The following settings apply to all Advanced Search blocks."),
       '#weight' => -2,
     ];
+
+    $isEDismax = \Drupal::config(SettingsForm::CONFIG_NAME)->get(self::EDISMAX_SEARCH_FLAG);
     $form['eDisMax'][self::EDISMAX_SEARCH_FLAG] = [
       '#type' => 'checkbox',
       '#title' => $this
@@ -89,7 +91,7 @@ class SettingsForm extends ConfigFormBase {
            </ul>
           </li>
         </ul>'),
-      '#default_value' => self::getConfig(self::EDISMAX_SEARCH_FLAG, 1),
+      '#default_value' => isset($isEDismax) ? $isEDismax : 1,
     ];
 
     $form['eDisMax']['textfields_container'] = [
