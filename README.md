@@ -379,7 +379,7 @@ available in the pager block (*documented below*).
 3. Configure Solr Server.
     - Navigate to `/admin/config/search/search-api` > Edit Server > Configure Solr backend > Advanced > Select `Retrieve highlighted snippets`.
     
-    ![image](https://user-images.githubusercontent.com/106131209/225056275-d6f34ff8-c517-4761-a092-2e6a5ae6f5b4.png)
+    ![image](https://user-images.githubusercontent.com/106131209/225057771-c42c5751-c63f-4170-9b48-d443f02b7d8f.png)
 
 ### Result Summary
 
