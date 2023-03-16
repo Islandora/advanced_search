@@ -296,7 +296,7 @@ class AdvancedSearchQueryTerm {
       // Case 1:  if keyword contains one word or a phrase
       if(strpos(trim($value), ' ') !== false) {
         // add Or for the search case "scarborough bulletin" show no results
-        $isNot = $this->getInclude() ? "" : "!";
+        $isNot = $this->getInclude() ? "" : "-";
         if (substr_count($value, '\"') == 2) {
           $value = str_replace('\"', "", trim($value));
           return $isNot . $value;
