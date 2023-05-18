@@ -301,9 +301,11 @@ class AdvancedSearchQuery {
             $refer->getPathInfo();
             $refer->attributes->add(\Drupal::getContainer()->get('router')->matchRequest($refer));
             $request_stack->push($refer);
-            $plugin = $view->argument[$immediate_children_contextual_filter]->getPlugin('argument_default');
-            if ($plugin) {
-              $view->args[$index] = $plugin->getArgument();
+            if (isset($view->argument[$immediate_children_contextual_filter])) {
+              $plugin = $view->argument[$immediate_children_contextual_filter]->getPlugin('argument_default');
+              if ($plugin) {
+                $view->args[$index] = $plugin->getArgument();
+              }
             }
             $request_stack->pop();
           }
