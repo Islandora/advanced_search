@@ -12,6 +12,7 @@ use Drupal\search_api\Query\QueryInterface as DrupalQueryInterface;
 use Drupal\views\ViewExecutable;
 use Solarium\Core\Query\QueryInterface as SolariumQueryInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Drupal\search_api_solr\Utility\Utility as SearchAPISolrUtility;
 
 /**
  * Alter current search query / view from using URL parameters.
@@ -252,6 +253,27 @@ class AdvancedSearchQuery {
           $dismax->setQueryFields($query_fields);
         }
       }
+
+      if ($backend->getConfiguration()['highlight_data']) {
+        // Just highlight string and text fields to avoid Solr exceptions.
+        $highlighted_fields = array_filter(array_unique($fields_list), function ($v) {
+          return preg_match('/^t.*?[sm]_/', $v) || preg_match('/^s[sm]_/', $v);
+        });
+
+        if (empty($highlighted_fields)) {
+          $highlighted_fields = ['*'];
+        }
+        
+        $this->setHighlighting($solarium_query, $search_api_query, $highlighted_fields);
+        
+        // The Search API Highlight processor checks if the 'keys' field of
+        // the Search API Query is non-empty before creating an excerpt.
+        // Since we are getting the highlighting result from Solr instead
+        // of using the Search API processor to create one, we just need
+        // make this field non-empty.
+        $search_api_query->keys("advanced search");
+      }
+     
       $solarium_query->setQuery($q);
     }
   }
@@ -346,4 +368,60 @@ class AdvancedSearchQuery {
     return $url;
   }
 
+  /**
+   * Sets the highlighting parameters.
+   *
+   * @param \Solarium\QueryType\Select\Query\Query $solarium_query
+   *   The Solarium select query object.
+   * @param \Drupal\search_api\Query\QueryInterface $query
+   *   The query object.
+   * @param array $highlighted_fields
+   *   (optional) The solr fields to be highlighted.
+   */
+   protected function setHighlighting(SolariumQueryInterface $solarium_query, DrupalQueryInterface $search_api_query, array $highlighted_fields = []) {
+    $index = $search_api_query->getIndex();
+    $settings = SearchAPISolrUtility::getIndexSolrSettings($index);
+    $highlighter = $settings['highlighter'];
+
+    $hl = $solarium_query->getHighlighting();
+    $hl->setSimplePrefix('[HIGHLIGHT]');
+    $hl->setSimplePostfix('[/HIGHLIGHT]');
+    $hl->setSnippets($highlighter['highlight']['snippets']);
+    $hl->setFragSize($highlighter['highlight']['fragsize']);
+    $hl->setMergeContiguous($highlighter['highlight']['mergeContiguous']);
+    $hl->setRequireFieldMatch($highlighter['highlight']['requireFieldMatch']);
+
+    // Overwrite Solr default values only if required to have shorter request
+    // strings.
+    if (51200 != $highlighter['maxAnalyzedChars']) {
+      $hl->setMaxAnalyzedChars($highlighter['maxAnalyzedChars']);
+    }
+    if ('gap' !== $highlighter['fragmenter']) {
+      $hl->setFragmenter($highlighter['fragmenter']);
+      if ('regex' !== $highlighter['fragmenter']) {
+        $hl->setRegexPattern($highlighter['regex']['pattern']);
+        if (0.5 != $highlighter['regex']['slop']) {
+          $hl->setRegexSlop($highlighter['regex']['slop']);
+        }
+        if (10000 != $highlighter['regex']['maxAnalyzedChars']) {
+          $hl->setRegexMaxAnalyzedChars($highlighter['regex']['maxAnalyzedChars']);
+        }
+      }
+    }
+    if (!$highlighter['usePhraseHighlighter']) {
+      $hl->setUsePhraseHighlighter(FALSE);
+    }
+    if (!$highlighter['highlightMultiTerm']) {
+      $hl->setHighlightMultiTerm(FALSE);
+    }
+    if ($highlighter['preserveMulti']) {
+      $hl->setPreserveMulti(TRUE);
+    }
+
+    foreach ($highlighted_fields as $highlighted_field) {
+      // We must not set the fields at once using setFields() to not break
+      // the altered queries.
+      $hl->addField($highlighted_field);
+    }
+  }
 }
