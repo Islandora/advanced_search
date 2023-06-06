@@ -40,7 +40,8 @@ function advanced_search_theme() {
 function advanced_search_library_info_alter(&$libraries, $extension) {
   if ($extension == 'facets') {
     // Override facets module javascript with customizations.
-    $path = '/' . drupal_get_path('module', 'advanced_search') . '/js/facets';
+    // https://www.drupal.org/node/2940438
+    $path = '/' . \Drupal::service('extension.list.module')->getPath('advanced_search') . '/js/facets';
     $libraries['soft-limit']['js'] = [
       "$path/soft-limit.js" => [],
     ];

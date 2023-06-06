@@ -61,7 +61,7 @@ class AdvancedSearchForm extends FormBase {
   /**
    * Class constructor.
    */
-  public function __construct(Request $request, RouteMatchInterface $current_route_match) {
+  final public function __construct(Request $request, RouteMatchInterface $current_route_match) {
     $this->request = $request;
     $this->currentRouteMatch = $current_route_match;
   }

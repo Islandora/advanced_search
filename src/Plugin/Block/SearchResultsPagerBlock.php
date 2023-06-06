@@ -46,7 +46,7 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   A request object for the current request.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, Request $request) {
+  final public function __construct(array $configuration, $plugin_id, $plugin_definition, Request $request) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->request = clone $request;
   }

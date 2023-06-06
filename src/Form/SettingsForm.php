@@ -35,7 +35,7 @@ class SettingsForm extends ConfigFormBase {
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The factory for configuration objects.
    */
-  public function __construct(ConfigFactoryInterface $config_factory) {
+  final public function __construct(ConfigFactoryInterface $config_factory) {
     $this->setConfigFactory($config_factory);
   }
 
