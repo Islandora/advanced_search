@@ -4,6 +4,7 @@ namespace Drupal\advanced_search;
 
 use Drupal\advanced_search\Form\AdvancedSearchForm;
 use Drupal\advanced_search\Form\SettingsForm;
+
 /**
  * Defines a single search term.
  *
@@ -271,7 +272,7 @@ class AdvancedSearchQueryTerm {
     return $this->conjunction;
   }
 
-    /**
+  /**
    * Using the provided field mapping create a Solr Query string.
    *
    * @param array $solr_field_mapping
@@ -287,22 +288,22 @@ class AdvancedSearchQueryTerm {
 
     $config = \Drupal::config(SettingsForm::CONFIG_NAME);
     $isDismax = $config->get(SettingsForm::EDISMAX_SEARCH_FLAG);
-    if (!isset($isDismax)){
-      $isDismax = true;
+    if (!isset($isDismax)) {
+      $isDismax = TRUE;
     }
 
     if ($isDismax || $this->field === "all") {
 
-      // Case 1:  if keyword contains one word or a phrase
-      if(strpos(trim($value), ' ') !== false) {
-        // add Or for the search case "scarborough bulletin" show no results
+      // Case 1:  if keyword contains one word or a phrase.
+      if (strpos(trim($value), ' ') !== FALSE) {
+        // Add Or for the search case "scarborough bulletin" show no results.
         $isNot = $this->getInclude() ? "" : "-";
         if (substr_count($value, '\"') == 2) {
           $value = str_replace('\"', "", trim($value));
           return $isNot . $value;
         }
         else {
-          return $isNot . "(" .$value . " OR " . str_replace('"', "", trim($value)) . ")";
+          return $isNot . "(" . $value . " OR " . str_replace('"', "", trim($value)) . ")";
         }
       }
       if (!$this->getInclude()) {
@@ -310,45 +311,44 @@ class AdvancedSearchQueryTerm {
       }
       else {
         // Case 2: keywords is one word
-        // if there is quotation (with backslash) surrounded, 
-        if (strpos(trim($value), '\"' ) !== false)  {
-           $value = str_replace('\"', "", trim($value));        
+        // if there is quotation (with backslash) surrounded,.
+        if (strpos(trim($value), '\"') !== FALSE) {
+          $value = str_replace('\"', "", trim($value));
         }
-        else { 
-           // if there is quotation (without backslash) surrounded
-           $value = str_replace('"', "", trim($value));
+        else {
+          // If there is quotation (without backslash) surrounded.
+          $value = str_replace('"', "", trim($value));
         }
       }
       return $value;
     }
     else {
-      $isTitleSearch = false;
+      $isTitleSearch = FALSE;
       foreach ($solr_field_mapping[$this->field] as $field) {
-        // if field fulltext title is selected
-        if (strpos($field, "fulltext_title") !== false) {
-          $isTitleSearch = true;
-          if (strpos(trim($value), " AND " ) !== false)  {
-            //When you type 'Orientation AND games' into the title search, you get one result.
-            // When you do the same search but add a search box, you get a lot more results.
-            // (Recreation: Add a search box, set both search criteria to 'Title' and keep the operator to 'and'.
-            // Type 'orientation' in one box and 'games' in the second box and click seach.)
-            $keyword =  str_replace('"', '', $value);
+        // If field fulltext title is selected.
+        if (strpos($field, "fulltext_title") !== FALSE) {
+          $isTitleSearch = TRUE;
+          if (strpos(trim($value), " AND ") !== FALSE) {
+            // Handle keyword with 'Orientation AND games'.
+            $keyword = str_replace('"', '', $value);
             $keys = explode(" AND ", $keyword);
             $str = "(";
             $i = 0;
             foreach ($keys as $key) {
 
-                if ($i != count($keys)-1)
-                  $str .= $field . ':"' .$key . '"  AND ';
-                else
-                  $str .= $field . ':"' .$key . '")';
-                $i++;
+              if ($i != count($keys) - 1) {
+                $str .= $field . ':"' . $key . '"  AND ';
+              }
+              else {
+                $str .= $field . ':"' . $key . '")';
+              }
+              $i++;
             }
             $terms[] = $str;
           }
           else {
             if ($isTitleSearch) {
-              $terms[] = 'tm_lowercase_title:'. $value;
+              $terms[] = 'tm_lowercase_title:' . $value;
             }
             else {
               $terms[] = "$field:$value";
@@ -366,8 +366,7 @@ class AdvancedSearchQueryTerm {
     return $this->include ? "($terms)" : "-($terms)";
   }
 
-
-   /**
+  /**
    * Using the provided field mapping create a Solr Fields string.
    *
    * @param array $solr_field_mapping
@@ -381,7 +380,7 @@ class AdvancedSearchQueryTerm {
     $query_helper = \Drupal::service('solarium.query_helper');
 
     if ($this->field !== "all") {
-      foreach ($solr_field_mapping[$this->field] as $field) {      
+      foreach ($solr_field_mapping[$this->field] as $field) {
         $terms[] = "$field";
       }
     }
@@ -390,11 +389,10 @@ class AdvancedSearchQueryTerm {
   }
 
   /**
-   * Get Field search
+   * Get Field search.
    */
   public function getField() {
     return $this->field;
   }
-
 
 }

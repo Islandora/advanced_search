@@ -2,6 +2,7 @@
 
 namespace Drupal\advanced_search\Plugin\Block;
 
+use Drupal\advanced_search\Form\SearchForm;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\advanced_search\Form\SettingsForm;
@@ -20,8 +21,7 @@ class SearchBlock extends BlockBase {
    * {@inheritdoc}
    */
   public function defaultConfiguration() {
-    return [
-      ] + parent::defaultConfiguration();
+    return [] + parent::defaultConfiguration();
   }
 
   /**
@@ -34,11 +34,11 @@ class SearchBlock extends BlockBase {
       '#title' => $this->t('Configure Search Block'),
     ];
 
-    if (!$config->get(SettingsForm::SEARCH_ALL_FIELDS_FLAG)) { 
+    if (!$config->get(SettingsForm::SEARCH_ALL_FIELDS_FLAG)) {
       $form['search-attributes'][SettingsForm::SEARCH_ALL_FIELDS_FLAG] = [
         '#markup' => $this
           ->t('<strong>This block is required to enable searching all fields for the Advanced Search.
-            To proceed, please enable "Enable searching all fields" in 
+            To proceed, please enable "Enable searching all fields" in
             <a href="/admin/config/search/advanced" target="_blank">Advanced Seach Configuration</a></strong>.'),
       ];
     }
@@ -46,28 +46,28 @@ class SearchBlock extends BlockBase {
       $views = \Drupal::EntityTypeManager()->getStorage('view')->loadMultiple();
       $options = [];
       foreach ($views as $view_name => $view) {
-          $displays = $view->get("display");
-          foreach ($displays as $display) {
-            if ($display['display_plugin'] === "page") {
-              $options["view.$view_name". "." . $display['id']] = "view.$view_name". "." . $display['id'];
-            }
+        $displays = $view->get("display");
+        foreach ($displays as $display) {
+          if ($display['display_plugin'] === "page") {
+            $options["view.$view_name" . "." . $display['id']] = "view.$view_name" . "." . $display['id'];
           }
+        }
       }
       $form['search-attributes']['view_machine_name'] = [
         '#type' => 'select',
-        '#title' => $this->t('Select Search Results Page\'s Machine Name:'),
+        '#title' => $this->t('Select the machine name of Search Results Page:'),
         '#default_value' => $this->configuration['search_view_machine_name'],
-        '#options' => $options
+        '#options' => $options,
       ];
       $form['search-attributes']['search_textfield'] = [
         '#type' => 'textfield',
-        '#title' => $this->t('Search Keyword Textfield Label:'),
+        '#title' => $this->t('Search Keyword Text field label:'),
         '#default_value' => $this->configuration['search_textfield_label'],
         '#maxlength' => 255,
       ];
       $form['search-attributes']['search_placeholder_textfield'] = [
         '#type' => 'textfield',
-        '#title' => $this->t('Search Keyword Textfield Placeholder:'),
+        '#title' => $this->t('Search Keyword text field placeholder:'),
         '#default_value' => $this->configuration['search_placeholder'],
         '#maxlength' => 255,
       ];
@@ -79,7 +79,7 @@ class SearchBlock extends BlockBase {
         '#maxlength' => 255,
       ];
     }
-    
+
     return $form;
   }
 
@@ -100,7 +100,7 @@ class SearchBlock extends BlockBase {
   public function build() {
     $config = $this->getConfiguration();
     $blockId = $config['block_id'];
-    $searchForm = new \Drupal\advanced_search\Form\SearchForm($blockId);
+    $searchForm = new SearchForm($blockId);
     return \Drupal::formBuilder()->getForm($searchForm);
   }
 

@@ -61,7 +61,7 @@ class AdvancedSearchForm extends FormBase {
   /**
    * Class constructor.
    */
-  public function __construct(Request $request, RouteMatchInterface $current_route_match) {
+  final public function __construct(Request $request, RouteMatchInterface $current_route_match) {
     $this->request = $request;
     $this->currentRouteMatch = $current_route_match;
   }
@@ -103,21 +103,21 @@ class AdvancedSearchForm extends FormBase {
     return self::getConfig(SettingsForm::SEARCH_REMOVE_OPERATOR, self::DEFAULT_REMOVE_OP);
   }
 
- /**
-   * Get if Edismax Search checkbox is enabled or disable
+  /**
+   * Get if Search All Fields checkbox is enabled or disable.
    *
-   * @return boolean
-   *
+   * @return bool
+   *   the enable or disable for Search All Fields checkbox
    */
   public static function getSearchAllFields() {
     return self::getConfig(SettingsForm::SEARCH_ALL_FIELDS_FLAG, 0);
   }
 
   /**
-   * Get if Edismax Search checkbox is enabled or disable
+   * Get if Edismax Search checkbox is enabled or disable.
    *
-   * @return boolean
-   *
+   * @return bool
+   *   the enable or disable for Edismax Search checkbox
    */
   public static function getEdismaxSearch() {
     return self::getConfig(SettingsForm::EDISMAX_SEARCH_FLAG, 0);
@@ -185,7 +185,7 @@ class AdvancedSearchForm extends FormBase {
    */
   protected function processInput(FormStateInterface $form_state, array $term_default_values) {
     $input = $form_state->getUserInput();
-    $recursive = isset($input['recursive']) ? $input['recursive'] : NULL;
+    $recursive = $input['recursive'] ?? NULL;
     $term_values = isset($input['terms']) && is_array($input['terms']) ? $input['terms'] : [];
     // Form was not submitted see if we can rebuild from query parameters.
     $advanced_search_query = new AdvancedSearchQuery();
@@ -273,9 +273,9 @@ class AdvancedSearchForm extends FormBase {
       ],
     ];
 
-    $options = (self::getEdismaxSearch() && self::getSearchAllFields()) ? ["all" => $this->t(self::getEdismaxSearchLabel())] + $this->fieldOptions($fields)  : $this->fieldOptions($fields);
+    $options = (self::getEdismaxSearch() && self::getSearchAllFields()) ? ["all" => $this->t("@label", ["@label" => self::getEdismaxSearchLabel()])] + $this->fieldOptions($fields) : $this->fieldOptions($fields);
     $term_default_values = $this->defaultTermValues($options);
-    list($recursive, $term_values) = $this->processInput($form_state, $term_default_values);
+    [$recursive, $term_values] = $this->processInput($form_state, $term_default_values);
     $i = 0;
     $term_elements = [];
     $total_terms = count($term_values);
@@ -284,20 +284,20 @@ class AdvancedSearchForm extends FormBase {
       // Either specified by the user in the request or use the default.
       $first = $i == 0;
       $term_value = !empty($term_values) ? array_shift($term_values) : $term_default_values;
-      $conjunction = isset($term_value[self::CONJUNCTION_FORM_FIELD]) ? $term_value[self::CONJUNCTION_FORM_FIELD] : $term_default_values[self::CONJUNCTION_FORM_FIELD];
+      $conjunction = $term_value[self::CONJUNCTION_FORM_FIELD] ?? $term_default_values[self::CONJUNCTION_FORM_FIELD];
       $term_elements[] = [
         // Only show on terms after the first.
         self::CONJUNCTION_FORM_FIELD => $first ? NULL : [
           '#type' => 'select',
           '#attributes' => [
-            'aria-label' => $this->t("Select search condition")
+            'aria-label' => $this->t("Select search condition"),
           ],
           '#options' => [
             self::AND_OP => $this->t('and'),
             self::OR_OP => $this->t('or'),
           ],
           '#default_value' => $conjunction,
-          '#theme_wrappers' => []
+          '#theme_wrappers' => [],
         ],
         self::SEARCH_FORM_FIELD => [
           '#type' => 'select',
@@ -306,7 +306,7 @@ class AdvancedSearchForm extends FormBase {
           ],
           '#options' => $options,
           '#default_value' => $term_value[self::SEARCH_FORM_FIELD],
-          '#theme_wrappers' => []
+          '#theme_wrappers' => [],
         ],
         self::INCLUDE_FORM_FIELD => [
           '#type' => 'select',
@@ -325,7 +325,7 @@ class AdvancedSearchForm extends FormBase {
               ':input[name="terms[' . $i . '][' . self::CONJUNCTION_FORM_FIELD . ']"]' => ['value' => self::AND_OP],
             ],
           ],
-          '#theme_wrappers' => []
+          '#theme_wrappers' => [],
         ],
         // Just markup to show when 'include' is not alterable due to the
         // selected 'conjunction'. Hide for the first term.
@@ -340,15 +340,15 @@ class AdvancedSearchForm extends FormBase {
           /*'content' => [
             '#markup' => $this->t('is'),
           ],*/
-          '#theme_wrappers' => []
+          '#theme_wrappers' => [],
         ],
         self::VALUE_FORM_FIELD => [
           '#type' => 'textfield',
           '#attributes' => [
-            'aria-label' => $this->t("Enter a search term")
+            'aria-label' => $this->t("Enter a search term"),
           ],
           '#default_value' => $term_value[self::VALUE_FORM_FIELD],
-          '#theme_wrappers' => []
+          '#theme_wrappers' => [],
         ],
         'actions' => [
           '#type' => 'container',
@@ -374,7 +374,7 @@ class AdvancedSearchForm extends FormBase {
             '#name' => 'remove-term-' . $i,
             '#term_index' => $i,
             '#attributes' => [
-              'class' => [$block_class_prefix . '__remove', 'fa' ],
+              'class' => [$block_class_prefix . '__remove', 'fa'],
               'aria-label' => $this->t("Remove"),
             ],
             '#ajax' => [
@@ -440,7 +440,7 @@ class AdvancedSearchForm extends FormBase {
       $terms[] = AdvancedSearchQueryTerm::fromUserInput($term);
     }
     $terms = array_filter($terms);
-    $recurse = filter_var(isset($values['recursive']) ? $values['recursive'] : FALSE, FILTER_VALIDATE_BOOLEAN);
+    $recurse = filter_var($values['recursive'] ?? FALSE, FILTER_VALIDATE_BOOLEAN);
     $route = $this->getRouteName($form_state);
     $advanced_search_query = new AdvancedSearchQuery();
     return $advanced_search_query->toUrl($this->request, $terms, $recurse, $route);

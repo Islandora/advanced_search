@@ -40,7 +40,8 @@ function advanced_search_theme() {
 function advanced_search_library_info_alter(&$libraries, $extension) {
   if ($extension == 'facets') {
     // Override facets module javascript with customizations.
-    $path = '/' . drupal_get_path('module', 'advanced_search') . '/js/facets';
+    // https://www.drupal.org/node/2940438
+    $path = '/' . \Drupal::service('extension.list.module')->getPath('advanced_search') . '/js/facets';
     $libraries['soft-limit']['js'] = [
       "$path/soft-limit.js" => [],
     ];
@@ -80,8 +81,8 @@ function advanced_search_form_block_form_alter(&$form, FormStateInterface $form_
   $condition_id = 'node_has_term';
 
   /** @var \Drupal\Core\Condition\ConditionInterface $condition */
-  if (array_key_exists($condition_id,$visibility)) {
-    $condition = $manager->createInstance($condition_id, isset($visibility[$condition_id]) ? $visibility[$condition_id] : []);
+  if (array_key_exists($condition_id, $visibility)) {
+    $condition = $manager->createInstance($condition_id, $visibility[$condition_id] ?? []);
     $form_state->set(['conditions', $condition_id], $condition);
     $condition_form = $condition->buildConfigurationForm([], $form_state);
     $condition_form['#type'] = 'details';
@@ -119,7 +120,7 @@ function advanced_search_preprocess_views_view(&$variables) {
   if (in_array([$view->id(), $view->current_display], $views)) {
     // Toggle between 'list' and 'grid' display depending on url parameter.
     $config = \Drupal::config(SettingsForm::CONFIG_NAME);
-    
+
     $format = \Drupal::request()->query->get('display') ?? $config->get(SettingsForm::DISPLAY_DEFAULT);
     $variables['attributes']['class'][] = "view-{$format}";
     $view->element['#attached']['library'][] = 'advanced_search/advanced.search.pager';

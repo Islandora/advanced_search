@@ -84,7 +84,7 @@ class AjaxBlocksController extends ControllerBase {
    * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
    *   The drupal container.
    */
-  public function __construct(RendererInterface $renderer, CurrentPathStack $currentPath, RouterInterface $router, PathProcessorManager $pathProcessor, CurrentRouteMatch $currentRouteMatch, ContainerInterface $container) {
+  final public function __construct(RendererInterface $renderer, CurrentPathStack $currentPath, RouterInterface $router, PathProcessorManager $pathProcessor, CurrentRouteMatch $currentRouteMatch, ContainerInterface $container) {
     $this->storage = $this->entityTypeManager()->getStorage('block');
     $this->renderer = $renderer;
     $this->currentPath = $currentPath;

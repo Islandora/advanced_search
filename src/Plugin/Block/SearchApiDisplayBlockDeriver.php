@@ -41,6 +41,11 @@ abstract class SearchApiDisplayBlockDeriver implements ContainerDeriverInterface
   abstract protected function label();
 
   /**
+   * The constructor.
+   */
+  final public function __construct(ContainerInterface $container, $base_plugin_id) {}
+
+  /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, $base_plugin_id) {
@@ -55,7 +60,7 @@ abstract class SearchApiDisplayBlockDeriver implements ContainerDeriverInterface
    */
   public function getDerivativeDefinition($derivative_id, $base_plugin_definition) {
     $derivatives = $this->getDerivativeDefinitions($base_plugin_definition);
-    return isset($derivatives[$derivative_id]) ? $derivatives[$derivative_id] : NULL;
+    return $derivatives[$derivative_id] ?? NULL;
   }
 
   /**
