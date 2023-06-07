@@ -82,8 +82,8 @@ class SearchForm extends FormBase {
         '#type' => 'textfield',
         '#title' => (!empty($settings['search_textfield_label']) ? $settings['search_textfield_label'] : ''),
         '#attributes' => [
-          'placeholder' => isset($settings['search_placeholder']) ? $this->t("@", $settings['search_placeholder']) : $this->t("Search collections"),
-          'aria-label' => (isset($settings['search_textfield_label']) ? $this->t("@", $settings['search_textfield_label']) : $this->t('Enter Keyword')),
+          'placeholder' => isset($settings['search_placeholder']) ? $this->t("@placeholder", ["@placeholder" => $settings['search_placeholder']]) : $this->t("Search collections"),
+          'aria-label' => (isset($settings['search_textfield_label']) ? $this->t("@label", ["@label" => $settings['search_textfield_label']]) : $this->t('Enter Keyword')),
         ],
         '#theme_wrappers' => [],
       ];

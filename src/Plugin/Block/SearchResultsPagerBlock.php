@@ -186,7 +186,7 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
         '#url' => $url,
         '#title' => $items_per_page,
         '#attributes' => [
-          'aria-label' => $this->t("@ items per page", $items_per_page),
+          'aria-label' => $this->t("@item items per page", ["@item" => $items_per_page]),
           'class' => $active ?
             ['pager__link', 'pager__link--is-active', 'pager__itemsperpage'] :
             ['pager__link', 'pager__itemsperpage'],
@@ -250,7 +250,7 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
           'class' => $active ?
             ['pager__link', 'pager__link--is-active', 'pager__display'] :
             ['pager__link', 'pager__display'],
-          'aria-label' => $this->t("Display as @", Markup::create($text)),
+          'aria-label' => $this->t("Display as @link", ["@link" => Markup::create($text)]),
         ],
         '#wrapper_attributes' => [
           'class' => $active ? ['pager__item', 'is-active'] : ['pager__item'],
