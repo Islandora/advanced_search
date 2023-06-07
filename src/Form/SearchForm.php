@@ -8,30 +8,45 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
 
 /**
- *
+ * Form for building and Simple Search.
  */
 class SearchForm extends FormBase {
-  protected $block_id;
 
   /**
-   * @param $block_id
+   * The Block ID.
+   *
+   * @var string
+   */
+  protected $blockId;
+
+  /**
+   * The constructor.
+   *
+   * @param string $block_id
+   *   Passing the block_id.
    */
   public function __construct($block_id) {
-    $this->block_id = $block_id;
+    $this->blockId = $block_id;
   }
 
   /**
+   * Get Block Id.
+   *
    * @return mixed
+   *   Return the Block ID
    */
   public function getBlockId() {
-    return $this->block_id;
+    return $this->blockId;
   }
 
   /**
-   * @param mixed $block_id
+   * Set Block ID.
+   *
+   * @param mixed $blockId
+   *   Set the block ID.
    */
-  public function setBlockId($block_id): void {
-    $this->block_id = $block_id;
+  public function setBlockId($blockId): void {
+    $this->blockId = $blockId;
   }
 
   /**
@@ -51,12 +66,12 @@ class SearchForm extends FormBase {
       $form['search-attributes'][SettingsForm::SEARCH_ALL_FIELDS_FLAG] = [
         '#markup' => $this
           ->t('<strong>This block is required to enable searching all fields for the Advanced Search.
-            To proceed, please enable the Search All fields in 
+            To proceed, please enable the Search All fields in
             <a href="/admin/config/search/advanced" target="_blank">Advanced Seach Configuration</a></strong>.'),
       ];
     }
     else {
-      $block = Block::load($this->block_id);
+      $block = Block::load($this->blockId);
 
       if ($block) {
         $settings = $block->get('settings');
@@ -67,8 +82,8 @@ class SearchForm extends FormBase {
         '#type' => 'textfield',
         '#title' => (!empty($settings['search_textfield_label']) ? $settings['search_textfield_label'] : ''),
         '#attributes' => [
-          'placeholder' => isset($settings['search_placeholder']) ? $this->t($settings['search_placeholder']) : $this->t("Search collections"),
-          'aria-label' => (isset($settings['search_textfield_label']) ? $this->t($settings['search_textfield_label']) : $this->t('Enter Keyword')),
+          'placeholder' => isset($settings['search_placeholder']) ? $this->t("@", $settings['search_placeholder']) : $this->t("Search collections"),
+          'aria-label' => (isset($settings['search_textfield_label']) ? $this->t("@", $settings['search_textfield_label']) : $this->t('Enter Keyword')),
         ],
         '#theme_wrappers' => [],
       ];
@@ -88,7 +103,7 @@ class SearchForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $block = Block::load($this->block_id);
+    $block = Block::load($this->blockId);
     if ($block) {
       $settings = $block->get('settings');
       $view_machine_name = $settings['search_view_machine_name'];

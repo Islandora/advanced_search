@@ -199,7 +199,7 @@ class AdvancedSearchQuery {
       if ($isDismax) {
 
         if ((strpos($q, "*") !== FALSE || strpos($q, "?") !== FALSE)) {
-          // If the query string contain '*', '?', OR is a single world, enable wildcard.
+          // If the query string contain '*','?',a single world,enable wildcard.
           $tmp = str_replace('"', "", trim($q));
           $query_fields = [];
 
@@ -207,9 +207,13 @@ class AdvancedSearchQuery {
             foreach ($field_mapping as $key => $field) {
               foreach ($field as $f => $item) {
                 // bs_ are boolean fields, do not work well with text search.
-                if (substr($item, 0, 3) !== "bs_" && !in_array($item, ['score', 'random', 'boost_document'])
-                  && ((strpos($item, "sm_") === 0) || (strpos($item, "tm_") === 0) || (strpos($item, "sort_ss_") === 0) || (strpos($item, "ts_") === 0)
-                    || (strpos($item, "ss_") === 0)
+                if (substr($item, 0, 3) !== "bs_"
+                  && !in_array($item, ['score', 'random', 'boost_document'])
+                  && ((strpos($item, "sm_") === 0)
+                  || (strpos($item, "tm_") === 0)
+                  || (strpos($item, "sort_ss_") === 0)
+                  || (strpos($item, "ts_") === 0)
+                  || (strpos($item, "ss_") === 0)
                   )) {
                   array_push($query_fields, '(' . $item . ':' . $tmp . ')');
                 }
@@ -370,9 +374,9 @@ class AdvancedSearchQuery {
   /**
    * Sets the highlighting parameters.
    *
-   * @param \Solarium\QueryType\Select\Query\Query $solarium_query
+   * @param \Solarium\Core\Query\QueryInterface $solarium_query
    *   The Solarium select query object.
-   * @param \Drupal\search_api\Query\QueryInterface $query
+   * @param \Drupal\search_api\Query\QueryInterface $search_api_query
    *   The query object.
    * @param array $highlighted_fields
    *   (optional) The solr fields to be highlighted.

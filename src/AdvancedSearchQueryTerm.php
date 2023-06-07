@@ -329,10 +329,7 @@ class AdvancedSearchQueryTerm {
         if (strpos($field, "fulltext_title") !== FALSE) {
           $isTitleSearch = TRUE;
           if (strpos(trim($value), " AND ") !== FALSE) {
-            // When you type 'Orientation AND games' into the title search, you get one result.
-            // When you do the same search but add a search box, you get a lot more results.
-            // (Recreation: Add a search box, set both search criteria to 'Title' and keep the operator to 'and'.
-            // Type 'orientation' in one box and 'games' in the second box and click seach.)
+            // Handle keyword with 'Orientation AND games'.
             $keyword = str_replace('"', '', $value);
             $keys = explode(" AND ", $keyword);
             $str = "(";

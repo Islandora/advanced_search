@@ -186,8 +186,10 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
         '#url' => $url,
         '#title' => $items_per_page,
         '#attributes' => [
-          'aria-label' => $this->t($items_per_page . " items per page"),
-          'class' => $active ? ['pager__link', 'pager__link--is-active', 'pager__itemsperpage'] : ['pager__link', 'pager__itemsperpage'],
+          'aria-label' => $this->t("@ items per page", $items_per_page),
+          'class' => $active ?
+            ['pager__link', 'pager__link--is-active', 'pager__itemsperpage'] :
+            ['pager__link', 'pager__itemsperpage'],
         ],
         '#wrapper_attributes' => [
           'class' => $active ? ['pager__item', 'is-active'] : ['pager__item'],
@@ -245,8 +247,10 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
         '#url' => $url,
         '#title' => Markup::create($text),
         '#attributes' => [
-          'class' => $active ? ['pager__link', 'pager__link--is-active', 'pager__display'] : ['pager__link', 'pager__display'],
-          'aria-label' => $this->t("Display as " . Markup::create($text)),
+          'class' => $active ?
+            ['pager__link', 'pager__link--is-active', 'pager__display'] :
+            ['pager__link', 'pager__display'],
+          'aria-label' => $this->t("Display as @", Markup::create($text)),
         ],
         '#wrapper_attributes' => [
           'class' => $active ? ['pager__item', 'is-active'] : ['pager__item'],

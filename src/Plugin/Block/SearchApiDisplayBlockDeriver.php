@@ -41,8 +41,8 @@ abstract class SearchApiDisplayBlockDeriver implements ContainerDeriverInterface
   abstract protected function label();
 
   /**
- *
- */
+   * The constructor.
+   */
   final public function __construct(ContainerInterface $container, $base_plugin_id) {}
 
   /**

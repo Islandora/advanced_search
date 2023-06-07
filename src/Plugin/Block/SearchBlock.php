@@ -38,7 +38,7 @@ class SearchBlock extends BlockBase {
       $form['search-attributes'][SettingsForm::SEARCH_ALL_FIELDS_FLAG] = [
         '#markup' => $this
           ->t('<strong>This block is required to enable searching all fields for the Advanced Search.
-            To proceed, please enable "Enable searching all fields" in 
+            To proceed, please enable "Enable searching all fields" in
             <a href="/admin/config/search/advanced" target="_blank">Advanced Seach Configuration</a></strong>.'),
       ];
     }
@@ -55,19 +55,19 @@ class SearchBlock extends BlockBase {
       }
       $form['search-attributes']['view_machine_name'] = [
         '#type' => 'select',
-        '#title' => $this->t('Select Search Results Page\'s Machine Name:'),
+        '#title' => $this->t('Select the machine name of Search Results Page:'),
         '#default_value' => $this->configuration['search_view_machine_name'],
         '#options' => $options,
       ];
       $form['search-attributes']['search_textfield'] = [
         '#type' => 'textfield',
-        '#title' => $this->t('Search Keyword Textfield Label:'),
+        '#title' => $this->t('Search Keyword Text field label:'),
         '#default_value' => $this->configuration['search_textfield_label'],
         '#maxlength' => 255,
       ];
       $form['search-attributes']['search_placeholder_textfield'] = [
         '#type' => 'textfield',
-        '#title' => $this->t('Search Keyword Textfield Placeholder:'),
+        '#title' => $this->t('Search Keyword text field placeholder:'),
         '#default_value' => $this->configuration['search_placeholder'],
         '#maxlength' => 255,
       ];

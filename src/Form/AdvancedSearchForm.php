@@ -104,9 +104,10 @@ class AdvancedSearchForm extends FormBase {
   }
 
   /**
-   * Get if Edismax Search checkbox is enabled or disable.
+   * Get if Search All Fields checkbox is enabled or disable.
    *
    * @return bool
+   *   the enable or disable for Search All Fields checkbox
    */
   public static function getSearchAllFields() {
     return self::getConfig(SettingsForm::SEARCH_ALL_FIELDS_FLAG, 0);
@@ -116,6 +117,7 @@ class AdvancedSearchForm extends FormBase {
    * Get if Edismax Search checkbox is enabled or disable.
    *
    * @return bool
+   *   the enable or disable for Edismax Search checkbox
    */
   public static function getEdismaxSearch() {
     return self::getConfig(SettingsForm::EDISMAX_SEARCH_FLAG, 0);
@@ -271,7 +273,7 @@ class AdvancedSearchForm extends FormBase {
       ],
     ];
 
-    $options = (self::getEdismaxSearch() && self::getSearchAllFields()) ? ["all" => $this->t(self::getEdismaxSearchLabel())] + $this->fieldOptions($fields) : $this->fieldOptions($fields);
+    $options = (self::getEdismaxSearch() && self::getSearchAllFields()) ? ["all" => $this->t("@", self::getEdismaxSearchLabel())] + $this->fieldOptions($fields) : $this->fieldOptions($fields);
     $term_default_values = $this->defaultTermValues($options);
     [$recursive, $term_values] = $this->processInput($form_state, $term_default_values);
     $i = 0;
