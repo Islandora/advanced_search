@@ -28,7 +28,7 @@ class SettingsForm extends ConfigFormBase {
   const DISPLAY_LIST_FLAG = 'list_on_off';
   const DISPLAY_GRID_FLAG = 'grid_on_off';
   const DISPLAY_DEFAULT = 'default-display-mode';
-  
+
   /**
    * Constructs a \Drupal\system\ConfigFormBase object.
    *
@@ -91,7 +91,7 @@ class SettingsForm extends ConfigFormBase {
            </ul>
           </li>
         </ul>'),
-      '#default_value' => isset($isEDismax) ? $isEDismax : 1,
+      '#default_value' => $isEDismax ?? 1,
     ];
 
     $form['eDisMax']['textfields_container'] = [
@@ -116,15 +116,14 @@ class SettingsForm extends ConfigFormBase {
       '#default_value' => self::getConfig(self::EDISMAX_SEARCH_LABEL, "Keyword"),
     ];
 
-
-    $form['display-mode'] =  [
+    $form['display-mode'] = [
       '#type' => 'fieldset',
       '#title' => $this->t("Pager Block"),
     ];
     $form['display-mode']['pager-block-description'] = [
       '#markup' => $this->t("Pager blocks are available in the Blocks interface for each Search API view.  The following settings apply for all Pager blocks."),
     ];
-    
+
     $form['display-mode'][self::DISPLAY_LIST_FLAG] = [
       '#type' => 'checkbox',
       '#title' => $this
@@ -145,7 +144,7 @@ class SettingsForm extends ConfigFormBase {
         ->t('Default view mode:'),
       '#options' => [
         'list' => 'List',
-        'grid' => 'Grid'
+        'grid' => 'Grid',
       ],
       '#default_value' => self::getConfig(self::DISPLAY_DEFAULT, 'grid'),
     ];
@@ -191,7 +190,6 @@ class SettingsForm extends ConfigFormBase {
         ],
       ],
     ];
-    
 
     return parent::buildForm($form, $form_state);
   }

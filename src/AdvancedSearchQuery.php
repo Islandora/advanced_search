@@ -150,78 +150,77 @@ class AdvancedSearchQuery {
       $language_ids = $search_api_query->getLanguages();
       $field_mapping = $backend->getSolrFieldNamesKeyedByLanguage($language_ids, $index);
 
-      // disable for Lucene and wildcard
-      //$q[] = "{!boost b=boost_document}";
-
-      // create a flag for active/inactive dismax
+      // Disable for Lucene and wildcard
+      // $q[] = "{!boost b=boost_document}";
+      // Create a flag for active/inactive dismax.
       $config = \Drupal::config(SettingsForm::CONFIG_NAME);
       $isDismax = $config->get(SettingsForm::EDISMAX_SEARCH_FLAG);
-      if (!isset($isDismax))
-        $isDismax = true;
-      $isSearchAllFields = false;
+      if (!isset($isDismax)) {
+        $isDismax = TRUE;
+      }
+      $isSearchAllFields = FALSE;
       $fields_list = [];
 
       if (!$isDismax) {
         // To support negative queries we must first bring in all documents.
         $q[] = $this->negativeQuery($terms) ? "*:*" : "";
       }
-      
+
       $term = array_shift($terms);
       $q[] = $term->toSolrQuery($field_mapping);
 
-      // new
+      // New.
       $fields_list[] = $term->toSolrFields($field_mapping);
-      
-      // set edismax is enabled if the field set to "all"
+
+      // Set edismax is enabled if the field set to "all".
       if ($term->getField() === "all") {
-        $isSearchAllFields = true;
+        $isSearchAllFields = TRUE;
 
       }
-      
-      // for multiple conditions
+
+      // For multiple conditions.
       foreach ($terms as $term) {
         $q[] = $term->getConjunction();
         $q[] = $term->toSolrQuery($field_mapping);
 
-        // new
+        // New.
         $fields_list[] = $term->toSolrFields($field_mapping);
 
-        // set dismax is enabled if the field set to "all"
+        // Set dismax is enabled if the field set to "all".
         if ($term->getField() === "all") {
-          $isSearchAllFields = true;
-          
+          $isSearchAllFields = TRUE;
+
         }
-        
+
       }
       $q = implode(' ', $q);
 
-      
-      // Limit extra processing if Luncene Search is enable
+      // Limit extra processing if Luncene Search is enable.
       if ($isDismax) {
 
-        if ((strpos($q, "*") !== false || strpos($q, "?") !== false)) {
-          // if the query string contain '*', '?', OR is a single world, enable wildcard
+        if ((strpos($q, "*") !== FALSE || strpos($q, "?") !== FALSE)) {
+          // If the query string contain '*', '?', OR is a single world, enable wildcard.
           $tmp = str_replace('"', "", trim($q));
           $query_fields = [];
-          
+
           if ($isSearchAllFields) {
             foreach ($field_mapping as $key => $field) {
               foreach ($field as $f => $item) {
-                // bs_ are boolean fields, do not work well with text search
+                // bs_ are boolean fields, do not work well with text search.
                 if (substr($item, 0, 3) !== "bs_" && !in_array($item, ['score', 'random', 'boost_document'])
-                  && ((strpos( $item, "sm_" ) === 0) || (strpos( $item, "tm_" ) === 0) || (strpos($item, "sort_ss_") === 0) || (strpos($item, "ts_") === 0)
+                  && ((strpos($item, "sm_") === 0) || (strpos($item, "tm_") === 0) || (strpos($item, "sort_ss_") === 0) || (strpos($item, "ts_") === 0)
                     || (strpos($item, "ss_") === 0)
-                  )){
-                  array_push($query_fields, '('.$item. ':'. $tmp .')');
+                  )) {
+                  array_push($query_fields, '(' . $item . ':' . $tmp . ')');
                 }
               }
             }
           }
           else {
-            foreach ($fields_list as $f) { 
+            foreach ($fields_list as $f) {
               $parts = explode(" ", $f);
-              foreach ($parts as $p) { 
-                array_push($query_fields, '(' . $p . ':' . $tmp .')');
+              foreach ($parts as $p) {
+                array_push($query_fields, '(' . $p . ':' . $tmp . ')');
               }
             }
           }
@@ -229,7 +228,7 @@ class AdvancedSearchQuery {
         }
         else {
 
-          // enable dismax search query option
+          // Enable dismax search query option.
           /** @var Solarium\QueryType\Select\Query\Component\DisMax $dismax */
           $dismax = $solarium_query->getEDisMax();
           $dismax->setQueryParser('edismax');
@@ -238,7 +237,7 @@ class AdvancedSearchQuery {
           if ($isSearchAllFields) {
             foreach ($field_mapping as $key => $field) {
               foreach ($field as $f => $item) {
-                // bs_ are boolean fields, do not work well with text search
+                // bs_ are boolean fields, do not work well with text search.
                 if (substr($item, 0, 3) !== "bs_") {
                   array_push($query_fields, $item);
                 }
@@ -247,7 +246,7 @@ class AdvancedSearchQuery {
           }
           else {
             $query_fields = $fields_list;
-            
+
           }
           $query_fields = implode(" ", array_unique($query_fields));
           $dismax->setQueryFields($query_fields);
@@ -263,9 +262,9 @@ class AdvancedSearchQuery {
         if (empty($highlighted_fields)) {
           $highlighted_fields = ['*'];
         }
-        
+
         $this->setHighlighting($solarium_query, $search_api_query, $highlighted_fields);
-        
+
         // The Search API Highlight processor checks if the 'keys' field of
         // the Search API Query is non-empty before creating an excerpt.
         // Since we are getting the highlighting result from Solr instead
@@ -273,7 +272,7 @@ class AdvancedSearchQuery {
         // make this field non-empty.
         $search_api_query->keys("advanced search");
       }
-     
+
       $solarium_query->setQuery($q);
     }
   }
@@ -378,7 +377,7 @@ class AdvancedSearchQuery {
    * @param array $highlighted_fields
    *   (optional) The solr fields to be highlighted.
    */
-   protected function setHighlighting(SolariumQueryInterface $solarium_query, DrupalQueryInterface $search_api_query, array $highlighted_fields = []) {
+  protected function setHighlighting(SolariumQueryInterface $solarium_query, DrupalQueryInterface $search_api_query, array $highlighted_fields = []) {
     $index = $search_api_query->getIndex();
     $settings = SearchAPISolrUtility::getIndexSolrSettings($index);
     $highlighter = $settings['highlighter'];
@@ -424,4 +423,5 @@ class AdvancedSearchQuery {
       $hl->addField($highlighted_field);
     }
   }
+
 }

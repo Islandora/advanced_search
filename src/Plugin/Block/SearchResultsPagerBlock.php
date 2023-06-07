@@ -68,7 +68,7 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
    */
   public function build() {
     $id = $this->getDerivativeId();
-    list($view_id, $display_id) = $this->getViewAndDisplayIdentifiers();
+    [$view_id, $display_id] = $this->getViewAndDisplayIdentifiers();
     $view = View::Load($view_id);
     $view_executable = $view->getExecutable();
     $view_executable->setDisplay($display_id);
@@ -121,7 +121,7 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
   protected function buildResultsSummary(ViewExecutable $view_executable) {
     $current_page = (int) $view_executable->getCurrentPage() + 1;
     $per_page = (int) $view_executable->getItemsPerPage();
-    $total = isset($view_executable->total_rows) ? $view_executable->total_rows : count($view_executable->result);
+    $total = $view_executable->total_rows ?? count($view_executable->result);
     // If there is no result the "start" and "current_record_count" should be
     // equal to 0. To have the same calculation logic, we use a "start offset"
     // to handle all the cases.
@@ -216,18 +216,18 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
   protected function buildDisplayLinks(array $query_parameters) {
     $config = \Drupal::config(SettingsForm::CONFIG_NAME);
     $display_options = [];
-    
-    if ($config->get(SettingsForm::DISPLAY_LIST_FLAG) == 1) { 
+
+    if ($config->get(SettingsForm::DISPLAY_LIST_FLAG) == 1) {
       $display_options['list'] = [
         'icon' => 'fa-list',
         'title' => $this->t('List'),
       ];
     }
 
-    if ($config->get(SettingsForm::DISPLAY_GRID_FLAG) ==1) { 
+    if ($config->get(SettingsForm::DISPLAY_GRID_FLAG) == 1) {
       $display_options['grid'] = [
         'icon' => 'fa-th',
-        'title' => $this->t('Grid')
+        'title' => $this->t('Grid'),
       ];
     }
 
@@ -246,7 +246,7 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
         '#title' => Markup::create($text),
         '#attributes' => [
           'class' => $active ? ['pager__link', 'pager__link--is-active', 'pager__display'] : ['pager__link', 'pager__display'],
-          'aria-label' => $this->t("Display as " . Markup::create($text))
+          'aria-label' => $this->t("Display as " . Markup::create($text)),
         ],
         '#wrapper_attributes' => [
           'class' => $active ? ['pager__item', 'is-active'] : ['pager__item'],
@@ -305,7 +305,7 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
       '#title_display' => 'invisible',
       '#options' => $options,
       '#options_attributes' => $options_attributes,
-      '#attributes' => ['autocomplete' => 'off', "aria-label"=>"Sort By"],
+      '#attributes' => ['autocomplete' => 'off', "aria-label" => "Sort By"],
       '#wrapper_attributes' => ['class' => ['pager__sort', 'container']],
       '#name' => 'order',
       '#value' => $default_value,
