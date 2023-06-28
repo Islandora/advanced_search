@@ -274,7 +274,7 @@ class AdvancedSearchQuery {
         // Since we are getting the highlighting result from Solr instead
         // of using the Search API processor to create one, we just need
         // make this field non-empty.
-        $search_api_query->keys("advanced search");
+        //$search_api_query->keys("advanced search");
       }
 
       $solarium_query->setQuery($q);
