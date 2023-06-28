@@ -1,0 +1,36 @@
+advanced_search.settings:
+  type: config_object
+  mapping:
+    lucene_on_off:
+      type: integer
+      label: Enable Extended DisMax Query
+    lucene_label: 
+      type: string
+      label: Set the label for the option of searching all fields
+    all_fields_on_off:
+      type: integer
+      label: Enable searching all fields
+    list_on_off:
+      type: integer
+      label: Expose "List view" option
+    grid_on_off:
+      type: integer
+      label: Expose "Grid view" option.
+    default-display-mode:
+      type: string
+      label: Default view mode
+    search_query_parameter:
+      type: string
+      label: Search Query Parameter
+    search_recursive_parameter:
+      type: string
+      label: Recurse Query Parameter
+    search_add_operator:
+      type: string
+      label: Facet Add Operator
+    search_remove_operator:
+      type: string
+      label: Facet Remove Operator
+    facet_truncate:
+      type: string
+      label: Truncate Facet
