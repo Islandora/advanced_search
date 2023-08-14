@@ -85,7 +85,7 @@ class AdvancedSearchQuery {
   public function getTerms(Request $request) {
     $terms = [];
     if ($request->query->has($this->queryParameter)) {
-      $query_params = $request->query->get($this->queryParameter);
+      $query_params = $request->query->all()[$this->queryParameter];
       if (is_array($query_params)) {
         foreach ($query_params as $params) {
           $terms[] = AdvancedSearchQueryTerm::fromQueryParams($params);
