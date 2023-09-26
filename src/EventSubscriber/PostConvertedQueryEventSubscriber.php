@@ -3,10 +3,15 @@
 namespace Drupal\advanced_search\EventSubscriber;
 
 use Drupal\advanced_search\AdvancedSearchQuery;
-use Drupal\search_api_solr\Event\SearchAPISolrEvents;
 use Drupal\search_api_solr\Event\PostConvertedQueryEvent;
+use Drupal\search_api_solr\Event\SearchAPISolrEvents;
 
-class PostConvertedQueryEventSubscriber extends EventSubscriberInterface() {
+/**
+ * Subscribes to PostConvertedQueryEvents.
+ *
+ * @package Drupal\advanced_search\EventSubscriber
+ */
+class PostConvertedQueryEventSubscriber extends EventSubscriberInterface {
 
   /**
    * {@inheritdoc}
