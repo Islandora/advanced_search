@@ -12,7 +12,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  *
  * @package Drupal\advanced_search\EventSubscriber
  */
-class PostConvertedQueryEventSubscriber extends EventSubscriberInterface {
+class PostConvertedQueryEventSubscriber implements EventSubscriberInterface {
 
   /**
    * {@inheritdoc}
