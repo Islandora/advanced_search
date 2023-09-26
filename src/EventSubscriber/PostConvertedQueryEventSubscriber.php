@@ -30,6 +30,12 @@ class PostConvertedQueryEventSubscriber implements EventSubscriberInterface {
   public function alter(PostConvertedQueryEvent $event) {
     $search_api_query = $event->getSearchApiQuery();
     $solarium_query = $event->getSolariumQuery();
+
+    // We must modify the query itself rather than the representation the
+    // search_api presents as it is not possible to use the 'OR' operator
+    // with it as it converts conditions into separate filter queries.
+    // Additionally filter queries do not affect the score so are not
+    // suitable for use in the advanced search queries.
     $advanced_search_query = new AdvancedSearchQuery();
     $advanced_search_query->alterQuery(\Drupal::request(), $solarium_query, $search_api_query);
   }
