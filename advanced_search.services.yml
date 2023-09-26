@@ -1,0 +1,4 @@
+services:
+  Drupal\advanced_search\EventSubscriber\PostConvertedQueryEventSubscriber:
+    tags:
+      - { name: 'event_subscriber' }
