@@ -5,6 +5,7 @@ namespace Drupal\advanced_search\EventSubscriber;
 use Drupal\advanced_search\AdvancedSearchQuery;
 use Drupal\search_api_solr\Event\PostConvertedQueryEvent;
 use Drupal\search_api_solr\Event\SearchAPISolrEvents;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Subscribes to PostConvertedQueryEvents.
