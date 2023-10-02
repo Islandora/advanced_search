@@ -217,7 +217,6 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
    *   A renderable array representing the display links portion of pager.
    */
   protected function buildDisplayLinks(array $query_parameters) {
-    $config = \Drupal::config(SettingsForm::CONFIG_NAME);
     $display_options = [];
 
     if ($this->configuration[SettingsForm::DISPLAY_LIST_FLAG] == 1) {
