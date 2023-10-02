@@ -3,6 +3,7 @@
 namespace Drupal\advanced_search\Plugin\Block;
 
 use Drupal\Core\Block\BlockBase;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Render\Markup;
 use Drupal\Core\Url;
@@ -219,21 +220,21 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
     $config = \Drupal::config(SettingsForm::CONFIG_NAME);
     $display_options = [];
 
-    if ($config->get(SettingsForm::DISPLAY_LIST_FLAG) == 1) {
+    if ($this->configuration[SettingsForm::DISPLAY_LIST_FLAG] == 1) {
       $display_options['list'] = [
         'icon' => 'fa-list',
         'title' => $this->t('List'),
       ];
     }
 
-    if ($config->get(SettingsForm::DISPLAY_GRID_FLAG) == 1) {
+    if ($this->configuration[SettingsForm::DISPLAY_GRID_FLAG] == 1) {
       $display_options['grid'] = [
         'icon' => 'fa-th',
         'title' => $this->t('Grid'),
       ];
     }
 
-    $active_display = $query_parameters['display'] ?? $config->get(SettingsForm::DISPLAY_DEFAULT);
+    $active_display = $query_parameters['display'] ?? $this->configuration[SettingsForm::DISPLAY_DEFAULT];
     $items = [];
     foreach ($display_options as $display => $options) {
       $url = Url::fromRoute('<current>', [], [
@@ -314,6 +315,65 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
       '#name' => 'order',
       '#value' => $default_value,
     ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function defaultConfiguration() {
+    $config = \Drupal::service('config.factory')->getEditable(SettingsForm::CONFIG_NAME);
+    return [
+      SettingsForm::DISPLAY_LIST_FLAG => $config->get(SettingsForm::DISPLAY_LIST_FLAG),
+      SettingsForm::DISPLAY_GRID_FLAG => $config->get(SettingsForm::DISPLAY_GRID_FLAG),
+      SettingsForm::DISPLAY_DEFAULT => $config->get(SettingsForm::DISPLAY_DEFAULT),
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function blockForm($form, FormStateInterface $form_state) {
+    $form['display-mode'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t("Pager Block"),
+    ];
+
+    $form['display-mode'][SettingsForm::DISPLAY_LIST_FLAG] = [
+      '#type' => 'checkbox',
+      '#title' => $this
+        ->t('Expose "List view" option.'),
+      '#default_value' => $this->configuration[SettingsForm::DISPLAY_LIST_FLAG],
+    ];
+
+    $form['display-mode'][SettingsForm::DISPLAY_GRID_FLAG] = [
+      '#type' => 'checkbox',
+      '#title' => $this
+        ->t('Expose "Grid view" option.'),
+      '#default_value' => $this->configuration[SettingsForm::DISPLAY_GRID_FLAG],
+    ];
+
+    $form['display-mode'][SettingsForm::DISPLAY_DEFAULT] = [
+      '#type' => 'select',
+      '#title' => $this
+        ->t('Default view mode:'),
+      '#options' => [
+        'list' => 'List',
+        'grid' => 'Grid',
+      ],
+      '#default_value' => $this->configuration[SettingsForm::DISPLAY_DEFAULT],
+    ];
+
+    return $form;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function blockSubmit($form, FormStateInterface $form_state) {
+    $values = $form_state->getValues();
+    $this->configuration[SettingsForm::DISPLAY_LIST_FLAG] = $values['display-mode'][SettingsForm::DISPLAY_LIST_FLAG];
+    $this->configuration[SettingsForm::DISPLAY_GRID_FLAG] = $values['display-mode'][SettingsForm::DISPLAY_GRID_FLAG];
+    $this->configuration[SettingsForm::DISPLAY_DEFAULT] = $values['display-mode'][SettingsForm::DISPLAY_DEFAULT];
   }
 
   /**
