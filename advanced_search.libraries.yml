@@ -3,6 +3,7 @@ advanced.search.admin:
     js/advanced_search.admin.js: {}
   dependencies:
     - core/drupal.tabledrag
+    - core/once
 
 advanced.search.form:
   js:

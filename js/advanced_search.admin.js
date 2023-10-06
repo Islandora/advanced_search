@@ -83,7 +83,7 @@
         updateFieldWeights(table, regionName);
       };
 
-      $(context).find('select.field-display').once('field-display').on('change', function (event) {
+      $(once('field-display', 'select.field-display', context)).on('change', function (event) {
         var row = $(this).closest('tr');
         var select = $(this);
 

@@ -171,8 +171,11 @@
             "-" +
             settings.view_display_id.replace(/_/g, "-")
           );
-          exposed_form
-            .once()
+          $(once('exposed-form',
+            "form#views-exposed-form-" +
+            settings.view_name.replace(/_/g, "-") +
+            "-" +
+            settings.view_display_id.replace(/_/g, "-")))
             .find("input[type=submit], input[type=image]")
             .not("[data-drupal-selector=edit-reset]")
             .each(function (index) {
@@ -228,8 +231,7 @@
         }
 
       // Attach behavior to pager, summary, facet links.
-      $("[data-drupal-pager-id], [data-drupal-facets-summary-id], [data-drupal-facet-id]")
-        .once()
+      $(once("new-window", "[data-drupal-pager-id], [data-drupal-facets-summary-id], [data-drupal-facet-id]"))
         .find("a:not(.facet-item)")
         .click(function (e) {
           // Let ctrl/cmd click open in a new window.
@@ -245,8 +247,7 @@
         });
 
       /* digitalutsc added */
-     $('.pager__sort select[name="order"]')
-        .once()
+      $(once('params-sort', '.pager__sort select[name="order"]'))
         .change(function () {
           var href = window.location.href;
           var params = Drupal.Views.parseQueryString(href);
@@ -263,8 +264,7 @@
 
 
       // Trigger on sort change.
-      $('[data-drupal-pager-id] select[name="order"]')
-        .once()
+      $(once('sort-change', '[data-drupal-pager-id] select[name="order"]'))
         .change(function () {
           var href = window.location.href;
           var params = Drupal.Views.parseQueryString(href);
