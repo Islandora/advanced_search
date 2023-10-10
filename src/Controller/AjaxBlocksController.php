@@ -125,7 +125,7 @@ class AjaxBlocksController extends ControllerBase {
 
     // Rebuild the request and the current path, needed for facets.
     $path = $request->request->get('link');
-    $blocks = $request->request->get('blocks');
+    $blocks = $request->request->all('blocks');
 
     // Make sure we are not updating blocks multiple times.
     $blocks = array_unique($blocks);
