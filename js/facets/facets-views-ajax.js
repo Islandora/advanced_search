@@ -246,35 +246,20 @@
           window.history.pushState(null, document.title, $(this).attr("href"));
         });
 
-      /* digitalutsc added */
-      $(once('params-sort', '.pager__sort select[name="order"]'))
+      // Trigger on sort change.
+      $(once('params-sort', '[data-drupal-pager-id] select[name="order"], .pager__sort select[name="order"]'))
         .change(function () {
           var href = window.location.href;
           var params = Drupal.Views.parseQueryString(href);
 
           var selection = $(this).val();
           var option = selection.split('_');
-          //params.sort_by = option[0];
           params.sort_order = option[option.length - 1].toUpperCase();
           params.sort_by = selection.replace("_" + option[option.length - 1], "");
-
           href = href.split("?")[0] + "?" + $.param(params);
           window.history.pushState(null, document.title, href);
         });
 
-
-      // Trigger on sort change.
-      $(once('sort-change', '[data-drupal-pager-id] select[name="order"]'))
-        .change(function () {
-          var href = window.location.href;
-          var params = Drupal.Views.parseQueryString(href);
-          var selection = $(this).val();
-          var option = $('option[value="' + selection + '"]');
-          params.sort_order = option.data("sort_order");
-          params.sort_by = option.data("sort_by");
-          href = href.split("?")[0] + "?" + $.param(params);
-          window.history.pushState(null, document.title, href);
-        });
     },
   };
 })(jQuery, Drupal);
