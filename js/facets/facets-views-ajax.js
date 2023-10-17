@@ -171,8 +171,11 @@
             "-" +
             settings.view_display_id.replace(/_/g, "-")
           );
-          exposed_form
-            .once()
+          $(once('exposed-form',
+            "form#views-exposed-form-" +
+            settings.view_name.replace(/_/g, "-") +
+            "-" +
+            settings.view_display_id.replace(/_/g, "-")))
             .find("input[type=submit], input[type=image]")
             .not("[data-drupal-selector=edit-reset]")
             .each(function (index) {
@@ -228,8 +231,7 @@
         }
 
       // Attach behavior to pager, summary, facet links.
-      $("[data-drupal-pager-id], [data-drupal-facets-summary-id], [data-drupal-facet-id]")
-        .once()
+      $(once("new-window", "[data-drupal-pager-id], [data-drupal-facets-summary-id], [data-drupal-facet-id]"))
         .find("a:not(.facet-item)")
         .click(function (e) {
           // Let ctrl/cmd click open in a new window.
@@ -244,37 +246,20 @@
           window.history.pushState(null, document.title, $(this).attr("href"));
         });
 
-      /* digitalutsc added */
-     $('.pager__sort select[name="order"]')
-        .once()
+      // Trigger on sort change.
+      $(once('params-sort', '[data-drupal-pager-id] select[name="order"], .pager__sort select[name="order"]'))
         .change(function () {
           var href = window.location.href;
           var params = Drupal.Views.parseQueryString(href);
 
           var selection = $(this).val();
           var option = selection.split('_');
-          //params.sort_by = option[0];
           params.sort_order = option[option.length - 1].toUpperCase();
           params.sort_by = selection.replace("_" + option[option.length - 1], "");
-
           href = href.split("?")[0] + "?" + $.param(params);
           window.history.pushState(null, document.title, href);
         });
 
-
-      // Trigger on sort change.
-      $('[data-drupal-pager-id] select[name="order"]')
-        .once()
-        .change(function () {
-          var href = window.location.href;
-          var params = Drupal.Views.parseQueryString(href);
-          var selection = $(this).val();
-          var option = $('option[value="' + selection + '"]');
-          params.sort_order = option.data("sort_order");
-          params.sort_by = option.data("sort_by");
-          href = href.split("?")[0] + "?" + $.param(params);
-          window.history.pushState(null, document.title, href);
-        });
     },
   };
 })(jQuery, Drupal);

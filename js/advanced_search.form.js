@@ -100,7 +100,7 @@
   Drupal.behaviors.advanced_search_form = {
     attach: function (context, settings) {
       if (settings.advanced_search_form.id !== 'undefined') {
-        const $form = $('form#' + settings.advanced_search_form.id).once();
+        const $form = $(once('search-form', 'form#' + settings.advanced_search_form.id));
         if ($form.length > 0) {
           window.addEventListener("pushstate", function (e) {
             $form.attr('action', window.location.pathname + window.location.search);
