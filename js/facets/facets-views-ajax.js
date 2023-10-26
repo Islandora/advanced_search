@@ -127,7 +127,7 @@
     // Replace filter, pager, summary, and facet blocks.
     var blocks = {};
     $(
-      ".block[class*='block-plugin-id--islandora-advanced-search-result-pager'], .block[class*='block-plugin-id--views-exposed-filter-block'], .block[class*='block-facets']"
+      "[class*='block-plugin-id--islandora-advanced-search-result-pager'], [class*='block-plugin-id--views-exposed-filter-block'], [class*='block-facets']"
     ).each(function () {
       var id = $(this).attr("id");
       var block_id = id
