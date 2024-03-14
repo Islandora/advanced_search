@@ -320,6 +320,14 @@ class AdvancedSearchQueryTerm {
           $value = str_replace('"', "", trim($value));
         }
       }
+      // Fixed for https://github.com/digitalutsc/advanced_search/issues/4
+      if ($this->field !== "all"){
+        $search_fields = "";
+        foreach ($solr_field_mapping[$this->field] as $field) {
+            $search_fields .= " $field:$value";
+        }
+        return $search_fields;
+      }
       return $value;
     }
     else {
