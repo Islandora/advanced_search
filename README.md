@@ -263,6 +263,15 @@ drush en advanced_search
 
 ## Configuration
 
+This module will make the following blocks available for every _display_
+of a Search API view:
+* Advanced Search Block
+* Pager Block
+
+This module also provides a block called "Search" that you can place and configure as a global search block.
+
+You can configure these blocks to show up on pages with their respective views using Drupal's Block interface. 
+
 You can set the following configuration at
 `/admin/config/search/advanced`:
 
@@ -276,13 +285,15 @@ Please review
 before continuing. The following assumes you already have a working Solr and the
 Drupal Search API setup.
 
-## eDismax Search
+## Extended Dismax (eDismax) Search
 
-Click [here](https://www.drupal.org/docs/contributed-modules/search-api-solr/solr-query-parsers) to find more detail about
+Read the [Drupal.org documentation on Solr Query Parsers](https://www.drupal.org/docs/contributed-modules/search-api-solr/solr-query-parsers) to find more detail about
 eDismax Search in Drupal.
 
+You can enable Extended Dismax search on this module's configuration page at
+`admin/config/islandora/advanced_search`. This will affect all Advanced Search
+and Search blocks provided by this module.
 
-![image](https://user-images.githubusercontent.com/7862086/216676786-4ce95af4-ee97-443c-84f1-370fb7e765ce.png)
 
 
 ## Configure Collection Search
