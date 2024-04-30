@@ -235,35 +235,33 @@ Use the following syntaxes (eDismax ONLY) to increase Search acuracy is provided
 
 ## Requirements
 
-Use composer to download the required libraries and modules.
+Advanced Search requires an installation of Solr, as its syntax is Solr-specific.
+The Advanced Search blocks also utilize the Facets API, therefore they only work on Views where Facets are enabled.
 
-```bash
-composer require drupal/facets "^1.3"
-composer require drupal/search_api_solr "^4.1"
-composer require drupal/search_api "^1.5"
-```
-
-However, for reference, `advanced_search` requires the following
-drupal modules:
+The following requirements (Drupal modules) will be downloaded automatically by Composer:
 
 - [facets](https://www.drupal.org/project/facets)
 - [search_api_solr](https://www.drupal.org/project/search_api_solr)
 
 ## Installation
 
-To download/enable just this module, use the following from the command line:
+This module is part of the [Islandora Starter Site](https://github.com/Islandora-Devops/islandora-starter-site), which is a full Drupal site setup that includes
+Solr, and automatically sets up the views and facets required for Advanced Search to work.
+
+To download and enable just this module, use the following from the command line:
 
 ```bash
-composer require islandora/islandora
+composer require drupal/advanced_search
 drush en advanced_search
 ```
 
 ## Configuration
 
 You can set the following configuration at
-`admin/config/islandora/advanced_search`:
+`/admin/config/search/advanced`:
 
-![image](https://user-images.githubusercontent.com/7862086/216649283-4c2866b0-aa29-4bc8-ae80-d7fcdead6e73.png)
+![Config screen, showing sections for Advanced Search Block, Pager Block, Advanced Search, and Facets](https://github.com/Islandora/advanced_search/assets/1943338/004c7932-6918-4036-8bfd-b9bf27b88f6f)
+
 
 ## Configuring Solr
 
