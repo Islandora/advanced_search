@@ -243,10 +243,16 @@ The following requirements (Drupal modules) will be downloaded automatically by 
 - [facets](https://www.drupal.org/project/facets)
 - [search_api_solr](https://www.drupal.org/project/search_api_solr)
 
+You do not need to use Islandora, however the instructions below for setting up search within a collection 
+(and optionally, its subcollections) use an pattern that is used by Islandora whereby nodes are organized 
+in a hierarchy using an Entity Reference field (typically called "Member Of" / `field_member_of`) on a node
+that accepts other nodes as values. If you are using Advanced Search and want to make use
+of "Search Sub-collections" then you will need to set up such a field on your content type(s).
+
 ## Installation
 
 This module is part of the [Islandora Starter Site](https://github.com/Islandora-Devops/islandora-starter-site), which is a full Drupal site setup that includes
-Solr, and automatically sets up the views and facets required for Advanced Search to work.
+Solr, and automatically sets up the views and facets required for Advanced Search to work. 
 
 To download and enable just this module, use the following from the command line:
 
@@ -281,16 +287,18 @@ eDismax Search in Drupal.
 
 ## Configure Collection Search
 
+See "Requirements" for a discussion of the use of `field_member_of`.
+
 To support collection based searches you need to index the `field_member_of` for
-every repository item as well define a new field that captures the full
+every node as well define a new Search API field that captures the full
 hierarchy of `field_member_of` for each repository item.
 
-Add a new `Content` solr field `field_decedent_of` to the solr index at
-`admin/config/search/search-api/index/default_solr_index/fields`.
+Add a new `Content` Search API field `field_decedent_of` to the index at
+`admin/config/search/search-api/index/[your default index]/fields`.
 
 ![image](./docs/field_decedent_of.png)
 
-Then under `admin/config/search/search-api/index/default_solr_index/processors`
+Then under `admin/config/search/search-api/index/[your default index]/processors`
 enable `Index hierarchy` and setup the new field to index the hierarchy.
 
 ![image](./docs/enable_index_hierarchy.png)
@@ -298,15 +306,23 @@ enable `Index hierarchy` and setup the new field to index the hierarchy.
 ![image](./docs/enable_index_hierarchy_processor.png)
 
 The field can now be used limit a search to all the decedents of a given object.
+See the section below, "Collection search", to finish configuring your site
+for collection and sub-collection search.
 
 > N.B. You may have to re-index to make sure the field is populated.
 
 ## Configure Views
 
+Create a Search API view that uses your index. 
+
 The configuration of views is outside of the scope of this document, please read
 the [Drupal Documentation](https://www.drupal.org/docs/8/core/modules/views), as
 well as the
 [Search API Documentation](https://www.drupal.org/docs/contributed-modules/search-api).
+
+However, do NOT add the "Fulltext search" filter, despite that it is the "usual" way of
+setting up a Search view. All fulltext searching (and fielded searching) will 
+be handled by blocks provided by this module.
 
 ### Exposed Form
 
@@ -325,9 +341,14 @@ additional query in the Exposed form as well.
 
 ### Collection Search
 
-That being said it will be typical that you require the following
-`Relationships` and `Contextual Filters` when setting up a search view to enable
-`Collection Search` searches.
+This module's "Advanced Search" block can be set up on a 
+"collection" (or, generically, on hierarchical entities
+that can contain other entities). This block allows the user
+to select whether they want the search to include sub-collections.
+
+![image](./docs/include_subcollections.png)
+
+The following instructions describe how to set up this feature.
 
 ![image](./docs/view_advanced_setting.png)
 
