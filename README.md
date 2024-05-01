@@ -298,19 +298,22 @@ and Search blocks provided by this module.
 
 See "Requirements" for a discussion of the use of `field_member_of`.
 
-In this section we set up fields in our Solr index (using Search API) 
-that index a node's parent ("Member of") and all its parents' parents,
-recursively ("Descendant of"), the latter achieved by using Search API's 
-"Index hierarchy" processor.
+In this section we set up fields in our Solr index (using Search API).
+The first Search API field ("Member of") indexes a node's parent(s) based
+on the Drupal field `field_member_of`, and the second ("Descendant of")
+indexes a node's parents and its parents' parents. This second field's 
+recursive behaviour is achieved by using Search API's "Index hierarchy" 
+processor.
 
 First ensure that your hierarchy field (assumed for convenience to be `field_member_of`)
-is indexed at `admin/config/search/search-api/index/[your default index]/fields`. 
-We will assume that the Search API field's name is "Member of". The field type
+is indexed at `admin/config/search/search-api/index/[your default index]/fields`. If
+not, add the field using the "Add field" button. When you find "Member of (field_member_of)",
+click the "Add" button - do not delve into the child properties under "(+)". 
+We will assume that the Search API field's name is also "Member of". The field type
 should be "Integer".
 
-Next, create a second Search API field, based on the same Drupal field. We'll
-call this one "Descendant of". It is also an Integer.
-
+Next, create a second Search API field, exactly the same as the first field 
+except for its name, so we can tell them apart. We'll call this one "Descendant of". 
 
 ![Search fields Member of and Descendant of set up](./docs/field_descendant_of.png)
 
