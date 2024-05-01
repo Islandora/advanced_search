@@ -235,35 +235,48 @@ Use the following syntaxes (eDismax ONLY) to increase Search acuracy is provided
 
 ## Requirements
 
-Use composer to download the required libraries and modules.
+Advanced Search requires an installation of Solr, as its syntax is Solr-specific.
+The Advanced Search blocks also utilize the Facets API, therefore they only work on Views where Facets are enabled.
 
-```bash
-composer require drupal/facets "^1.3"
-composer require drupal/search_api_solr "^4.1"
-composer require drupal/search_api "^1.5"
-```
-
-However, for reference, `advanced_search` requires the following
-drupal modules:
+The following requirements (Drupal modules) will be downloaded automatically by Composer:
 
 - [facets](https://www.drupal.org/project/facets)
 - [search_api_solr](https://www.drupal.org/project/search_api_solr)
 
+You do not need to use Islandora, however the instructions below for setting up search within a collection 
+(and optionally, its subcollections) use an pattern that is used by Islandora whereby nodes are organized 
+in a hierarchy using an Entity Reference field (typically called "Member Of" / `field_member_of`) on a node
+that accepts other nodes as values. If you are using Advanced Search and want to make use
+of "Search Sub-collections" then you will need to set up such a field on your content type(s).
+
 ## Installation
 
-To download/enable just this module, use the following from the command line:
+This module is part of the [Islandora Starter Site](https://github.com/Islandora-Devops/islandora-starter-site), which is a full Drupal site setup that includes
+Solr, and automatically sets up the views and facets required for Advanced Search to work. 
+
+To download and enable just this module, use the following from the command line:
 
 ```bash
-composer require islandora/islandora
+composer require drupal/advanced_search
 drush en advanced_search
 ```
 
 ## Configuration
 
-You can set the following configuration at
-`admin/config/islandora/advanced_search`:
+This module will make the following blocks available for every _display_
+of a Search API view:
+* Advanced Search Block
+* Pager Block
 
-![image](https://user-images.githubusercontent.com/7862086/216649283-4c2866b0-aa29-4bc8-ae80-d7fcdead6e73.png)
+This module also provides a block called "Search" that you can place and configure as a global search block.
+
+You can configure these blocks to show up on pages with their respective views using Drupal's Block interface. 
+
+You can set the following configuration at
+`/admin/config/search/advanced`:
+
+![Config screen, showing sections for Advanced Search Block, Pager Block, Advanced Search, and Facets](https://github.com/Islandora/advanced_search/assets/1943338/004c7932-6918-4036-8bfd-b9bf27b88f6f)
+
 
 ## Configuring Solr
 
@@ -272,43 +285,68 @@ Please review
 before continuing. The following assumes you already have a working Solr and the
 Drupal Search API setup.
 
-## eDismax Search
+## Extended Dismax (eDismax) Search
 
-Click [here](https://www.drupal.org/docs/contributed-modules/search-api-solr/solr-query-parsers) to find more detail about
+Read the [Drupal.org documentation on Solr Query Parsers](https://www.drupal.org/docs/contributed-modules/search-api-solr/solr-query-parsers) to find more detail about
 eDismax Search in Drupal.
 
+You can enable Extended Dismax search on this module's configuration page at
+`admin/config/islandora/advanced_search`. This will affect all Advanced Search
+and Search blocks provided by this module.
 
-![image](https://user-images.githubusercontent.com/7862086/216676786-4ce95af4-ee97-443c-84f1-370fb7e765ce.png)
+## Configure Search Fields for Collection Search
+
+See "Requirements" for a discussion of the use of `field_member_of`.
+
+In this section we set up fields in our Solr index (using Search API).
+The first Search API field ("Member of") indexes a node's parent(s) based
+on the Drupal field `field_member_of`, and the second ("Descendant of")
+indexes a node's parents and its parents' parents. This second field's 
+recursive behaviour is achieved by using Search API's "Index hierarchy" 
+processor.
+
+First ensure that your hierarchy field (assumed for convenience to be `field_member_of`)
+is indexed at `admin/config/search/search-api/index/[your default index]/fields`. If
+not, add the field using the "Add field" button. When you find "Member of (field_member_of)",
+click the "Add" button - do not delve into the child properties under "(+)". 
+We will assume that the Search API field's name is also "Member of". The field type
+should be "Integer".
+
+Next, create a second Search API field, exactly the same as the first field 
+except for its name, so we can tell them apart. We'll call this one "Descendant of". 
+
+![Search fields Member of and Descendant of set up](./docs/field_descendant_of.png)
+
+Then, under the Processors tab (`admin/config/search/search-api/index/[your default index]/processors`)
+enable the checkbox for `Index hierarchy` and at the bottom of the page, setup the processor
+to index hierarchy for "Descendant of" (but not "Member of").
+
+!["Index hierarchy" checkbox selected](./docs/enable_index_hierarchy.png)
+
+!["Decendant of" selected under Index Hierarchy processor settings.](./docs/enable_index_hierarchy_processor.png)
 
 
-## Configure Collection Search
+This "Descendant of" field now contains a list of all its ancestors, so can
+be used as a contextual filter on views, thereby allowing the view to display all 
+descendants of a given node. 
 
-To support collection based searches you need to index the `field_member_of` for
-every repository item as well define a new field that captures the full
-hierarchy of `field_member_of` for each repository item.
-
-Add a new `Content` solr field `field_decedent_of` to the solr index at
-`admin/config/search/search-api/index/default_solr_index/fields`.
-
-![image](./docs/field_decedent_of.png)
-
-Then under `admin/config/search/search-api/index/default_solr_index/processors`
-enable `Index hierarchy` and setup the new field to index the hierarchy.
-
-![image](./docs/enable_index_hierarchy.png)
-
-![image](./docs/enable_index_hierarchy_processor.png)
-
-The field can now be used limit a search to all the decedents of a given object.
+See the section below, "Collection search", to finish configuring your site
+for collection and sub-collection search.
 
 > N.B. You may have to re-index to make sure the field is populated.
 
 ## Configure Views
 
-The configuration of views is outside of the scope of this document, please read
-the [Drupal Documentation](https://www.drupal.org/docs/8/core/modules/views), as
+Detailed instruction on the configuration of views is outside of the scope of this document.
+Please read the [Drupal Documentation](https://www.drupal.org/docs/8/core/modules/views), as
 well as the
 [Search API Documentation](https://www.drupal.org/docs/contributed-modules/search-api).
+
+To use the Advanced Search module, you will need to create at least one view that
+is based on Search API and uses Solr. However, do NOT add the "Fulltext search"
+filter, despite that being the "usual" way of setting up a Search view. All 
+fulltext searching (and fielded searching) will be handled by blocks provided 
+by this module.
 
 ### Exposed Form
 
@@ -323,28 +361,36 @@ The Advanced Search Block requires that if present the Exposed forms
 `Input Required` will prevent any search from occurring unless the user puts an
 additional query in the Exposed form as well.
 
-![Form Style](./docs/basic-input.png)
+![Exposed Form set to Basic.](./docs/basic-exposed-form.png)
 
 ### Collection Search
 
-That being said it will be typical that you require the following
-`Relationships` and `Contextual Filters` when setting up a search view to enable
-`Collection Search` searches.
+This module's "Advanced Search" block can be set up on a 
+"collection" (or, generically, on hierarchical entities
+that can contain other entities). This block allows the user
+to select whether they want the search to include sub-collections.
 
-![image](./docs/view_advanced_setting.png)
+!["Include Sub-collections" checkbox in the Advanced Search Block.](./docs/include_subcollections.png)
 
-Here a relationship is setup with `Member Of` field and we have **two**
-contextual filters:
+The following instructions describe how to set up this feature.
 
-1. `field_member_of` (Direct decedents of the Entity)
-2. `field_decedent_of` (All decedents of the Entity)
+First, in your Search API view, set up **two** contextual filters:
 
-Both of these filters are configured the exact same way.
+1. "Member of" (Direct descendants only)
+2. "Descendant of" (All descendants)
 
-![image](./docs/contextual_filter_settings.png)
 
-These filters are toggled by the Advanced Search block to allow the search to
-include all decedents or just direct decedents (*documented below*).
+![Views config showing two contextual filters.](./docs/view_advanced_setting.png)
+
+Both of these filters are configured the exact same way. The only configuration
+to set is "When the filter value is NOT available" then "Provide default value". 
+Under Type, select "Content ID from URL".
+
+![Contextual filter showing "Content ID from URL" selected.](./docs/contextual_filter_settings.png)
+
+These two contextual filters are used by the Advanced Search block to
+expose the toggle to search direct descendants or all descendants
+(documented under "Advanced Search Block", below).
 
 ### Paging
 
@@ -451,12 +497,13 @@ the models you want to display the search on, e.g:
 
 ### Advanced Search Block
 
-For any valid search field, you can drag / drop and reorder the fields to
+For any valid Search API field, you can drag / drop and reorder the fields to
 display in the advanced search form on. The configuration resides on the block
-so this can differ across views / displays if need be. Additionally if the View
-the block was derived from has multiple contextual filters you can choose which
-one corresponds to direct children, this will enable the recursive search
-checkbox.
+so this can differ across views / displays if need be. 
+
+If the view this block is attached to has *two* exposed filters, then you can 
+choose which one corresponds to direct descendants. This will enable the 
+"Include Sub-Collections" search checkbox on the Advanced Search block.
 
 ![image](./docs/advanced_search_block_settings.png)
 
