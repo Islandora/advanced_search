@@ -77,7 +77,7 @@ abstract class SearchApiDisplayBlockDeriver implements ContainerDeriverInterface
         $view_display = $display_definition['view_display'];
         // The derived block needs both the view / display identifiers to
         // construct the pager.
-        $machine_name = "${view_id}__${view_display}";
+        $machine_name = "{$view_id}__{$view_display}";
 
         /** @var \Drupal\views\ViewEntityInterface $view */
         $view = $this->storage->load($view_id);
