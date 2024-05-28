@@ -13,11 +13,8 @@
         "source": "https://github.com/digitalutsc/advanced_search/tree/islandora_lite"
     },
     "minimum-stability": "dev",
-    "repositories": {
-        "drupal": {
-            "type": "composer",
-            "url": "https://packages.drupal.org/8"
-        }
+    "replace": {
+      "islandora/advanced_search": "self.version"
     },
     "require": {
         "drupal/facets": "^2.0",
