@@ -250,10 +250,25 @@ class AdvancedSearchQuery {
           }
           else {
             $query_fields = $fields_list;
-
           }
-          $query_fields = implode(" ", array_unique($query_fields));
-          $dismax->setQueryFields($query_fields);
+
+          // Get the indexed fields from /admin/config/search/search-api/index/..../fields
+          $boostedFields = [];
+          foreach ($index->getFields() as $field_id => $field) {
+              $boostedFields[$field_id] = $field->getBoost();
+          }
+          
+          $str_fields_with_boost = "";
+          // Adding a boost number for each field)
+          foreach($query_fields as $solr_field) {
+            foreach($boostedFields as $indexed_field => $boostnum) {
+                if(strpos($str_fields_with_boost, $indexed_field) == false && strpos($solr_field, $indexed_field) !== false) {
+                    $str_fields_with_boost .=  $solr_field . "^" . $boostnum . " ";
+                }
+            }
+          }
+
+          $dismax->setQueryFields($str_fields_with_boost);
         }
       }
 
