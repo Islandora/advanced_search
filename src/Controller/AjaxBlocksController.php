@@ -135,6 +135,7 @@ class AjaxBlocksController extends ControllerBase {
     }
 
     $new_request = Request::create($path);
+    $new_request->setSession($request->getSession());
     $request_stack = \Drupal::requestStack();
     $processed = $this->pathProcessor->processInbound($new_request->getPathInfo(), $new_request);
 
