@@ -1,5 +1,5 @@
 {
-    "name": "islandora/advanced_search",
+    "name": "drupal/advanced_search",
     "type": "drupal-module",
     "description": "This module creates several blocks to support searching. It also enables the use of Ajax with search blocks, facets, and search results.",
     "keywords": [
