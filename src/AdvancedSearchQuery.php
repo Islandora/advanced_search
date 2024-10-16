@@ -151,7 +151,8 @@ class AdvancedSearchQuery {
       $field_mapping = $backend->getSolrFieldNamesKeyedByLanguage($language_ids, $index);
 
       // Disable for Lucene and wildcard
-      // $q[] = "{!boost b=boost_document}";
+      //$q[] = "{!boost b=boost_document}";
+      
       // Create a flag for active/inactive dismax.
       $config = \Drupal::config(SettingsForm::CONFIG_NAME);
       $isDismax = $config->get(SettingsForm::EDISMAX_SEARCH_FLAG);
@@ -197,84 +198,33 @@ class AdvancedSearchQuery {
 
       // Limit extra processing if Luncene Search is enable.
       if ($isDismax) {
+        // Enable dismax search query option.
+        /** @var Solarium\QueryType\Select\Query\Component\DisMax $dismax */
+        $dismax = $solarium_query->getEDisMax();
+        $dismax->setQueryParser('edismax');
+        $query_fields = [];
 
-        if ((strpos($q, "*") !== FALSE || strpos($q, "?") !== FALSE)) {
-          // If the query string contain '*','?',a single world,enable wildcard.
-          $tmp = str_replace('"', "", trim($q));
-          $query_fields = [];
-
-          if ($isSearchAllFields) {
-            foreach ($field_mapping as $key => $field) {
-              foreach ($field as $f => $item) {
-                // bs_ are boolean fields, do not work well with text search.
-                if (substr($item, 0, 3) !== "bs_"
-                  && !in_array($item, ['score', 'random', 'boost_document'])
-                  && ((strpos($item, "sm_") === 0)
-                  || (strpos($item, "tm_") === 0)
-                  || (strpos($item, "sort_ss_") === 0)
-                  || (strpos($item, "ts_") === 0)
-                  || (strpos($item, "ss_") === 0)
-                  )) {
-                  array_push($query_fields, '(' . $item . ':' . $tmp . ')');
-                }
+        if ($isSearchAllFields) {
+          foreach ($field_mapping as $key => $field) {
+            foreach ($field as $f => $item) {
+              // bs_ are boolean fields, do not work well with text search.
+              if (substr($item, 0, 3) !== "bs_") {
+                array_push($query_fields, $item);
               }
             }
           }
-          else {
-            foreach ($fields_list as $f) {
-              $parts = explode(" ", $f);
-              foreach ($parts as $p) {
-                array_push($query_fields, '(' . $p . ':' . $tmp . ')');
-              }
-            }
-          }
-          $q = implode(" ", array_unique($query_fields));
         }
         else {
+          $query_fields = $fields_list;
 
-          // Enable dismax search query option.
-          /** @var Solarium\QueryType\Select\Query\Component\DisMax $dismax */
-          $dismax = $solarium_query->getEDisMax();
-          $dismax->setQueryParser('edismax');
-          $query_fields = [];
-
-          if ($isSearchAllFields) {
-            foreach ($field_mapping as $key => $field) {
-              foreach ($field as $f => $item) {
-                // bs_ are boolean fields, do not work well with text search.
-                if (substr($item, 0, 3) !== "bs_") {
-                  array_push($query_fields, $item);
-                }
-              }
-            }
-          }
-          else {
-            $query_fields = $fields_list;
-          }
-
-          // Get the indexed fields from /admin/config/search/search-api/index/..../fields
-          $boostedFields = [];
-          foreach ($index->getFields() as $field_id => $field) {
-              $boostedFields[$field_id] = $field->getBoost();
-          }
-          
-          $str_fields_with_boost = "";
-          // Adding a boost number for each field)
-          foreach($query_fields as $solr_field) {
-            foreach($boostedFields as $indexed_field => $boostnum) {
-                if(strpos($str_fields_with_boost, $indexed_field) == false && strpos($solr_field, $indexed_field) !== false) {
-                    $str_fields_with_boost .=  $solr_field . "^" . $boostnum . " ";
-                }
-            }
-          }
-
-          $dismax->setQueryFields($str_fields_with_boost);
         }
+        $query_fields = implode(" ", array_unique($query_fields));
+        $dismax->setQueryFields($query_fields);
       }
 
       if ($backend->getConfiguration()['highlight_data']) {
         // Just highlight string and text fields to avoid Solr exceptions.
-        $highlighted_fields = array_filter(array_unique($fields_list), function ($v) {
+          $highlighted_fields = array_filter(array_unique($fields_list), function ($v) {
           return preg_match('/^t.*?[sm]_/', $v) || preg_match('/^s[sm]_/', $v);
         });
 
