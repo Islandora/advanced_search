@@ -17,7 +17,7 @@ class PostConvertedQueryEventSubscriber implements EventSubscriberInterface {
   /**
    * {@inheritdoc}
    */
-  public static function getSubscribedEvents() {
+  public static function getSubscribedEvents(): array {
     $events[SearchAPISolrEvents::POST_CONVERT_QUERY][] = ['alter'];
 
     return $events;
