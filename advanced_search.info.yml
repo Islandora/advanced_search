@@ -7,5 +7,5 @@ package: Islandora
 core_version_requirement: ^8.8 || ^9 || ^10 || ^11
 dependencies:
   - facets:facets
-  - facets_summary:facets_summary
+  - facets:facets_summary
   - search_api_solr:search_api_solr
