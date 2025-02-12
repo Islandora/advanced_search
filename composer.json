@@ -23,7 +23,7 @@
         }
     },
     "require": {
-        "drupal/facets": "^2.0",
+        "drupal/facets": "^2.0 || ^3.0",
         "drupal/search_api_solr": "^4.2"
     },
     "require-dev": {
