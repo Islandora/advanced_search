@@ -17,3 +17,8 @@ advanced.search.pager:
   css:
     component:
       css/advanced_search.pager.css: {}
+
+advanced.search.facets_views_ajax: 
+  js: 
+     js/facets/facets-views-ajax.js: {}
+
