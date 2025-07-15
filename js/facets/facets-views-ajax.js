@@ -92,7 +92,7 @@
     if (url.indexOf("display=") == -1) { 
       // append items_per_page
       $("a.pager__display").each(function( index ) {
-        var newUrl = url + "&display=" . $(this).attr('type');
+        var newUrl = url + "&display=" + $(this).attr('type');
         $(this).attr("href", newUrl);
       });
       
