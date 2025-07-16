@@ -111,7 +111,6 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
    */
   public function blockSubmit($form, FormStateInterface $form_state) {
     $values = $form_state->getValues();
-    drupal_log(json_encode($values));
     $this->configuration["override_list_on_off"] = $values["display-mode"]['override_list_on_off'];
     $this->configuration["override_grid_on_off"] = $values["display-mode"]['override_grid_on_off'];
     $this->configuration["override-default-display-mode"] = $values["display-mode"]['override-default-display-mode'];
@@ -289,6 +288,7 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
           'title' => $this->t('Grid'),
         ];
       }
+      $active_display = $query_parameters['display'] ?? $this->configuration["override-default-display-mode"];
     }
     else {
       if ($config->get(SettingsForm::DISPLAY_LIST_FLAG) == 1) {
@@ -304,9 +304,9 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
           'title' => $this->t('Grid'),
         ];
       }
+      $active_display = $query_parameters['display'] ?? $config->get(SettingsForm::DISPLAY_DEFAULT);
     }
 
-    $active_display = $query_parameters['display'] ?? $config->get(SettingsForm::DISPLAY_DEFAULT);
     $items = [];
     foreach ($display_options as $display => $options) {
       $url = Url::fromRoute('<current>', [], [
@@ -324,19 +324,30 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
             ['pager__link', 'pager__link--is-active', 'pager__display'] :
             ['pager__link', 'pager__display'],
           'aria-label' => $this->t("Display as @link", ["@link" => Markup::create($text)]),
+          'type' => $display
         ],
         '#wrapper_attributes' => [
           'class' => $active ? ['pager__item', 'is-active'] : ['pager__item'],
         ],
       ];
     }
-    return [
-      '#theme' => 'item_list',
-      '#list_type' => 'ul',
-      '#items' => $items,
-      '#attributes' => [],
-      '#wrapper_attributes' => ['class' => ['pager__display', 'container']],
-    ];
+
+    if (count($items) > 0) {
+      return [
+        '#theme' => 'item_list',
+        '#list_type' => 'ul',
+        '#items' => $items,
+        '#attributes' => [],
+        '#wrapper_attributes' => ['class' => ['pager__display', 'container']],
+      ];
+    }
+    else {
+      return [
+        '#markup' => Markup::create('<span hidden id="override-default-display-mode">' . $active_display . '</span>'),
+        '#attributes' => [],
+        '#wrapper_attributes' => ['class' => ['pager__display', 'container']],
+      ];
+    }
   }
 
   /**
@@ -362,6 +373,7 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
         $id = $sort->options['id'];
         // Label should be translated via views already.
         $label = $sort->options['expose']['label'];
+        $label = $this->t($label);
         $asc = "{$id}_asc";
         $desc = "{$id}_desc";
         $options[$asc] = "{$label} ↓";
