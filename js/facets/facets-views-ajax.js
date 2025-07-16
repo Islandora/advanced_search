@@ -6,6 +6,24 @@
 (function ($, Drupal) {
   "use strict";
 
+  // For each search view override display mode config (in SearchPagerResultBlock.php)
+  jQuery( document ).ready(function() {
+      var initial_display = jQuery('a.pager__link.pager__link--is-active.pager__display').attr('type');
+      if (initial_display == undefined) {
+        initial_display = jQuery("#override-default-display-mode").html();
+      }
+      if (jQuery('div.view.view-list').length == 1 && initial_display != "list") {
+        var search_view = jQuery('div.view.view-list');
+        search_view.removeClass("view-list");
+        search_view.addClass("view-grid");
+      }
+      if (jQuery('div.view.view-grid').length == 1 && initial_display != "grid") {
+        var search_view = jQuery('div.view.view-grid');
+        search_view.removeClass("view-grid");
+        search_view.addClass("view-list");
+      }
+  });
+
   // Generate events on push state.
   (function (history) {
     var pushState = history.pushState;
@@ -92,9 +110,10 @@
     if (url.indexOf("display=") == -1) { 
       // append items_per_page
       $("a.pager__display").each(function( index ) {
-        var newUrl = url + "&display=" + $(this).find(".display-mode").html().toLowerCase();
+        var newUrl = url + "&display=" + $(this).attr('type');
         $(this).attr("href", newUrl);
       });
+      
     } 
     else { 
       // replace existed display
@@ -117,7 +136,7 @@
       var newParamsUrl = newParams.join('&');
       $("a.pager__display").each(function( index ) {
 
-        var value = $(this).find(".display-mode").html().toLowerCase();
+        var value = $(this).attr('type');
         $(this).attr("href", url.split("?")[0] + '?' + newParamsUrl + "&display=" + value);
       });
     }
