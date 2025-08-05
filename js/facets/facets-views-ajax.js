@@ -8,6 +8,25 @@
 
   // For each search view override display mode config (in SearchPagerResultBlock.php)
   jQuery( document ).ready(function() {
+    handleDisplayMode(); 
+  });
+
+  jQuery(document).ajaxComplete(function() {
+    handleDisplayMode();
+  });
+
+  // Generate events on push state.
+  (function (history) {
+    var pushState = history.pushState;
+    history.pushState = function (state, title, url) {
+      var ret = pushState.apply(this, arguments);
+      var event = new Event("pushstate");
+      window.dispatchEvent(event);
+      return ret;
+    };
+  })(window.history);
+
+  function handleDisplayMode() {
       var initial_display = jQuery('a.pager__link.pager__link--is-active.pager__display').attr('type');
       if (initial_display == undefined) {
         initial_display = jQuery("#override-default-display-mode").html();
@@ -22,19 +41,8 @@
         search_view.removeClass("view-grid");
         search_view.addClass("view-list");
       }
-  });
-
-  // Generate events on push state.
-  (function (history) {
-    var pushState = history.pushState;
-    history.pushState = function (state, title, url) {
-      var ret = pushState.apply(this, arguments);
-      var event = new Event("pushstate");
-      window.dispatchEvent(event);
-      return ret;
-    };
-  })(window.history);
-
+  }
+  
   function parseQueryString( queryString ) {
         var params = {}, queries, temp, i, l;
 
