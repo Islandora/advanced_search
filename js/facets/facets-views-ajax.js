@@ -234,7 +234,7 @@
               $("li.pager__item a.pager__display").each(function () {
                   $(this).parent().removeClass("is-active");
                   $(this).removeClass("pager__link--is-active");
-                  if ($(this).text().trim().toLowerCase() === getParam(window.location.search, "display").trim().toLowerCase()) {
+                  if ($(this).attr('type').trim().toLowerCase() === getParam(window.location.search, "display").trim().toLowerCase()) {
                       $(this).addClass("pager__link--is-active");
                   }
               });
