@@ -34,3 +34,23 @@ advanced_search.settings:
     facet_truncate:
       type: string
       label: Truncate Facet
+
+block.settings.search_block:
+  type: block_settings
+  label: 'Search block'
+  mapping:
+    block_id:
+      type: string
+      label: 'Block ID'
+    search_view_machine_name:
+      type: string
+      label: 'Search view machine name'
+    search_textfield_label:
+      type: label
+      label: 'Search text field label'
+    search_placeholder:
+      type: label
+      label: 'Search placeholder text'
+    search_submit_label:
+      type: label
+      label: 'Search button label'
