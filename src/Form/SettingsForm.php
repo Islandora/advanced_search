@@ -12,7 +12,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 /**
  * Config form for Islandora Advanced Search settings.
  */
-class SettingsForm extends ConfigFormBase {
+class SettingsForm extends ConfigFormBase
+{
 
   use GetConfigTrait;
 
@@ -28,6 +29,7 @@ class SettingsForm extends ConfigFormBase {
   const DISPLAY_LIST_FLAG = 'list_on_off';
   const DISPLAY_GRID_FLAG = 'grid_on_off';
   const DISPLAY_DEFAULT = 'default-display-mode';
+  const QUERY_FIELDS = 'query_fields';
 
   /**
    * Constructs a \Drupal\system\ConfigFormBase object.
@@ -35,37 +37,66 @@ class SettingsForm extends ConfigFormBase {
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
    *   The factory for configuration objects.
    */
-  final public function __construct(ConfigFactoryInterface $config_factory) {
+  final public function __construct(ConfigFactoryInterface $config_factory)
+  {
     $this->setConfigFactory($config_factory);
   }
 
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container) {
+  public static function create(ContainerInterface $container)
+  {
     return new static($container->get('config.factory'));
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getFormId() {
+  public function getFormId()
+  {
     return 'advanced_search_settings_form';
   }
 
   /**
    * {@inheritdoc}
    */
-  protected function getEditableConfigNames() {
+  protected function getEditableConfigNames()
+  {
     return [
       self::CONFIG_NAME,
     ];
   }
 
   /**
+   * Get available fields from all Search API indexes.
+   *
+   * @return array
+   *   An associative array of field identifiers to field labels.
+   */
+  protected function getAvailableFields()
+  {
+    $field_options = [];
+
+    // Load all Search API indexes.
+    $index_storage = \Drupal::entityTypeManager()->getStorage('search_api_index');
+    $indexes = $index_storage->loadMultiple();
+
+    foreach ($indexes as $index) {
+      $fields = $index->getFields();
+      foreach ($fields as $field_id => $field) {
+        $field_options[$field_id] = $field->getLabel();
+      }
+    }
+
+    return $field_options;
+  }
+
+  /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state) {
+  public function buildForm(array $form, FormStateInterface $form_state)
+  {
     $form['eDisMax'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Advanced Search Block'),
@@ -114,6 +145,25 @@ class SettingsForm extends ConfigFormBase {
       '#title' => $this->t('If enabled, set the label for the option of searching all fields'),
       '#description' => $this->t('E.g. keyword.'),
       '#default_value' => self::getConfig(self::EDISMAX_SEARCH_LABEL, "Keyword"),
+    ];
+
+    // Get all available Solr fields from all Search API indexes.
+    $field_options = $this->getAvailableFields();
+
+    // Create scrollable container for checkboxes.
+    $form['eDisMax']['textfields_container']['query_fields_wrapper'] = [
+      '#type' => 'container',
+      '#attributes' => [
+        'style' => 'max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; background: #f9f9f9;',
+      ],
+    ];
+
+    $form['eDisMax']['textfields_container']['query_fields_wrapper'][self::QUERY_FIELDS] = [
+      '#type' => 'checkboxes',
+      '#title' => $this->t('Query fields'),
+      '#description' => $this->t('Select which fields should be queried when searching all fields label (keyword) chosen. If no fields are selected, all fields will be searched.'),
+      '#options' => $field_options,
+      '#default_value' => self::getConfig(self::QUERY_FIELDS, []),
     ];
 
     $form['display-mode'] = [
@@ -197,7 +247,8 @@ class SettingsForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state)
+  {
     $config = $this->configFactory->getEditable(self::CONFIG_NAME);
     $config
       ->set(self::SEARCH_QUERY_PARAMETER, $form_state->getValue(self::SEARCH_QUERY_PARAMETER))
@@ -211,8 +262,8 @@ class SettingsForm extends ConfigFormBase {
       ->set(self::DISPLAY_LIST_FLAG, $form_state->getValue(self::DISPLAY_LIST_FLAG))
       ->set(self::DISPLAY_GRID_FLAG, $form_state->getValue(self::DISPLAY_GRID_FLAG))
       ->set(self::DISPLAY_DEFAULT, $form_state->getValue(self::DISPLAY_DEFAULT))
+      ->set(self::QUERY_FIELDS, $form_state->getValue(self::QUERY_FIELDS))
       ->save();
     parent::submitForm($form, $form_state);
   }
-
 }

@@ -205,11 +205,18 @@ class AdvancedSearchQuery {
         $query_fields = [];
 
         if ($isSearchAllFields) {
+          // Get configured query fields from settings.
+          $configured_query_fields = $config->get(SettingsForm::QUERY_FIELDS);
+
           foreach ($field_mapping as $key => $field) {
             foreach ($field as $f => $item) {
               // bs_ are boolean fields, do not work well with text search.
               if (substr($item, 0, 3) !== "bs_") {
-                array_push($query_fields, $item);
+
+                // If query_fields is configured, only include those fields.
+                if (empty($configured_query_fields) || in_array($f, $configured_query_fields)) {
+                  array_push($query_fields, $item);
+                }
               }
             }
           }
