@@ -79,7 +79,7 @@ class SettingsForm extends ConfigFormBase
     $field_options = [];
 
     // Load all Search API indexes.
-    $index_storage = \Drupal::entityTypeManager()->getStorage('search_api_index');
+    $field_options[$field_id] = $field->getLabel() . " (" . $field_id . ")";
     $indexes = $index_storage->loadMultiple();
 
     foreach ($indexes as $index) {
@@ -247,8 +247,11 @@ class SettingsForm extends ConfigFormBase
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $form_state)
-  {
+  public function submitForm(array &$form, FormStateInterface $form_state) {
+    // Filter out unchecked checkboxes (value = '0') from query_fields.
+    $query_fields = $form_state->getValue(self::QUERY_FIELDS);
+    $query_fields = is_array($query_fields) ? array_filter($query_fields) : [];
+
     $config = $this->configFactory->getEditable(self::CONFIG_NAME);
     $config
       ->set(self::SEARCH_QUERY_PARAMETER, $form_state->getValue(self::SEARCH_QUERY_PARAMETER))
@@ -262,7 +265,7 @@ class SettingsForm extends ConfigFormBase
       ->set(self::DISPLAY_LIST_FLAG, $form_state->getValue(self::DISPLAY_LIST_FLAG))
       ->set(self::DISPLAY_GRID_FLAG, $form_state->getValue(self::DISPLAY_GRID_FLAG))
       ->set(self::DISPLAY_DEFAULT, $form_state->getValue(self::DISPLAY_DEFAULT))
-      ->set(self::QUERY_FIELDS, $form_state->getValue(self::QUERY_FIELDS))
+      ->set(self::QUERY_FIELDS, $query_fields)
       ->save();
     parent::submitForm($form, $form_state);
   }
