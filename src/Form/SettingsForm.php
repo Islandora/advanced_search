@@ -79,13 +79,13 @@ class SettingsForm extends ConfigFormBase
     $field_options = [];
 
     // Load all Search API indexes.
-    $field_options[$field_id] = $field->getLabel() . " (" . $field_id . ")";
+    $index_storage = \Drupal::entityTypeManager()->getStorage('search_api_index');
     $indexes = $index_storage->loadMultiple();
 
     foreach ($indexes as $index) {
       $fields = $index->getFields();
       foreach ($fields as $field_id => $field) {
-        $field_options[$field_id] = $field->getLabel();
+        $field_options[$field_id] = $field->getLabel() . " (" . $field_id . ")";
       }
     }
 
