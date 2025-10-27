@@ -231,15 +231,14 @@ class AdvancedSearchQuery {
       }
 
       if ($backend->getConfiguration()['highlight_data']) {
-        // // Just highlight string and text fields to avoid Solr exceptions.
-        // $highlighted_fields = array_filter(array_unique($fields_list), function ($v) {
-        //   return preg_match('/^t.*?[sm]_/', $v) || preg_match('/^s[sm]_/', $v);
-        // });
+        // Just highlight string and text fields to avoid Solr exceptions.
+        $highlighted_fields = array_filter(array_unique($fields_list), function ($v) {
+          return preg_match('/^t.*?[sm]_/', $v) || preg_match('/^s[sm]_/', $v);
+        });
 
-        // if (empty($highlighted_fields)) {
-        //   $highlighted_fields = ['*'];
-        // }
-        $highlighted_fields = [];
+        if (empty($highlighted_fields)) {
+          $highlighted_fields = ['*'];
+        }
 
 
         $this->setHighlighting($solarium_query, $search_api_query, $highlighted_fields);
