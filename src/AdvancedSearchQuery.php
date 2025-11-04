@@ -17,7 +17,8 @@ use Drupal\search_api_solr\Utility\Utility as SearchAPISolrUtility;
 /**
  * Alter current search query / view from using URL parameters.
  */
-class AdvancedSearchQuery {
+class AdvancedSearchQuery
+{
 
   use GetConfigTrait;
 
@@ -47,7 +48,8 @@ class AdvancedSearchQuery {
    * @param string $recurse_parameter
    *   The field that signifies the search should be recursive.
    */
-  public function __construct(string $query_parameter = self::DEFAULT_QUERY_PARAM, string $recurse_parameter = self::DEFAULT_RECURSE_PARAM) {
+  public function __construct(string $query_parameter = self::DEFAULT_QUERY_PARAM, string $recurse_parameter = self::DEFAULT_RECURSE_PARAM)
+  {
     $this->queryParameter = $query_parameter;
     $this->recurseParameter = $recurse_parameter;
   }
@@ -58,7 +60,8 @@ class AdvancedSearchQuery {
    * @return string
    *   The query parameter to use that stores the search terms.
    */
-  public static function getQueryParameter() {
+  public static function getQueryParameter()
+  {
     return self::getConfig(SettingsForm::SEARCH_QUERY_PARAMETER, self::DEFAULT_QUERY_PARAM);
   }
 
@@ -69,7 +72,8 @@ class AdvancedSearchQuery {
    *   The recurse parameter used to indicate that the search should be
    *   recursive.
    */
-  public static function getRecurseParameter() {
+  public static function getRecurseParameter()
+  {
     return self::getConfig(SettingsForm::SEARCH_RECURSIVE_PARAMETER, self::DEFAULT_RECURSE_PARAM);
   }
 
@@ -82,7 +86,8 @@ class AdvancedSearchQuery {
    * @return \Drupal\advanced_search\AdvancedSearchQueryTerm[]
    *   A list of search terms.
    */
-  public function getTerms(Request $request) {
+  public function getTerms(Request $request)
+  {
     $terms = [];
     if ($request->query->has($this->queryParameter)) {
       $query_params = $request->query->all()[$this->queryParameter];
@@ -104,7 +109,8 @@ class AdvancedSearchQuery {
    * @return bool
    *   TRUE if the search should recurse FALSE otherwise.
    */
-  public function shouldRecurse(Request $request) {
+  public function shouldRecurse(Request $request)
+  {
     if ($request->query->has($this->recurseParameter)) {
       $recurse_param = $request->query->get($this->recurseParameter);
       return filter_var($recurse_param, FILTER_VALIDATE_BOOLEAN);
@@ -121,7 +127,8 @@ class AdvancedSearchQuery {
    * @return bool
    *   TRUE if all terms are to be excluded otherwise FALSE.
    */
-  protected function negativeQuery(array $terms) {
+  protected function negativeQuery(array $terms)
+  {
     foreach ($terms as $term) {
       if ($term->getInclude()) {
         return FALSE;
@@ -140,7 +147,8 @@ class AdvancedSearchQuery {
    * @param \Drupal\search_api\Query\QueryInterface $search_api_query
    *   The search api query from which the solr query was build.
    */
-  public function alterQuery(Request $request, SolariumQueryInterface &$solarium_query, DrupalQueryInterface $search_api_query) {
+  public function alterQuery(Request $request, SolariumQueryInterface &$solarium_query, DrupalQueryInterface $search_api_query)
+  {
     // Only apply if a Advanced Search Query was made.
     $terms = $this->getTerms($request);
     if (!empty($terms)) {
@@ -152,7 +160,7 @@ class AdvancedSearchQuery {
 
       // Disable for Lucene and wildcard
       //$q[] = "{!boost b=boost_document}";
-      
+
       // Create a flag for active/inactive dismax.
       $config = \Drupal::config(SettingsForm::CONFIG_NAME);
       $isDismax = $config->get(SettingsForm::EDISMAX_SEARCH_FLAG);
@@ -176,7 +184,6 @@ class AdvancedSearchQuery {
       // Set edismax is enabled if the field set to "all".
       if ($term->getField() === "all") {
         $isSearchAllFields = TRUE;
-
       }
 
       // For multiple conditions.
@@ -190,9 +197,7 @@ class AdvancedSearchQuery {
         // Set dismax is enabled if the field set to "all".
         if ($term->getField() === "all") {
           $isSearchAllFields = TRUE;
-
         }
-
       }
       $q = implode(' ', $q);
 
@@ -207,7 +212,7 @@ class AdvancedSearchQuery {
         if ($isSearchAllFields) {
           // Get configured query fields from settings.
           $configured_query_fields = $config->get(SettingsForm::QUERY_FIELDS) ?: [];
-          
+
           // field_mapping structure: [field_id => [language => solr_field_name]]
           foreach ($field_mapping as $field_id => $languages) {
             foreach ($languages as $lang => $solr_field_name) {
@@ -221,27 +226,29 @@ class AdvancedSearchQuery {
               }
             }
           }
-        }
-        else {
+        } else {
           $query_fields = $fields_list;
-
         }
         $query_fields = implode(" ", array_unique($query_fields));
         $dismax->setQueryFields($query_fields);
       }
 
-      // Use all fields for highlighting if all fields are searched.
-      $highlight_source_fields = $isSearchAllFields && isset($query_fields) ? explode(" ", $query_fields) : $fields_list;
+      // if all fields are searched, use the query_fields for highlighting.
+      if ($isSearchAllFields && isset($query_fields)) {
+        // Convert back to an array.
+        $highlight_source_fields = explode(" ", $query_fields);
+      } else {
+        $highlight_source_fields = $fields_list;
+      }
 
       if ($backend->getConfiguration()['highlight_data']) {
         // Just highlight string and text fields to avoid Solr exceptions.
-        // Exclude fulltext fields (containing 'fulltext') as they don't have offsets indexed.
+        // Exclude tm_X3b_*_fulltext_title
         $highlighted_fields = array_filter(array_unique($highlight_source_fields), function ($v) {
-          return !empty($v) && (preg_match('/^t.*?[sm]_/', $v) || preg_match('/^s[sm]_/', $v)) && strpos($v, 'fulltext') === FALSE;
+          return !empty($v) && (preg_match('/^t.*?[sm]_/', $v) || preg_match('/^s[sm]_/', $v)) && !preg_match('/^tm_X3b_.*_fulltext_title$/', $v);
         });
 
-        // Only set highlighting if we have valid fields.
-        // Don't use wildcard as it causes Solr to try highlighting fields without offsets.
+        // Check if there are any valid fields for highlighting.
         if (!empty($highlighted_fields)) {
           $this->setHighlighting($solarium_query, $search_api_query, $highlighted_fields);
         }
@@ -268,7 +275,8 @@ class AdvancedSearchQuery {
    * @param string $display_id
    *   The view display to potentially alter.
    */
-  public function alterView(Request $request, ViewExecutable $view, $display_id) {
+  public function alterView(Request $request, ViewExecutable $view, $display_id)
+  {
     $views = Utilities::getAdvancedSearchViewDisplays();
     // Only specify contextual filters for views which the advanced search
     // blocks are derived from.
@@ -287,8 +295,7 @@ class AdvancedSearchQuery {
           // Change the argument to the exception value which should cause the
           // contextual filter to be ignored.
           $view->args[$index] = $display_arguments[$immediate_children_contextual_filter]['exception']['value'];
-        }
-        else {
+        } else {
           // Explicitly set the default argument for AJAX requests.
           // We need to restore the default as that functionality is currently
           // broken. @see https://www.drupal.org/project/drupal/issues/3173778
@@ -322,7 +329,8 @@ class AdvancedSearchQuery {
    * @return \Drupal\Core\Url
    *   Url for the given request combined with search query parameters.
    */
-  public function toUrl(Request $request, array $terms, bool $recurse, $route = NULL) {
+  public function toUrl(Request $request, array $terms, bool $recurse, $route = NULL)
+  {
     $query_params = $request->query->all();
     if ($route) {
       $url = Url::fromRoute($route);
@@ -330,8 +338,7 @@ class AdvancedSearchQuery {
       // new page, so it should be disabled.
       unset($query_params[FormBuilderInterface::AJAX_FORM_REQUEST]);
       unset($query_params[MainContentViewSubscriber::WRAPPER_FORMAT]);
-    }
-    else {
+    } else {
       $url = Url::createFromRequest($request);
     }
     unset($query_params[$this->queryParameter]);
@@ -340,8 +347,7 @@ class AdvancedSearchQuery {
     }
     if ($recurse) {
       $query_params[$this->recurseParameter] = '1';
-    }
-    else {
+    } else {
       unset($query_params[$this->recurseParameter]);
     }
     $url->setOptions(['query' => $query_params]);
@@ -358,7 +364,8 @@ class AdvancedSearchQuery {
    * @param array $highlighted_fields
    *   (optional) The solr fields to be highlighted.
    */
-  protected function setHighlighting(SolariumQueryInterface $solarium_query, DrupalQueryInterface $search_api_query, array $highlighted_fields = []) {
+  protected function setHighlighting(SolariumQueryInterface $solarium_query, DrupalQueryInterface $search_api_query, array $highlighted_fields = [])
+  {
     $index = $search_api_query->getIndex();
     $settings = SearchAPISolrUtility::getIndexSolrSettings($index);
     $highlighter = $settings['highlighter'];
@@ -404,5 +411,4 @@ class AdvancedSearchQuery {
       $hl->addField($highlighted_field);
     }
   }
-
 }
