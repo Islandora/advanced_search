@@ -230,18 +230,21 @@ class AdvancedSearchQuery {
         $dismax->setQueryFields($query_fields);
       }
 
+      // Use all fields for highlighting if all fields are searched.
+      $highlight_source_fields = $isSearchAllFields && isset($query_fields) ? explode(" ", $query_fields) : $fields_list;
+
       if ($backend->getConfiguration()['highlight_data']) {
         // Just highlight string and text fields to avoid Solr exceptions.
-        $highlighted_fields = array_filter(array_unique($fields_list), function ($v) {
-          return preg_match('/^t.*?[sm]_/', $v) || preg_match('/^s[sm]_/', $v);
+        // Exclude fulltext fields (containing 'fulltext') as they don't have offsets indexed.
+        $highlighted_fields = array_filter(array_unique($highlight_source_fields), function ($v) {
+          return !empty($v) && (preg_match('/^t.*?[sm]_/', $v) || preg_match('/^s[sm]_/', $v)) && strpos($v, 'fulltext') === FALSE;
         });
 
-        if (empty($highlighted_fields)) {
-          $highlighted_fields = ['*'];
+        // Only set highlighting if we have valid fields.
+        // Don't use wildcard as it causes Solr to try highlighting fields without offsets.
+        if (!empty($highlighted_fields)) {
+          $this->setHighlighting($solarium_query, $search_api_query, $highlighted_fields);
         }
-
-
-        $this->setHighlighting($solarium_query, $search_api_query, $highlighted_fields);
 
         // The Search API Highlight processor checks if the 'keys' field of
         // the Search API Query is non-empty before creating an excerpt.

@@ -103,7 +103,7 @@ class SettingsForm extends ConfigFormBase
       '#weight' => -1,
     ];
     $form['eDisMax']['advanced-search-block-description'] = [
-      '#markup' => $this->t("Advanced Search Blocks are available in the Blocks interface for each Search API view. When placing an Advanced Search Block, you can configure the fields that are used for field-based search and whether a “recursive” search is available.  The following settings apply to all Advanced Search blocks."),
+      '#markup' => $this->t('Advanced Search Blocks are available in the Blocks interface for each Search API view. When placing an Advanced Search Block, you can configure the fields that are used for field-based search and whether a "recursive" search is available.  The following settings apply to all Advanced Search blocks.'),
       '#weight' => -2,
     ];
 
@@ -136,7 +136,7 @@ class SettingsForm extends ConfigFormBase
         ->t('Enable searching all fields'),
       '#description' => $this->t('<ul>
           <li>This makes an additional option visible in all Advanced Search Blocks, which searches across all fields. Its label is configured below.</li>
-          <li>This setting must be enabled for the “Simple Search Block” to function.</li>
+          <li>This setting must be enabled for the "Simple Search Block" to function.</li>
         </ul>'),
       '#default_value' => self::getConfig(self::SEARCH_ALL_FIELDS_FLAG, 0),
     ];
@@ -147,21 +147,35 @@ class SettingsForm extends ConfigFormBase
       '#default_value' => self::getConfig(self::EDISMAX_SEARCH_LABEL, "Keyword"),
     ];
 
-    // Get all available Solr fields from all Search API indexes.
+    // Query Fields Block 
+    $form['query_fields_block'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Query Fields'),
+      '#weight' => -0.5,
+    ];
+
     $field_options = $this->getAvailableFields();
 
-    // Create scrollable container for checkboxes.
-    $form['eDisMax']['textfields_container']['query_fields_wrapper'] = [
+    $base_url = \Drupal::request()->getSchemeAndHttpHost();
+    $query_fields_description = $this->t('Select which fields should be queried when searching all fields label (keyword) chosen. If no fields are selected, <a href="@fields_url" target="_blank">all fields will be searched</a>.', [
+      '@fields_url' => $base_url . '/admin/config/search/search-api/index/default_solr_index_islandora_lite/fields',
+    ]);
+
+    $form['query_fields_block']['query_fields_description'] = [
+      '#type' => 'item',
+      '#markup' => '<div style=" background: #f0f0f0; border-left: 4px solid #0074bd;">' . $query_fields_description . '</div>',
+    ];
+
+    $form['query_fields_block']['query_fields_wrapper'] = [
       '#type' => 'container',
       '#attributes' => [
-        'style' => 'max-height: 300px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; background: #f9f9f9;',
+        'style' => 'max-height: 350px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; background: #f9f9f9;',
       ],
     ];
 
-    $form['eDisMax']['textfields_container']['query_fields_wrapper'][self::QUERY_FIELDS] = [
+    $form['query_fields_block']['query_fields_wrapper'][self::QUERY_FIELDS] = [
       '#type' => 'checkboxes',
-      '#title' => $this->t('Query fields'),
-      '#description' => $this->t('Select which fields should be queried when searching all fields label (keyword) chosen. If no fields are selected, all fields will be searched.'),
+      '#title' => $this->t('Select fields to query'),
       '#options' => $field_options,
       '#default_value' => self::getConfig(self::QUERY_FIELDS, []),
     ];
