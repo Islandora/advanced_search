@@ -251,6 +251,7 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
             ['pager__link', 'pager__link--is-active', 'pager__display'] :
             ['pager__link', 'pager__display'],
           'aria-label' => $this->t("Display as @link", ["@link" => Markup::create($text)]),
+          'type' => $display
         ],
         '#wrapper_attributes' => [
           'class' => $active ? ['pager__item', 'is-active'] : ['pager__item'],
@@ -289,6 +290,7 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
         $id = $sort->options['id'];
         // Label should be translated via views already.
         $label = $sort->options['expose']['label'];
+        $label = $this->t($label);
         $asc = "{$id}_asc";
         $desc = "{$id}_desc";
         $options[$asc] = "{$label} ↓";

@@ -92,9 +92,10 @@
     if (url.indexOf("display=") == -1) { 
       // append items_per_page
       $("a.pager__display").each(function( index ) {
-        var newUrl = url + "&display=" + $(this).find(".display-mode").html().toLowerCase();
+        var newUrl = url + "&display=" + $(this).attr('type');
         $(this).attr("href", newUrl);
       });
+      
     } 
     else { 
       // replace existed display
@@ -117,7 +118,7 @@
       var newParamsUrl = newParams.join('&');
       $("a.pager__display").each(function( index ) {
 
-        var value = $(this).find(".display-mode").html().toLowerCase();
+        var value = $(this).attr('type');
         $(this).attr("href", url.split("?")[0] + '?' + newParamsUrl + "&display=" + value);
       });
     }
