@@ -137,13 +137,15 @@
         .replace(/-/g, "_");
       blocks[block_id] = "#" + id;
     });
-    Drupal.ajax({
-      url: Drupal.url("islandora-advanced-search-ajax-blocks"),
-      submit: {
-        link: url,
-        blocks: blocks,
-      },
-    }).execute();
+    if (Object.keys(blocks).length > 0) {
+      Drupal.ajax({
+        url: Drupal.url("islandora-advanced-search-ajax-blocks"),
+        submit: {
+          link: url,
+          blocks: blocks,
+        },
+      }).execute();
+    }
   }
 
   // On location change reload all the blocks / ajax view.

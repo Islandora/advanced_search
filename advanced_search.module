@@ -45,9 +45,6 @@ function advanced_search_library_info_alter(&$libraries, $extension) {
     $libraries['soft-limit']['js'] = [
       "$path/soft-limit.js" => [],
     ];
-    $libraries['drupal.facets.views-ajax']['js'] = [
-      "$path/facets-views-ajax.js" => [],
-    ];
   }
 }
 
@@ -111,6 +108,7 @@ function advanced_search_preprocess_views_view(&$variables) {
     $format = \Drupal::request()->query->get('display') ?? $config->get(SettingsForm::DISPLAY_DEFAULT);
     $variables['attributes']['class'][] = "view-{$format}";
     $view->element['#attached']['library'][] = 'advanced_search/advanced.search.pager';
+    $view->element['#attached']['library'][] = 'advanced_search/advanced.search.facets_views_ajax';
   }
   $view = &$variables['view'];
 }
