@@ -136,7 +136,7 @@
         .replace(/-/g, "_");
       blocks[block_id] = "#" + id;
     });
-    if (Object.keys(blocks) > 0) {
+    if (Object.keys(blocks).length > 0) {
       Drupal.ajax({
         url: Drupal.url("islandora-advanced-search-ajax-blocks"),
         submit: {
