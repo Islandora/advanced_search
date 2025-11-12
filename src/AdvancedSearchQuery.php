@@ -205,11 +205,19 @@ class AdvancedSearchQuery {
         $query_fields = [];
 
         if ($isSearchAllFields) {
-          foreach ($field_mapping as $key => $field) {
-            foreach ($field as $f => $item) {
+          // Get configured query fields from settings.
+          $configured_query_fields = $config->get(SettingsForm::QUERY_FIELDS) ?: [];
+          
+          // field_mapping structure: [field_id => [language => solr_field_name]]
+          foreach ($field_mapping as $field_id => $languages) {
+            foreach ($languages as $lang => $solr_field_name) {
               // bs_ are boolean fields, do not work well with text search.
-              if (substr($item, 0, 3) !== "bs_") {
-                array_push($query_fields, $item);
+              if (substr($solr_field_name, 0, 3) !== "bs_") {
+
+                // If query_fields is configured, only include those fields.
+                if (empty($configured_query_fields) || in_array($field_id, $configured_query_fields)) {
+                  array_push($query_fields, $solr_field_name);
+                }
               }
             }
           }
@@ -222,17 +230,26 @@ class AdvancedSearchQuery {
         $dismax->setQueryFields($query_fields);
       }
 
+      // if all fields are searched, use the query_fields for highlighting.
+      if ($isSearchAllFields && isset($query_fields)) {
+        // Convert back to an array.
+        $highlight_source_fields = explode(" ", $query_fields);
+      }
+      else {
+        $highlight_source_fields = $fields_list;
+      }
+
       if ($backend->getConfiguration()['highlight_data']) {
         // Just highlight string and text fields to avoid Solr exceptions.
-          $highlighted_fields = array_filter(array_unique($fields_list), function ($v) {
-          return preg_match('/^t.*?[sm]_/', $v) || preg_match('/^s[sm]_/', $v);
+        // Exclude tm_X3b_*_fulltext_title
+        $highlighted_fields = array_filter(array_unique($highlight_source_fields), function ($v) {
+          return !empty($v) && (preg_match('/^t.*?[sm]_/', $v) || preg_match('/^s[sm]_/', $v)) && !preg_match('/^tm_X3b_.*_fulltext_title$/', $v);
         });
 
-        if (empty($highlighted_fields)) {
-          $highlighted_fields = ['*'];
+        // Check if there are any valid fields for highlighting.
+        if (!empty($highlighted_fields)) {
+          $this->setHighlighting($solarium_query, $search_api_query, $highlighted_fields);
         }
-
-        $this->setHighlighting($solarium_query, $search_api_query, $highlighted_fields);
 
         // The Search API Highlight processor checks if the 'keys' field of
         // the Search API Query is non-empty before creating an excerpt.

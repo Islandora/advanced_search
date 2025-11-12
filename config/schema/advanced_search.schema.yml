@@ -34,6 +34,12 @@ advanced_search.settings:
     facet_truncate:
       type: string
       label: Truncate Facet
+    query_fields:
+      type: sequence
+      label: Query Fields
+      sequence:
+        type: string
+        label: Field identifier
 
 block.settings.search_block:
   type: block_settings
