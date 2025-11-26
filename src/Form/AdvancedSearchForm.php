@@ -130,7 +130,7 @@ class AdvancedSearchForm extends FormBase {
      *   the enable or disable for Edismax Search checkbox
      */
     public static function getRecursive() {
-        return self::getConfig(SettingsForm::RECURSIVE_FIELD_FLAG, 0);
+        return self::getConfig(SettingsForm::RECURSIVE_FLAG, 0);
     }
     /**
      * Get the character to use for removing a facet from the query.

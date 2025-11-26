@@ -25,7 +25,7 @@ class SettingsForm extends ConfigFormBase {
     const EDISMAX_SEARCH_FLAG = 'lucene_on_off';
     const EDISMAX_SEARCH_LABEL = 'lucene_label';
     const SEARCH_ALL_FIELDS_FLAG = 'all_fields_on_off';
-    const RECURSIVE_FIELD_FLAG = 'recursive';
+    const RECURSIVE_FLAG = 'recursive';
     const DISPLAY_LIST_FLAG = 'list_on_off';
     const DISPLAY_GRID_FLAG = 'grid_on_off';
     const DISPLAY_DEFAULT = 'default-display-mode';
@@ -111,7 +111,7 @@ class SettingsForm extends ConfigFormBase {
             '#default_value' => self::getConfig(self::SEARCH_ALL_FIELDS_FLAG, 0),
         ];
 
-        $form['eDisMax']['textfields_container'][self::RECURSIVE_FIELD_FLAG] = [
+        $form['eDisMax']['textfields_container'][self::RECURSIVE_FLAG] = [
             '#type' => 'checkbox',
             '#title' => $this
                 ->t('Search collections recursively by default.'),
@@ -119,7 +119,7 @@ class SettingsForm extends ConfigFormBase {
           <li>Select whether subcollections are searched by default.</li>
           <li>The user can override this setting.</li>
         </ul>'),
-            '#default_value' => self::getConfig(self::RECURSIVE_FIELD_FLAG, 0),
+            '#default_value' => self::getConfig(self::RECURSIVE_FLAG, 0),
         ];
         $form['eDisMax']['textfields_container'][self::EDISMAX_SEARCH_LABEL] = [
             '#type' => 'textfield',
@@ -225,7 +225,7 @@ class SettingsForm extends ConfigFormBase {
             ->set(self::DISPLAY_LIST_FLAG, $form_state->getValue(self::DISPLAY_LIST_FLAG))
             ->set(self::DISPLAY_GRID_FLAG, $form_state->getValue(self::DISPLAY_GRID_FLAG))
             ->set(self::DISPLAY_DEFAULT, $form_state->getValue(self::DISPLAY_DEFAULT))
-            ->set(self::RECURSIVE_FIELD_FLAG, $form_state->getValue(self::RECURSIVE_FIELD_FLAG))
+            ->set(self::RECURSIVE_FLAG, $form_state->getValue(self::RECURSIVE_FLAG))
             ->save();
         parent::submitForm($form, $form_state);
     }
