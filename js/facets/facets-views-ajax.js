@@ -6,6 +6,15 @@
 (function ($, Drupal) {
   "use strict";
 
+  // For each search view override display mode config (in SearchPagerResultBlock.php)
+  jQuery( document ).ready(function() {
+    handleDisplayMode(); 
+  });
+
+  jQuery(document).ajaxComplete(function() {
+    handleDisplayMode();
+  });
+
   // Generate events on push state.
   (function (history) {
     var pushState = history.pushState;
@@ -17,6 +26,23 @@
     };
   })(window.history);
 
+  function handleDisplayMode() {
+      var initial_display = jQuery('a.pager__link.pager__link--is-active.pager__display').attr('type');
+      if (initial_display == undefined) {
+        initial_display = jQuery("#override-default-display-mode").html();
+      }
+      if (jQuery('div.view.view-list').length == 1 && initial_display != "list") {
+        var search_view = jQuery('div.view.view-list');
+        search_view.removeClass("view-list");
+        search_view.addClass("view-grid");
+      }
+      if (jQuery('div.view.view-grid').length == 1 && initial_display != "grid") {
+        var search_view = jQuery('div.view.view-grid');
+        search_view.removeClass("view-grid");
+        search_view.addClass("view-list");
+      }
+  }
+  
   function parseQueryString( queryString ) {
         var params = {}, queries, temp, i, l;
 
@@ -210,7 +236,7 @@
               $("li.pager__item a.pager__display").each(function () {
                   $(this).parent().removeClass("is-active");
                   $(this).removeClass("pager__link--is-active");
-                  if ($(this).text().trim().toLowerCase() === getParam(window.location.search, "display").trim().toLowerCase()) {
+                  if ($(this).attr('type').trim().toLowerCase() === getParam(window.location.search, "display").trim().toLowerCase()) {
                       $(this).addClass("pager__link--is-active");
                   }
               });
