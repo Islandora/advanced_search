@@ -13,6 +13,7 @@ use Drupal\views\ViewExecutable;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Drupal\advanced_search\Form\SettingsForm;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Provides a 'AjaxViewBlock' block.
@@ -61,6 +62,58 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
       $plugin_definition,
       $container->get('request_stack')->getMainRequest()
     );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function blockForm($form, FormStateInterface $form_state) {
+    $config = \Drupal::config(SettingsForm::CONFIG_NAME);
+
+    $form['display-mode'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t("Pager Block"),
+      '#description' => $this->t("If this settings are set here, they will override the global settings at `/admin/config/search/advanced`")
+    ];
+    
+    $form['display-mode']['override_list_on_off'] = [
+      '#type' => 'checkbox',
+      '#title' => $this
+        ->t('Expose "List view" option.'),
+      '#default_value' => $this->configuration['override_list_on_off'] ?? $config->get(SettingsForm::DISPLAY_LIST_FLAG),
+    ];
+
+    $form['display-mode']['override_grid_on_off'] = [
+      '#type' => 'checkbox',
+      '#title' => $this
+        ->t('Expose "Grid view" option.'),
+      '#default_value' => $this->configuration['override_grid_on_off'] ?? $config->get(SettingsForm::DISPLAY_GRID_FLAG),
+    ];
+
+    $form['display-mode']['override-default-display-mode'] = [
+      '#type' => 'select',
+      '#title' => $this
+        ->t('Default view mode:'),
+      '#options' => [
+        'list' => 'List',
+        'grid' => 'Grid',
+      ],
+      '#default_value' => $this->configuration['override-default-display-mode'] ?? $config->get(SettingsForm::DISPLAY_DEFAULT),
+    ];
+    
+    $form['#attributes']['class'][] = 'clearfix';
+    $form['#attached']['library'][] = 'advanced_search/advanced.search.admin';
+    return $form; 
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function blockSubmit($form, FormStateInterface $form_state) {
+    $values = $form_state->getValues();
+    $this->configuration["override_list_on_off"] = $values["display-mode"]['override_list_on_off'];
+    $this->configuration["override_grid_on_off"] = $values["display-mode"]['override_grid_on_off'];
+    $this->configuration["override-default-display-mode"] = $values["display-mode"]['override-default-display-mode'];
   }
 
   /**
@@ -219,21 +272,41 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
     $config = \Drupal::config(SettingsForm::CONFIG_NAME);
     $display_options = [];
 
-    if ($config->get(SettingsForm::DISPLAY_LIST_FLAG) == 1) {
-      $display_options['list'] = [
-        'icon' => 'fa-list',
-        'title' => $this->t('List'),
-      ];
+
+    if (isset($this->configuration["override_list_on_off"]) && isset($this->configuration["override_grid_on_off"])
+    && isset($this->configuration["override-default-display-mode"])) {
+      if ($this->configuration["override_list_on_off"] == 1) { 
+        $display_options['list'] = [
+          'icon' => 'fa-list',
+          'title' => $this->t('List'),
+        ];
+      } 
+
+      if ($this->configuration["override_grid_on_off"] == 1) { 
+        $display_options['grid'] = [
+          'icon' => 'fa-th',
+          'title' => $this->t('Grid'),
+        ];
+      }
+      $active_display = $query_parameters['display'] ?? $this->configuration["override-default-display-mode"];
+    }
+    else {
+      if ($config->get(SettingsForm::DISPLAY_LIST_FLAG) == 1) {
+        $display_options['list'] = [
+          'icon' => 'fa-list',
+          'title' => $this->t('List'),
+        ];
+      }
+
+      if ($config->get(SettingsForm::DISPLAY_GRID_FLAG) == 1) {
+        $display_options['grid'] = [
+          'icon' => 'fa-th',
+          'title' => $this->t('Grid'),
+        ];
+      }
+      $active_display = $query_parameters['display'] ?? $config->get(SettingsForm::DISPLAY_DEFAULT);
     }
 
-    if ($config->get(SettingsForm::DISPLAY_GRID_FLAG) == 1) {
-      $display_options['grid'] = [
-        'icon' => 'fa-th',
-        'title' => $this->t('Grid'),
-      ];
-    }
-
-    $active_display = $query_parameters['display'] ?? $config->get(SettingsForm::DISPLAY_DEFAULT);
     $items = [];
     foreach ($display_options as $display => $options) {
       $url = Url::fromRoute('<current>', [], [
@@ -258,13 +331,23 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
         ],
       ];
     }
-    return [
-      '#theme' => 'item_list',
-      '#list_type' => 'ul',
-      '#items' => $items,
-      '#attributes' => [],
-      '#wrapper_attributes' => ['class' => ['pager__display', 'container']],
-    ];
+
+    if (count($items) > 0) {
+      return [
+        '#theme' => 'item_list',
+        '#list_type' => 'ul',
+        '#items' => $items,
+        '#attributes' => [],
+        '#wrapper_attributes' => ['class' => ['pager__display', 'container']],
+      ];
+    }
+    else {
+      return [
+        '#markup' => Markup::create('<span hidden id="override-default-display-mode">' . $active_display . '</span>'),
+        '#attributes' => [],
+        '#wrapper_attributes' => ['class' => ['pager__display', 'container']],
+      ];
+    }
   }
 
   /**
