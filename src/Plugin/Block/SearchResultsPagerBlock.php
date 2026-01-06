@@ -418,8 +418,4 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
         return 0;
     }
 
-    public function getDerivativeId()
-    {
-        // TODO: Implement getDerivativeId() method.
-    }
 }
