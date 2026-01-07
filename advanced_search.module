@@ -45,6 +45,9 @@ function advanced_search_library_info_alter(&$libraries, $extension) {
     $libraries['soft-limit']['js'] = [
       "$path/soft-limit.js" => [],
     ];
+    $libraries['drupal.facets.views-ajax']['js'] = [
+      "$path/facets-views-ajax.js" => [],
+    ];
   }
 }
 
