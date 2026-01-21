@@ -34,6 +34,9 @@ advanced_search.settings:
     facet_truncate:
       type: string
       label: Truncate Facet
+    recursive:
+      type: integer
+      label: Include Sub-Collections
     query_fields:
       type: sequence
       label: Query Fields
