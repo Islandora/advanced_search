@@ -84,7 +84,7 @@
     if (url.indexOf("items_per_page=") == -1) { 
       // append items_per_page
       $("a.pager__itemsperpage").each(function( index ) {
-        var newUrl = url + "&items_per_page=" + $(this).html();
+        var newUrl = url + "&items_per_page=" + $(this).attr('itemsperpage');
         $(this).attr("href", newUrl);
       });
     } 
@@ -108,7 +108,7 @@
       }
       var newParamsUrl = newParams.join('&');
       $("a.pager__itemsperpage").each(function( index ) {
-        $(this).attr("href", url.split("?")[0] + '?' + newParamsUrl + "&items_per_page=" + $(this).html());
+        $(this).attr("href", url.split("?")[0] + '?' + newParamsUrl + "&items_per_page=" + $(this).attr('itemsperpage'));
       });
     }
 

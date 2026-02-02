@@ -237,12 +237,13 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
       $items[] = [
         '#type' => 'link',
         '#url' => $url,
-        '#title' => $items_per_page,
+        '#title' => $this->t($items_per_page),
         '#attributes' => [
           'aria-label' => $this->t("@item items per page", ["@item" => $items_per_page]),
           'class' => $active ?
             ['pager__link', 'pager__link--is-active', 'pager__itemsperpage'] :
             ['pager__link', 'pager__itemsperpage'],
+ 	  "itemsperpage" => $items_per_page
         ],
         '#wrapper_attributes' => [
           'class' => $active ? ['pager__item', 'is-active'] : ['pager__item'],
