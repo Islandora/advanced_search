@@ -243,7 +243,7 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
           'class' => $active ?
             ['pager__link', 'pager__link--is-active', 'pager__itemsperpage'] :
             ['pager__link', 'pager__itemsperpage'],
- 	  "itemsperpage" => $items_per_page
+          'itemsperpage' => $items_per_page
         ],
         '#wrapper_attributes' => [
           'class' => $active ? ['pager__item', 'is-active'] : ['pager__item'],
