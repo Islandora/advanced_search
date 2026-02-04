@@ -27,6 +27,14 @@ jobs:
       - name: create docker network
         run: docker network create ci-default
 
+      - name: Start chromedriver
+        run: |-
+          docker run -d \
+            --name chromedriver \
+            --network ci-default \
+            drupalci/webdriver-chromedriver:production \
+            chromedriver --log-path=/dev/null --verbose --allowed-ips= --allowed-origins=*
+
       - name: PHPUNIT tests
         run: |
           docker run \
