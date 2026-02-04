@@ -2,10 +2,12 @@
 
 namespace Drupal\advanced_search\Form;
 
-use Drupal\block\Entity\Block;
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Form for building and Simple Search.
@@ -20,13 +22,41 @@ class SearchForm extends FormBase {
   protected $blockId;
 
   /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
    * The constructor.
    *
    * @param string $block_id
    *   Passing the block_id.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The config factory.
    */
-  public function __construct($block_id) {
+  public function __construct(
+    $block_id,
+    EntityTypeManagerInterface $entity_type_manager,
+    ConfigFactoryInterface $config_factory,
+  ) {
     $this->blockId = $block_id;
+    $this->entityTypeManager = $entity_type_manager;
+    $this->setConfigFactory($config_factory);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      NULL,
+      $container->get('entity_type.manager'),
+      $container->get('config.factory')
+    );
   }
 
   /**
@@ -60,7 +90,7 @@ class SearchForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $config = \Drupal::config(SettingsForm::CONFIG_NAME);
+    $config = $this->configFactory()->get(SettingsForm::CONFIG_NAME);
 
     if (!$config->get(SettingsForm::SEARCH_ALL_FIELDS_FLAG)) {
       $form['search-attributes'][SettingsForm::SEARCH_ALL_FIELDS_FLAG] = [
@@ -71,12 +101,10 @@ class SearchForm extends FormBase {
       ];
     }
     else {
-      $block = Block::load($this->blockId);
+      $block = $this->entityTypeManager->getStorage('block')->load($this->blockId);
 
       if ($block) {
         $settings = $block->get('settings');
-        $view_machine_name = $settings['search_view_machine_name'];
-
       }
       $form['search-textfield'] = [
         '#type' => 'textfield',
@@ -103,7 +131,8 @@ class SearchForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $block = Block::load($this->blockId);
+    $block = $this->entityTypeManager->getStorage('block')->load($this->blockId);
+    $view_machine_name = NULL;
     if ($block) {
       $settings = $block->get('settings');
       $view_machine_name = $settings['search_view_machine_name'];

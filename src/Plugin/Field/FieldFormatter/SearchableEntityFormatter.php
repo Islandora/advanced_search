@@ -6,6 +6,7 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\Plugin\Field\FieldFormatter\EntityReferenceLabelFormatter;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 /**
  * Plugin implementation of the 'searchable_entity_formatter' formatter.
@@ -19,6 +20,8 @@ use Drupal\Core\Form\FormStateInterface;
  * )
  */
 class SearchableEntityFormatter extends EntityReferenceLabelFormatter {
+
+  use StringTranslationTrait;
 
   /**
    * {@inheritdoc}
@@ -36,19 +39,19 @@ class SearchableEntityFormatter extends EntityReferenceLabelFormatter {
    */
   public function settingsForm(array $form, FormStateInterface $form_state) {
     $elements['search_link'] = [
-      '#title' => t('Search base path'),
+      '#title' => $this->t('Search base path'),
       '#type' => 'textfield',
       '#required' => TRUE,
       '#default_value' => $this->getSetting('search_link'),
     ];
     $elements['search_var'] = [
-      '#title' => t('Search variable'),
+      '#title' => $this->t('Search variable'),
       '#type' => 'textfield',
       '#required' => TRUE,
       '#default_value' => $this->getSetting('search_var'),
     ];
     $elements['search_term'] = [
-      '#title' => t('Use label as search term'),
+      '#title' => $this->t('Use label as search term'),
       '#type' => 'checkbox',
       '#default_value' => $this->getSetting('search_term'),
     ];
@@ -60,9 +63,9 @@ class SearchableEntityFormatter extends EntityReferenceLabelFormatter {
    */
   public function settingsSummary() {
     $summary = [];
-    $summary[] = t('Search path: @search_link', ['@search_link' => $this->getSetting('search_link')]);
-    $summary[] = t('Variable: @search_var', ['@search_var' => $this->getSetting('search_var')]);
-    $summary[] = $this->getSetting('search_term') ? t('Use label as search term') : t('Use ID as search term');
+    $summary[] = $this->t('Search path: @search_link', ['@search_link' => $this->getSetting('search_link')]);
+    $summary[] = $this->t('Variable: @search_var', ['@search_var' => $this->getSetting('search_var')]);
+    $summary[] = $this->getSetting('search_term') ? $this->t('Use label as search term') : $this->t('Use ID as search term');
     return $summary;
   }
 

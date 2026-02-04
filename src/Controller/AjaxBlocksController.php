@@ -11,6 +11,7 @@ use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Routing\CurrentRouteMatch;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\RouterInterface;
 
@@ -69,6 +70,13 @@ class AjaxBlocksController extends ControllerBase {
   protected $container;
 
   /**
+   * The request stack.
+   *
+   * @var \Symfony\Component\HttpFoundation\RequestStack
+   */
+  protected $requestStack;
+
+  /**
    * Constructs a FacetBlockAjaxController object.
    *
    * @param \Drupal\Core\Render\RendererInterface $renderer
@@ -83,8 +91,18 @@ class AjaxBlocksController extends ControllerBase {
    *   The current route match service.
    * @param \Symfony\Component\DependencyInjection\ContainerInterface $container
    *   The drupal container.
+   * @param \Symfony\Component\HttpFoundation\RequestStack $request_stack
+   *   The request stack.
    */
-  final public function __construct(RendererInterface $renderer, CurrentPathStack $currentPath, RouterInterface $router, PathProcessorManager $pathProcessor, CurrentRouteMatch $currentRouteMatch, ContainerInterface $container) {
+  final public function __construct(
+    RendererInterface $renderer,
+    CurrentPathStack $currentPath,
+    RouterInterface $router,
+    PathProcessorManager $pathProcessor,
+    CurrentRouteMatch $currentRouteMatch,
+    ContainerInterface $container,
+    RequestStack $request_stack,
+  ) {
     $this->storage = $this->entityTypeManager()->getStorage('block');
     $this->renderer = $renderer;
     $this->currentPath = $currentPath;
@@ -92,6 +110,7 @@ class AjaxBlocksController extends ControllerBase {
     $this->pathProcessor = $pathProcessor;
     $this->currentRouteMatch = $currentRouteMatch;
     $this->container = $container;
+    $this->requestStack = $request_stack;
   }
 
   /**
@@ -104,7 +123,8 @@ class AjaxBlocksController extends ControllerBase {
       $container->get('router'),
       $container->get('path_processor_manager'),
       $container->get('current_route_match'),
-      $container
+      $container,
+      $container->get('request_stack')
     );
   }
 
@@ -136,7 +156,7 @@ class AjaxBlocksController extends ControllerBase {
 
     $new_request = Request::create($path);
     $new_request->setSession($request->getSession());
-    $request_stack = \Drupal::requestStack();
+    $request_stack = $this->requestStack;
     $processed = $this->pathProcessor->processInbound($new_request->getPathInfo(), $new_request);
 
     $this->currentPath->setPath($processed);

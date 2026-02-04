@@ -4,8 +4,13 @@ namespace Drupal\advanced_search\Plugin\Block;
 
 use Drupal\advanced_search\Form\SearchForm;
 use Drupal\Core\Block\BlockBase;
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\advanced_search\Form\SettingsForm;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Provides a 'SearchBlock' block.
@@ -15,20 +20,91 @@ use Drupal\advanced_search\Form\SettingsForm;
  *  admin_label = @Translation("Search"),
  * )
  */
-class SearchBlock extends BlockBase {
+class SearchBlock extends BlockBase implements ContainerFactoryPluginInterface {
+
+  /**
+   * The config factory.
+   *
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
+  protected $configFactory;
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
+   * The form builder.
+   *
+   * @var \Drupal\Core\Form\FormBuilderInterface
+   */
+  protected $formBuilder;
+
+  /**
+   * Constructs a SearchBlock object.
+   *
+   * @param array $configuration
+   *   A configuration array containing information about the plugin instance.
+   * @param string $plugin_id
+   *   The plugin_id for the plugin instance.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The config factory.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   The entity type manager.
+   * @param \Drupal\Core\Form\FormBuilderInterface $form_builder
+   *   The form builder.
+   */
+  final public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    ConfigFactoryInterface $config_factory,
+    EntityTypeManagerInterface $entity_type_manager,
+    FormBuilderInterface $form_builder,
+  ) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->configFactory = $config_factory;
+    $this->entityTypeManager = $entity_type_manager;
+    $this->formBuilder = $form_builder;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('config.factory'),
+      $container->get('entity_type.manager'),
+      $container->get('form_builder')
+    );
+  }
 
   /**
    * {@inheritdoc}
    */
   public function defaultConfiguration() {
-    return [] + parent::defaultConfiguration();
+    return [
+      'search_view_machine_name' => '',
+      'search_textfield_label' => '',
+      'search_placeholder' => '',
+      'search_submit_label' => 'Search',
+      'block_id' => '',
+    ] + parent::defaultConfiguration();
   }
 
   /**
    * {@inheritdoc}
    */
   public function blockForm($form, FormStateInterface $form_state) {
-    $config = \Drupal::config(SettingsForm::CONFIG_NAME);
+    $config = $this->configFactory->get(SettingsForm::CONFIG_NAME);
     $form['search-attributes'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Configure Search Block'),
@@ -43,13 +119,13 @@ class SearchBlock extends BlockBase {
       ];
     }
     else {
-      $views = \Drupal::EntityTypeManager()->getStorage('view')->loadMultiple();
+      $views = $this->entityTypeManager->getStorage('view')->loadMultiple();
       $options = [];
       foreach ($views as $view_name => $view) {
         $displays = $view->get("display");
         foreach ($displays as $display) {
           if ($display['display_plugin'] === "page") {
-            $options["view.$view_name" . "." . $display['id']] = "view.$view_name" . "." . $display['id'];
+            $options["view.{$view_name}.{$display['id']}"] = "view.{$view_name}.{$display['id']}";
           }
         }
       }
@@ -99,9 +175,13 @@ class SearchBlock extends BlockBase {
    */
   public function build() {
     $config = $this->getConfiguration();
-    $blockId = $config['block_id'];
-    $searchForm = new SearchForm($blockId);
-    return \Drupal::formBuilder()->getForm($searchForm);
+    $blockId = $config['block_id'] ?? NULL;
+    $searchForm = new SearchForm(
+      $blockId,
+      $this->entityTypeManager,
+      $this->configFactory
+    );
+    return $this->formBuilder->getForm($searchForm);
   }
 
 }
