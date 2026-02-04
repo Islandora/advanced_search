@@ -3,11 +3,13 @@
 namespace Drupal\advanced_search\Form;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\advanced_search\AdvancedSearchQuery;
 use Drupal\advanced_search\GetConfigTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Config form for Islandora Advanced Search settings.
@@ -15,6 +17,20 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class SettingsForm extends ConfigFormBase {
 
   use GetConfigTrait;
+
+  /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
+   * The request stack.
+   *
+   * @var \Symfony\Component\HttpFoundation\RequestStack
+   */
+  protected $requestStack;
 
   const CONFIG_NAME = 'advanced_search.settings';
 
@@ -47,15 +63,25 @@ class SettingsForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  final public function __construct(ConfigFactoryInterface $config_factory) {
+  final public function __construct(
+    ConfigFactoryInterface $config_factory,
+    EntityTypeManagerInterface $entity_type_manager,
+    RequestStack $request_stack,
+  ) {
     $this->setConfigFactory($config_factory);
+    $this->entityTypeManager = $entity_type_manager;
+    $this->requestStack = $request_stack;
   }
 
   /**
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container) {
-    return new static($container->get('config.factory'));
+    return new static(
+      $container->get('config.factory'),
+      $container->get('entity_type.manager'),
+      $container->get('request_stack')
+    );
   }
 
   /**
@@ -80,7 +106,7 @@ class SettingsForm extends ConfigFormBase {
    */
   protected function getAvailableFields(): array {
     $options = [];
-    $indexes = \Drupal::entityTypeManager()
+    $indexes = $this->entityTypeManager
       ->getStorage('search_api_index')
       ->loadMultiple();
 
@@ -163,7 +189,7 @@ class SettingsForm extends ConfigFormBase {
       '#title' => $this->t('Query Fields'),
     ];
 
-    $base_url = \Drupal::request()->getSchemeAndHttpHost();
+    $base_url = $this->requestStack->getCurrentRequest()->getSchemeAndHttpHost();
     $form['query_fields_block']['description'] = [
       '#markup' => $this->t(
         'Select fields to query when using the all-fields option. If none are selected, <a href="@url" target="_blank">all fields will be searched</a>.',
@@ -200,7 +226,7 @@ class SettingsForm extends ConfigFormBase {
     $form['display'][self::DISPLAY_DEFAULT] = [
       '#type' => 'select',
       '#title' => $this->t('Default display mode'),
-      '#options' => ['list' => 'List', 'grid' => 'Grid'],
+      '#options' => ['list' => $this->t('List'), 'grid' => $this->t('Grid')],
       '#default_value' => self::getConfig(self::DISPLAY_DEFAULT, 'grid'),
     ];
 

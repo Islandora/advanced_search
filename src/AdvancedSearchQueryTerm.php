@@ -386,7 +386,6 @@ class AdvancedSearchQueryTerm {
    */
   public function toSolrFields(array $solr_field_mapping) {
     $terms = [];
-    $query_helper = \Drupal::service('solarium.query_helper');
 
     if ($this->field !== "all") {
       foreach ($solr_field_mapping[$this->field] as $field) {

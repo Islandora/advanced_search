@@ -3,6 +3,7 @@
 namespace Drupal\advanced_search\Plugin\Block;
 
 use Drupal\Core\Block\BlockBase;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Render\Markup;
 use Drupal\Core\Url;
@@ -36,6 +37,13 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
   protected $request;
 
   /**
+   * The config factory.
+   *
+   * @var \Drupal\Core\Config\ConfigFactoryInterface
+   */
+  protected $configFactory;
+
+  /**
    * Construct a FacetBlock instance.
    *
    * @param array $configuration
@@ -46,10 +54,19 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
    *   The plugin implementation definition.
    * @param \Symfony\Component\HttpFoundation\Request $request
    *   A request object for the current request.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The config factory.
    */
-  final public function __construct(array $configuration, $plugin_id, $plugin_definition, Request $request) {
+  final public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    Request $request,
+    ConfigFactoryInterface $config_factory,
+  ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->request = clone $request;
+    $this->configFactory = $config_factory;
   }
 
   /**
@@ -60,7 +77,8 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('request_stack')->getMainRequest()
+      $container->get('request_stack')->getMainRequest(),
+      $container->get('config.factory')
     );
   }
 
@@ -68,7 +86,7 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
    * {@inheritdoc}
    */
   public function blockForm($form, FormStateInterface $form_state) {
-    $config = \Drupal::config(SettingsForm::CONFIG_NAME);
+    $config = $this->configFactory->get(SettingsForm::CONFIG_NAME);
 
     $form['display-mode'] = [
       '#type' => 'fieldset',
@@ -95,8 +113,8 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
       '#title' => $this
         ->t('Default view mode:'),
       '#options' => [
-        'list' => 'List',
-        'grid' => 'Grid',
+        'list' => $this->t('List'),
+        'grid' => $this->t('Grid'),
       ],
       '#default_value' => $this->configuration['override-default-display-mode'] ?? $config->get(SettingsForm::DISPLAY_DEFAULT),
     ];
@@ -237,7 +255,7 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
       $items[] = [
         '#type' => 'link',
         '#url' => $url,
-        '#title' => $this->t($items_per_page),
+        '#title' => $items_per_page,
         '#attributes' => [
           'aria-label' => $this->t("@item items per page", ["@item" => $items_per_page]),
           'class' => $active ?
@@ -270,7 +288,7 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
    *   A renderable array representing the display links portion of pager.
    */
   protected function buildDisplayLinks(array $query_parameters) {
-    $config = \Drupal::config(SettingsForm::CONFIG_NAME);
+    $config = $this->configFactory->get(SettingsForm::CONFIG_NAME);
     $display_options = [];
 
     if (isset($this->configuration["override_list_on_off"]) && isset($this->configuration["override_grid_on_off"])
@@ -373,7 +391,6 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
         $id = $sort->options['id'];
         // Label should be translated via views already.
         $label = $sort->options['expose']['label'];
-        $label = $this->t($label);
         $asc = "{$id}_asc";
         $desc = "{$id}_desc";
         $options[$asc] = "{$label} ↓";

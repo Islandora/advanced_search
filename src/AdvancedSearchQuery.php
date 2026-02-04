@@ -207,9 +207,10 @@ class AdvancedSearchQuery {
           // Get configured query fields from settings.
           $configured_query_fields = $config->get(SettingsForm::QUERY_FIELDS) ?: [];
 
-          // field_mapping structure: [field_id => [language => solr_field_name]].
+          // field_mapping structure:
+          // [field_id => [language => solr_field_name]].
           foreach ($field_mapping as $field_id => $languages) {
-            foreach ($languages as $lang => $solr_field_name) {
+            foreach ($languages as $solr_field_name) {
               // bs_ are boolean fields, do not work well with text search.
               if (substr($solr_field_name, 0, 3) !== "bs_") {
 

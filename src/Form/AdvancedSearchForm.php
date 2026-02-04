@@ -329,8 +329,8 @@ class AdvancedSearchForm extends FormBase {
             self::NOT_OP => $this->t('is not'),
           ],
           '#default_value' => $term_value[self::INCLUDE_FORM_FIELD],
-                // Show only when conjunction is 'AND' as 'OR NOT' is not supported
-                // by solr and will be converted to 'AND NOT'.
+          // Show only when conjunction is 'AND' as 'OR NOT' is not
+          // supported by solr and will be converted to 'AND NOT'.
           '#states' => [
             'visible' => [
               ':input[name="terms[' . $i . '][' . self::CONJUNCTION_FORM_FIELD . ']"]' => ['value' => self::AND_OP],
@@ -338,8 +338,8 @@ class AdvancedSearchForm extends FormBase {
           ],
           '#theme_wrappers' => [],
         ],
-            // Just markup to show when 'include' is not alterable due to the
-            // selected 'conjunction'. Hide for the first term.
+        // Just markup to show when 'include' is not alterable due to the
+        // selected 'conjunction'. Hide for the first term.
         'is' => $first ? NULL : [
           '#type' => 'container',
           '#attributes' => ['style' => 'display:inline;'],
