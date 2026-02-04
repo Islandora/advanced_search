@@ -73,9 +73,9 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
     $form['display-mode'] = [
       '#type' => 'fieldset',
       '#title' => $this->t("Pager Block"),
-      '#description' => $this->t("If this settings are set here, they will override the global settings at `/admin/config/search/advanced`")
+      '#description' => $this->t("If this settings are set here, they will override the global settings at `/admin/config/search/advanced`"),
     ];
-    
+
     $form['display-mode']['override_list_on_off'] = [
       '#type' => 'checkbox',
       '#title' => $this
@@ -100,10 +100,10 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
       ],
       '#default_value' => $this->configuration['override-default-display-mode'] ?? $config->get(SettingsForm::DISPLAY_DEFAULT),
     ];
-    
+
     $form['#attributes']['class'][] = 'clearfix';
     $form['#attached']['library'][] = 'advanced_search/advanced.search.admin';
-    return $form; 
+    return $form;
   }
 
   /**
@@ -243,7 +243,7 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
           'class' => $active ?
             ['pager__link', 'pager__link--is-active', 'pager__itemsperpage'] :
             ['pager__link', 'pager__itemsperpage'],
-          'itemsperpage' => $items_per_page
+          'itemsperpage' => $items_per_page,
         ],
         '#wrapper_attributes' => [
           'class' => $active ? ['pager__item', 'is-active'] : ['pager__item'],
@@ -273,17 +273,16 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
     $config = \Drupal::config(SettingsForm::CONFIG_NAME);
     $display_options = [];
 
-
     if (isset($this->configuration["override_list_on_off"]) && isset($this->configuration["override_grid_on_off"])
     && isset($this->configuration["override-default-display-mode"])) {
-      if ($this->configuration["override_list_on_off"] == 1) { 
+      if ($this->configuration["override_list_on_off"] == 1) {
         $display_options['list'] = [
           'icon' => 'fa-list',
           'title' => $this->t('List'),
         ];
-      } 
+      }
 
-      if ($this->configuration["override_grid_on_off"] == 1) { 
+      if ($this->configuration["override_grid_on_off"] == 1) {
         $display_options['grid'] = [
           'icon' => 'fa-th',
           'title' => $this->t('Grid'),
@@ -325,7 +324,7 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
             ['pager__link', 'pager__link--is-active', 'pager__display'] :
             ['pager__link', 'pager__display'],
           'aria-label' => $this->t("Display as @link", ["@link" => Markup::create($text)]),
-          'type' => $display
+          'type' => $display,
         ],
         '#wrapper_attributes' => [
           'class' => $active ? ['pager__item', 'is-active'] : ['pager__item'],
