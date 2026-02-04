@@ -18,9 +18,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\advanced_search\AdvancedSearchQuery;
 use Drupal\advanced_search\Form\SettingsForm;
 use Drupal\advanced_search\Utilities;
-use Drupal\search_api\Query\QueryInterface as DrupalQueryInterface;
 use Drupal\views\ViewExecutable;
-use Solarium\Core\Query\QueryInterface as SolariumQueryInterface;
 
 /**
  * Implements hook_theme().

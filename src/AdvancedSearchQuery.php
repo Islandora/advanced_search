@@ -151,8 +151,7 @@ class AdvancedSearchQuery {
       $field_mapping = $backend->getSolrFieldNamesKeyedByLanguage($language_ids, $index);
 
       // Disable for Lucene and wildcard
-      //$q[] = "{!boost b=boost_document}";
-      
+      // $q[] = "{!boost b=boost_document}";
       // Create a flag for active/inactive dismax.
       $config = \Drupal::config(SettingsForm::CONFIG_NAME);
       $isDismax = $config->get(SettingsForm::EDISMAX_SEARCH_FLAG);
@@ -207,10 +206,11 @@ class AdvancedSearchQuery {
         if ($isSearchAllFields) {
           // Get configured query fields from settings.
           $configured_query_fields = $config->get(SettingsForm::QUERY_FIELDS) ?: [];
-          
-          // field_mapping structure: [field_id => [language => solr_field_name]]
+
+          // field_mapping structure:
+          // [field_id => [language => solr_field_name]].
           foreach ($field_mapping as $field_id => $languages) {
-            foreach ($languages as $lang => $solr_field_name) {
+            foreach ($languages as $solr_field_name) {
               // bs_ are boolean fields, do not work well with text search.
               if (substr($solr_field_name, 0, 3) !== "bs_") {
 
@@ -230,7 +230,7 @@ class AdvancedSearchQuery {
         $dismax->setQueryFields($query_fields);
       }
 
-      // if all fields are searched, use the query_fields for highlighting.
+      // If all fields are searched, use the query_fields for highlighting.
       if ($isSearchAllFields && isset($query_fields)) {
         // Convert back to an array.
         $highlight_source_fields = explode(" ", $query_fields);
@@ -241,7 +241,7 @@ class AdvancedSearchQuery {
 
       if ($backend->getConfiguration()['highlight_data']) {
         // Just highlight string and text fields to avoid Solr exceptions.
-        // Exclude tm_X3b_*_fulltext_title
+        // Exclude tm_X3b_*_fulltext_title.
         $highlighted_fields = array_filter(array_unique($highlight_source_fields), function ($v) {
           return !empty($v) && (preg_match('/^t.*?[sm]_/', $v) || preg_match('/^s[sm]_/', $v)) && !preg_match('/^tm_X3b_.*_fulltext_title$/', $v);
         });
@@ -256,7 +256,7 @@ class AdvancedSearchQuery {
         // Since we are getting the highlighting result from Solr instead
         // of using the Search API processor to create one, we just need
         // make this field non-empty.
-        //$search_api_query->keys("advanced search");
+        // $search_api_query->keys("advanced search");.
       }
 
       $solarium_query->setQuery($q);
