@@ -65,7 +65,6 @@ class SearchBlockTest extends WebDriverTestBase {
 
     // Navigate to block placement.
     $this->drupalGet('admin/structure/block/add/search_block/stark');
-    $this->assertSession()->statusCodeEquals(200);
 
     // Check that the block configuration form loads.
     $this->assertSession()->pageTextContains('Configure Search Block');
@@ -91,7 +90,6 @@ class SearchBlockTest extends WebDriverTestBase {
 
     // Navigate to block placement.
     $this->drupalGet('admin/structure/block/add/search_block/stark');
-    $this->assertSession()->statusCodeEquals(200);
 
     // Should show the warning message about enabling all fields search.
     $this->assertSession()->pageTextContains('This block is required to enable searching all fields');

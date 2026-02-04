@@ -91,7 +91,13 @@ class SearchBlock extends BlockBase implements ContainerFactoryPluginInterface {
    * {@inheritdoc}
    */
   public function defaultConfiguration() {
-    return [] + parent::defaultConfiguration();
+    return [
+      'search_view_machine_name' => '',
+      'search_textfield_label' => '',
+      'search_placeholder' => '',
+      'search_submit_label' => 'Search',
+      'block_id' => '',
+    ] + parent::defaultConfiguration();
   }
 
   /**
@@ -169,7 +175,7 @@ class SearchBlock extends BlockBase implements ContainerFactoryPluginInterface {
    */
   public function build() {
     $config = $this->getConfiguration();
-    $blockId = $config['block_id'];
+    $blockId = $config['block_id'] ?? NULL;
     $searchForm = new SearchForm(
       $blockId,
       $this->entityTypeManager,
