@@ -173,25 +173,34 @@
             });
           }
           // Reset should trigger refresh of AJAX Blocks / Views.
+          // Add a simple flag so we know that the user wants a reset.
+          let resetTriggered = false;
           $form.find('input[data-drupal-selector = "edit-reset"]').mousedown(function (e) {
-            const inputs = [];
-            const href = url(inputs, settings.advanced_search_form);
-            window.history.pushState(null, document.title, href.split('?')[0] );
-
-            /* reset the url after reset button clicked */
-            window.location.replace(href.split('?')[0]);
+            resetTriggered = true;
           });
-          
+
           // Handle the page summary
           $("#ajax-page-summary").hide();
-          $( document ).ajaxComplete(function( event, request, settings ) {
-              
+          $( document ).ajaxComplete(function( event, request, ajaxSettings ) {
               $("#ajax-page-summary").hide();
               if (jQuery("#ajax-page-summary").length >0) { 
                 $(".pager__summary").html($("#ajax-page-summary").html());
               }
               else {
                 $(".pager__summary").html("");
+              }
+
+              // After the ajax completes, see if the user wanted the reset.
+              if (resetTriggered){
+                const inputs = [];
+                const href = url(inputs, settings.advanced_search_form);
+
+                // Instead of using window.location.replace which causes full page to reload,
+                // Use pushState to update the URL without stopping any processes.
+                window.history.pushState(null, document.title, href.split('?')[0] );
+
+                // Reset the flag.
+                resetTriggered = false;
               }
           });
         }
