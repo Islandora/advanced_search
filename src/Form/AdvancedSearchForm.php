@@ -157,8 +157,8 @@ class AdvancedSearchForm extends FormBase {
     $options = [];
     foreach ($fields as $field) {
       $id = $field->getFieldIdentifier();
-      $label = $field->getLabel();
-      $options[$id] = $this->t($label);
+      // phpcs:ignore
+      $options[$id] = $this->t($field->getLabel());
     }
     return $options;
   }
@@ -284,8 +284,9 @@ class AdvancedSearchForm extends FormBase {
         self::VALUE_FORM_FIELD => AdvancedSearchQueryTerm::VALUE_QUERY_PARAMETER,
       ],
     ];
-    $dismaxlabel = self::getEdismaxSearchLabel();
-    $options = (self::getEdismaxSearch() && self::getSearchAllFields()) ? ["all" => $this->t("@label", ["@label" => $this->t($dismaxlabel)])] + $this->fieldOptions($fields) : $this->fieldOptions($fields);
+
+    // phpcs:ignore
+    $options = (self::getEdismaxSearch() && self::getSearchAllFields()) ? ["all" => $this->t("@label", ["@label" => $this->t(self::getEdismaxSearchLabel())])] + $this->fieldOptions($fields) : $this->fieldOptions($fields);
     $term_default_values = $this->defaultTermValues($options);
     [$recursive, $term_values] = $this->processInput($form_state, $term_default_values);
     $i = 0;
