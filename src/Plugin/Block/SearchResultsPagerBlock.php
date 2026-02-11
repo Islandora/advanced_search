@@ -257,6 +257,7 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
         '#url' => $url,
         '#title' => $items_per_page,
         '#attributes' => [
+          'rel' => $config->get(SettingsForm::NO_FOLLOW) == 1 ? 'nofollow' : '',
           'aria-label' => $this->t("@item items per page", ["@item" => $items_per_page]),
           'class' => $active ?
             ['pager__link', 'pager__link--is-active', 'pager__itemsperpage'] :
@@ -338,6 +339,7 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
         '#url' => $url,
         '#title' => Markup::create($text),
         '#attributes' => [
+          'rel' => $config->get(SettingsForm::NO_FOLLOW) == 1 ? 'nofollow' : '',
           'class' => $active ?
             ['pager__link', 'pager__link--is-active', 'pager__display'] :
             ['pager__link', 'pager__display'],
