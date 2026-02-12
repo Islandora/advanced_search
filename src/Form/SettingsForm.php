@@ -279,6 +279,9 @@ class SettingsForm extends ConfigFormBase {
       '#min' => 1,
     ];
 
+    /* -------------------------
+     * No follow option
+     * ------------------------- */
     $form['no-follow'] = [
       '#type' => 'fieldset',
       '#title' => $this->t("No Follow Block"),
