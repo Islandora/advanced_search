@@ -236,6 +236,7 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
    *   A renderable array representing the results per page portion of pager.
    */
   protected function buildResultsPerPageLinks(SqlBase $pager, array $query_parameters) {
+    $config = $this->configFactory->get(SettingsForm::CONFIG_NAME);
     $active_items_per_page = $query_parameters['items_per_page'] ?? $pager->options['items_per_page'];
     $items_per_page_options = array_map(function ($value) {
       return trim($value);
@@ -252,12 +253,11 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
         'absolute' => TRUE,
       ]);
       $active = $items_per_page == $active_items_per_page;
-      $items[] = [
+      $item = [
         '#type' => 'link',
         '#url' => $url,
         '#title' => $items_per_page,
         '#attributes' => [
-          'rel' => $config->get(SettingsForm::NO_FOLLOW) == 1 ? 'nofollow' : '',
           'aria-label' => $this->t("@item items per page", ["@item" => $items_per_page]),
           'class' => $active ?
             ['pager__link', 'pager__link--is-active', 'pager__itemsperpage'] :
@@ -268,6 +268,10 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
           'class' => $active ? ['pager__item', 'is-active'] : ['pager__item'],
         ],
       ];
+      if (!empty($config->get(SettingsForm::NO_FOLLOW))) {
+        $item['#attributes']['rel'] = 'nofollow';
+      }
+      $items[] = $item;
     }
     return [
       '#theme' => 'item_list',
@@ -334,12 +338,11 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
       ]);
       $text = "<i class='fa {$options['icon']}' aria-hidden='true'>&nbsp;</i><span class='display-mode'>{$options['title']}</span>";
       $active = $active_display == $display;
-      $items[] = [
+      $item = [
         '#type' => 'link',
         '#url' => $url,
         '#title' => Markup::create($text),
         '#attributes' => [
-          'rel' => $config->get(SettingsForm::NO_FOLLOW) == 1 ? 'nofollow' : '',
           'class' => $active ?
             ['pager__link', 'pager__link--is-active', 'pager__display'] :
             ['pager__link', 'pager__display'],
@@ -350,6 +353,10 @@ class SearchResultsPagerBlock extends BlockBase implements ContainerFactoryPlugi
           'class' => $active ? ['pager__item', 'is-active'] : ['pager__item'],
         ],
       ];
+      if (!empty($config->get(SettingsForm::NO_FOLLOW))) {
+        $item['#attributes']['rel'] = 'nofollow';
+      }
+      $items[] = $item;
     }
 
     if (count($items) > 0) {
