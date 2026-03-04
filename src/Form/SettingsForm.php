@@ -60,6 +60,8 @@ class SettingsForm extends ConfigFormBase {
 
   const QUERY_FIELDS = 'query_fields';
 
+  const NO_FOLLOW = 'no_follow';
+
   /**
    * {@inheritdoc}
    */
@@ -277,6 +279,19 @@ class SettingsForm extends ConfigFormBase {
       '#min' => 1,
     ];
 
+    /* -------------------------
+     * No follow option
+     * ------------------------- */
+    $form['no-follow'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t("No Follow Block"),
+    ];
+    $form['no-follow'][self::NO_FOLLOW] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Add rel="nofollow" attribute in links'),
+      '#default_value' => self::getConfig(self::NO_FOLLOW, 0),
+    ];
+
     return parent::buildForm($form, $form_state);
   }
 
@@ -300,6 +315,7 @@ class SettingsForm extends ConfigFormBase {
       ->set(self::DISPLAY_GRID_FLAG, $form_state->getValue(self::DISPLAY_GRID_FLAG))
       ->set(self::DISPLAY_DEFAULT, $form_state->getValue(self::DISPLAY_DEFAULT))
       ->set(self::QUERY_FIELDS, $query_fields)
+      ->set(self::NO_FOLLOW, $form_state->getValue(self::NO_FOLLOW))
       ->save();
 
     parent::submitForm($form, $form_state);
