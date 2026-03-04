@@ -43,6 +43,9 @@ advanced_search.settings:
       sequence:
         type: string
         label: Field identifier
+    no_follow:
+      type: integer
+      label: Add rel="nofollow" attribute in links
 
 block.settings.search_block:
   type: block_settings
