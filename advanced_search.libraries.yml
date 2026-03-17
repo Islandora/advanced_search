@@ -21,4 +21,8 @@ advanced.search.pager:
 advanced.search.facets_views_ajax: 
   js: 
      js/facets/facets-views-ajax.js: {}
-
+  dependencies:
+    - core/drupal.ajax
+    - core/jquery
+    - core/once
+    - facets/drupal.facets.views-ajax
