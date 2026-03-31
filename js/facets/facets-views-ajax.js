@@ -180,9 +180,7 @@
   });
 
   window.addEventListener("popstate", function (e) {
-    if (e.state != null) {
       reload(window.location.href);
-    }
   });
 
   /**
