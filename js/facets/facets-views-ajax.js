@@ -86,7 +86,7 @@
       $("a.pager__itemsperpage").each(function( index ) {
         var newUrl = url + "&items_per_page=" + $(this).attr('itemsperpage');
         if (url.indexOf('?') === -1)  {
-           newUrl = url + "?&items_per_page=" + $(this).attr('itemsperpage'); //"?&display=" + $(this).attr('type');
+           newUrl = url + "?items_per_page=" + $(this).attr('itemsperpage');
         }
 	      $(this).attr("href", newUrl);
       });
@@ -123,7 +123,7 @@
       $("a.pager__display").each(function( index ) {
         var newUrl = url + "&display=" + $(this).attr('type');
       	if (url.indexOf('?') === -1)  {
-           newUrl = url + "?&display=" + $(this).attr('type');
+           newUrl = url + "?display=" + $(this).attr('type');
         }
       	$(this).attr("href", newUrl);
       });
