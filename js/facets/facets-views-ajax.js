@@ -88,7 +88,7 @@
         if (url.indexOf('?') === -1)  {
            newUrl = url + "?items_per_page=" + $(this).attr('itemsperpage');
         }
-	      $(this).attr("href", newUrl);
+	    $(this).attr("href", newUrl);
       });
     } 
     else { 
