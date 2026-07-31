@@ -43,27 +43,43 @@
       }
   }
   
-  function parseQueryString( queryString ) {
-        var params = {}, queries, temp, i, l;
+  /**
+   * Parse query parameters without discarding repeated exposed-filter values.
+   */
+  function parseQueryParameters(url) {
+    var params = {};
+    new URL(url, window.location.origin).searchParams.forEach(function (
+      value,
+      key
+    ) {
+      if (Object.prototype.hasOwnProperty.call(params, key)) {
+        params[key] = Array.isArray(params[key])
+          ? params[key].concat(value)
+          : [params[key], value];
+      } else {
+        params[key] = value;
+      }
+    });
+    return params;
+  }
 
-        // Split into key/value pairs
-        queries = queryString.split("&");
-
-        // Convert the array of strings into an object
-        for ( i = 0, l = queries.length; i < l; i++ ) {
-            temp = queries[i].split('=');
-            params[temp[0]] = temp[1];
-        }
-
-        return params;
-    };
+  /**
+   * Update one pager parameter while preserving every active filter value.
+   */
+  function updatePagerLinks(url, selector, parameter, attribute) {
+    $(selector).each(function () {
+      var newUrl = new URL(url, window.location.origin);
+      newUrl.searchParams.set(parameter, $(this).attr(attribute));
+      $(this).attr("href", newUrl.toString());
+    });
+  }
 
   function reload(url) {
     // Update View.
     if (drupalSettings && drupalSettings.views && drupalSettings.views.ajaxViews) {
       var view_path = drupalSettings.views.ajax_path;
       $.each(drupalSettings.views.ajaxViews, function (views_dom_id) {
-        var views_parameters = Drupal.Views.parseQueryString(url);
+        var views_parameters = parseQueryParameters(url);
         var views_arguments = Drupal.Views.parseViewArgs(url, "search");
         var views_settings = $.extend(
           {},
@@ -75,79 +91,21 @@
           Drupal.views.instances[views_dom_id].element_settings;
         views_ajax_settings.submit = views_settings;
         views_ajax_settings.url =
-          view_path + "?" + $.param(Drupal.Views.parseQueryString(url));
+          view_path +
+          "?" +
+          new URL(url, window.location.origin).searchParams.toString();
         Drupal.ajax(views_ajax_settings).execute();
       });
     }
 
-    // Update items_per_page links in pager 
-    if (url.indexOf("items_per_page=") == -1) { 
-      // append items_per_page
-      $("a.pager__itemsperpage").each(function( index ) {
-        var newUrl = url + "&items_per_page=" + $(this).attr('itemsperpage');
-        $(this).attr("href", newUrl);
-      });
-    } 
-    else { 
-      // replace existed items_per_page
-      var params = parseQueryString(url.split("?")[1]);
-      var newParams = [];
-      var existingDateQuery = false; // true if a date query already exists
-
-      var links = {};
-      // update publication date in url if previously queried
-      for (var key in params) {
-        if (!params[key]) { // no search parameters in url
-          break;
-        }
-
-        // check for items_per_page query
-        if (!key.startsWith("items_per_page")) { 
-          newParams.push(key + "=" + params[key]);
-        }
-      }
-      var newParamsUrl = newParams.join('&');
-      $("a.pager__itemsperpage").each(function( index ) {
-        $(this).attr("href", url.split("?")[0] + '?' + newParamsUrl + "&items_per_page=" + $(this).attr('itemsperpage'));
-      });
-    }
-
-
-
-    // Update display mode links in pager 
-    if (url.indexOf("display=") == -1) { 
-      // append items_per_page
-      $("a.pager__display").each(function( index ) {
-        var newUrl = url + "&display=" + $(this).attr('type');
-        $(this).attr("href", newUrl);
-      });
-      
-    } 
-    else { 
-      // replace existed display
-      var params = parseQueryString(url.split("?")[1]);
-      var newParams = [];
-      var existingDateQuery = false; // true if a date query already exists
-
-      var links = {};
-      // update publication date in url if previously queried
-      for (var key in params) {
-        if (!params[key]) { // no search parameters in url
-          break;
-        }
-
-        // check for display query
-        if (!key.startsWith("display")) { 
-          newParams.push(key + "=" + params[key]);
-        }
-      }
-      var newParamsUrl = newParams.join('&');
-      $("a.pager__display").each(function( index ) {
-
-        var value = $(this).attr('type');
-        $(this).attr("href", url.split("?")[0] + '?' + newParamsUrl + "&display=" + value);
-      });
-    }
+    // Update pager links without flattening multi-value facet parameters.
+    updatePagerLinks(
+      url,
+      "a.pager__itemsperpage",
+      "items_per_page",
+      "itemsperpage"
+    );
+    updatePagerLinks(url, "a.pager__display", "display", "type");
 
 
     
@@ -214,17 +172,19 @@
                 }
                 e.preventDefault();
                 e.stopPropagation();
-                var href = window.location.href;
-                var params = Drupal.Views.parseQueryString(href);
+                var href = new URL(window.location.href);
                 // Remove the page if set as submitting the form should always take
                 // the user to the first page (facets do the same).
-                delete params.page;
-                // Include values from the form in the URL.
-                $.each(exposed_form.serializeArray(), function () {
-                  params[this.name] = this.value;
+                href.searchParams.delete("page");
+                // Remove stale values, including unchecked facet options.
+                exposed_form.find(":input[name]").each(function () {
+                  href.searchParams.delete(this.name);
                 });
-                href = href.split("?")[0] + "?" + $.param(params);
-                window.history.pushState(null, document.title, href);
+                // Include every selected value from the form in the URL.
+                $.each(exposed_form.serializeArray(), function () {
+                  href.searchParams.append(this.name, this.value);
+                });
+                window.history.pushState(null, document.title, href.toString());
               });
             });
         });
@@ -276,15 +236,13 @@
       // Trigger on sort change.
       $(once('params-sort', '[data-drupal-pager-id] select[name="order"], .pager__sort select[name="order"]'))
         .change(function () {
-          var href = window.location.href;
-          var params = Drupal.Views.parseQueryString(href);
+          var href = new URL(window.location.href);
 
           var selection = $(this).val();
           var option = selection.split('_');
-          params.sort_order = option[option.length - 1].toUpperCase();
-          params.sort_by = selection.replace("_" + option[option.length - 1], "");
-          href = href.split("?")[0] + "?" + $.param(params);
-          window.history.pushState(null, document.title, href);
+          href.searchParams.set("sort_order", option[option.length - 1].toUpperCase());
+          href.searchParams.set("sort_by", selection.replace("_" + option[option.length - 1], ""));
+          window.history.pushState(null, document.title, href.toString());
         });
 
     },

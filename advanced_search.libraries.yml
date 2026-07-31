@@ -25,4 +25,4 @@ advanced.search.facets_views_ajax:
     - core/drupal.ajax
     - core/jquery
     - core/once
-    - facets/drupal.facets.views-ajax
+    - views/views.ajax
