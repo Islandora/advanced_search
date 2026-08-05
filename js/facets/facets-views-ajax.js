@@ -1,292 +1,530 @@
 //# sourceURL=modules/contrib/islandora/modules/advanced_search/js/facets/facets-view.ajax.js
 /**
  * @file
- * Overrides the facets-view-ajax.js behavior from the 'facets' module.
+ * Coordinates Advanced Search controls with their owning AJAX View.
  */
-(function ($, Drupal) {
-  "use strict";
+(function ($, Drupal, drupalSettings, once) {
+  'use strict';
 
-  // For each search view override display mode config (in SearchPagerResultBlock.php)
-  jQuery( document ).ready(function() {
-    handleDisplayMode(); 
-  });
+  const toolbarSelector = '[data-drupal-pager-id]';
+  const historyStateKey = 'advancedSearchToolbarId';
 
-  jQuery(document).ajaxComplete(function() {
-    handleDisplayMode();
-  });
-
-  // Generate events on push state.
-  (function (history) {
-    var pushState = history.pushState;
-    history.pushState = function (state, title, url) {
-      var ret = pushState.apply(this, arguments);
-      var event = new Event("pushstate");
-      window.dispatchEvent(event);
-      return ret;
-    };
-  })(window.history);
-
-  function handleDisplayMode() {
-      var initial_display = jQuery('a.pager__link.pager__link--is-active.pager__display').attr('type');
-      if (initial_display == undefined) {
-        initial_display = jQuery("#override-default-display-mode").html();
-      }
-      if (jQuery('div.view.view-list').length == 1 && initial_display != "list") {
-        var search_view = jQuery('div.view.view-list');
-        search_view.removeClass("view-list");
-        search_view.addClass("view-grid");
-      }
-      if (jQuery('div.view.view-grid').length == 1 && initial_display != "grid") {
-        var search_view = jQuery('div.view.view-grid');
-        search_view.removeClass("view-grid");
-        search_view.addClass("view-list");
-      }
+  /**
+   * Finds a toolbar without interpolating an identifier into a CSS selector.
+   */
+  function findToolbar(toolbarId) {
+    if (!toolbarId) {
+      return null;
+    }
+    return (
+      Array.from(document.querySelectorAll(toolbarSelector)).find(
+        (toolbar) =>
+          toolbar.getAttribute('data-drupal-pager-id') === toolbarId,
+      ) || null
+    );
   }
-  
-  function parseQueryString( queryString ) {
-        var params = {}, queries, temp, i, l;
 
-        // Split into key/value pairs
-        queries = queryString.split("&");
+  /**
+   * Returns the server-emitted ownership settings for a toolbar.
+   */
+  function getToolbarSettings(toolbar) {
+    if (!toolbar) {
+      return null;
+    }
+    const toolbarId = toolbar.getAttribute('data-drupal-pager-id');
+    const emitted =
+      drupalSettings.advanced_search_pager_views_ajax?.[toolbarId];
+    if (emitted) {
+      return emitted;
+    }
 
-        // Convert the array of strings into an object
-        for ( i = 0, l = queries.length; i < l; i++ ) {
-            temp = queries[i].split('=');
-            params[temp[0]] = temp[1];
+    // Data attributes keep normal links usable even if settings are absent.
+    return {
+      view_id: toolbar.dataset.advancedSearchViewId,
+      current_display_id: toolbar.dataset.advancedSearchDisplayId,
+      view_dom_id: toolbar.dataset.advancedSearchViewDomId,
+      ajax_enabled: toolbar.dataset.advancedSearchAjaxEnabled === 'true',
+    };
+  }
+
+  /**
+   * Reads the View DOM identifier from the toolbar's closest View wrapper.
+   */
+  function getClosestViewDomId(toolbar) {
+    const view = toolbar?.closest('.view');
+    if (!view) {
+      return null;
+    }
+    const domClass = Array.from(view.classList).find((className) =>
+      className.startsWith('js-view-dom-id-'),
+    );
+    return domClass ? domClass.slice('js-view-dom-id-'.length) : null;
+  }
+
+  /**
+   * Finds the one core AJAX View instance owned by a toolbar.
+   */
+  function getViewInstance(toolbar) {
+    const toolbarSettings = getToolbarSettings(toolbar);
+    if (!toolbarSettings?.ajax_enabled || !Drupal.views?.instances) {
+      return null;
+    }
+
+    const possibleDomIds = [
+      getClosestViewDomId(toolbar),
+      toolbarSettings.view_dom_id,
+    ].filter(Boolean);
+    for (const domId of possibleDomIds) {
+      const instance = Drupal.views.instances[`views_dom_id:${domId}`];
+      if (instance) {
+        return instance;
+      }
+    }
+
+    // A legacy toolbar block executes its own copy of the View, so its emitted
+    // DOM id differs from the View rendered elsewhere on the page. Fall back
+    // to the stable View/display identity only when it is unambiguous.
+    const matches = Object.values(Drupal.views.instances).filter(
+      (instance) =>
+        instance.settings?.view_name === toolbarSettings.view_id &&
+        instance.settings?.view_display_id ===
+          toolbarSettings.current_display_id,
+    );
+    return matches.length === 1 ? matches[0] : null;
+  }
+
+  /**
+   * Finds the toolbar owned by one core AJAX View setting.
+   */
+  function findToolbarForView(viewSettings) {
+    const exactView = Array.from(
+      document.getElementsByClassName(
+        `js-view-dom-id-${viewSettings.view_dom_id}`,
+      ),
+    )[0];
+    const exactToolbar = exactView?.querySelector(toolbarSelector);
+    if (exactToolbar) {
+      return exactToolbar;
+    }
+
+    const matches = Array.from(document.querySelectorAll(toolbarSelector)).filter(
+      (toolbar) => {
+        const toolbarSettings = getToolbarSettings(toolbar);
+        return (
+          toolbarSettings?.view_id === viewSettings.view_name &&
+          toolbarSettings?.current_display_id === viewSettings.view_display_id
+        );
+      },
+    );
+    return matches.length === 1 ? matches[0] : null;
+  }
+
+  /**
+   * Parses query parameters while retaining repeated values.
+   */
+  function parseQueryParameters(url) {
+    const params = {};
+    new URL(url, window.location.origin).searchParams.forEach((value, key) => {
+      if (Object.prototype.hasOwnProperty.call(params, key)) {
+        params[key] = Array.isArray(params[key])
+          ? params[key].concat(value)
+          : [params[key], value];
+      }
+      else {
+        params[key] = value;
+      }
+    });
+    return params;
+  }
+
+  /**
+   * Keeps one toolbar's links, state, and owning View presentation in sync.
+   */
+  function syncToolbar(toolbar, url) {
+    const destination = new URL(url, window.location.origin);
+    const updateLinks = (selector, parameter, attribute) => {
+      toolbar.querySelectorAll(selector).forEach((link) => {
+        const linkUrl = new URL(destination.toString());
+        linkUrl.searchParams.set(parameter, link.getAttribute(attribute));
+        link.href = linkUrl.toString();
+      });
+    };
+    updateLinks(
+      'a.pager__itemsperpage',
+      'items_per_page',
+      'itemsperpage',
+    );
+    updateLinks('a.pager__display', 'display', 'type');
+
+    const display = destination.searchParams.get('display');
+    if (display === 'list' || display === 'grid') {
+      toolbar.querySelectorAll('a.pager__display').forEach((link) => {
+        const active = link.getAttribute('type') === display;
+        const label = link.querySelector('.display-mode')?.textContent.trim();
+        link.parentElement?.classList.toggle('is-active', active);
+        link.classList.toggle('pager__link--is-active', active);
+        if (active) {
+          link.setAttribute('aria-current', 'true');
         }
+        else {
+          link.removeAttribute('aria-current');
+        }
+        if (label) {
+          link.setAttribute(
+            'aria-label',
+            active
+              ? Drupal.t('Current display: @display', { '@display': label })
+              : Drupal.t('Display as @display', { '@display': label }),
+          );
+        }
+      });
 
-        return params;
+      const instance = getViewInstance(toolbar);
+      const view = toolbar.closest('.view') || instance?.$view?.get(0);
+      view?.classList.toggle('view-list', display === 'list');
+      view?.classList.toggle('view-grid', display === 'grid');
+    }
+
+    const itemsPerPage = destination.searchParams.get('items_per_page');
+    if (itemsPerPage !== null) {
+      toolbar.querySelectorAll('a.pager__itemsperpage').forEach((link) => {
+        const active = link.getAttribute('itemsperpage') === itemsPerPage;
+        const label = link.textContent.trim();
+        link.parentElement?.classList.toggle('is-active', active);
+        link.classList.toggle('pager__link--is-active', active);
+        if (active) {
+          link.setAttribute('aria-current', 'true');
+        }
+        else {
+          link.removeAttribute('aria-current');
+        }
+        link.setAttribute(
+          'aria-label',
+          active
+            ? Drupal.t('Current page size: @item items per page', {
+                '@item': label,
+              })
+            : Drupal.t('@item items per page', { '@item': label }),
+        );
+      });
+    }
+  }
+
+  /**
+   * Collects only legacy blocks associated with the toolbar's View display.
+   */
+  function getRelatedBlocks(toolbar, instance) {
+    const blocks = {};
+    const owningView = instance.$view?.get(0);
+    const addBlock = (element) => {
+      const block = element?.closest?.('[id^="block-"]');
+      if (!block || (owningView && block.contains(owningView))) {
+        return;
+      }
+      const htmlId = block.id.replace(/--.*$/, '');
+      const blockId = htmlId.slice('block-'.length).replace(/-/g, '_');
+      if (blockId) {
+        blocks[blockId] = `#${block.id}`;
+      }
     };
 
-  function reload(url) {
-    // Update View.
-    if (drupalSettings && drupalSettings.views && drupalSettings.views.ajaxViews) {
-      var view_path = drupalSettings.views.ajax_path;
-      $.each(drupalSettings.views.ajaxViews, function (views_dom_id) {
-        var views_parameters = Drupal.Views.parseQueryString(url);
-        var views_arguments = Drupal.Views.parseViewArgs(url, "search");
-        var views_settings = $.extend(
-          {},
-          Drupal.views.instances[views_dom_id].settings,
-          views_arguments,
-          views_parameters
-        );
-        var views_ajax_settings =
-          Drupal.views.instances[views_dom_id].element_settings;
-        views_ajax_settings.submit = views_settings;
-        views_ajax_settings.url =
-          view_path + "?" + $.param(Drupal.Views.parseQueryString(url));
-        Drupal.ajax(views_ajax_settings).execute();
-      });
+    addBlock(toolbar);
+    addBlock(instance.$exposed_form?.get(0));
+
+    const toolbarSettings = getToolbarSettings(toolbar);
+    Object.entries(drupalSettings.facets_views_ajax || {}).forEach(
+      ([facetId, facetSettings]) => {
+        if (
+          facetSettings.view_id !== toolbarSettings.view_id ||
+          facetSettings.current_display_id !==
+            toolbarSettings.current_display_id
+        ) {
+          return;
+        }
+        document
+          .querySelectorAll('[data-drupal-facet-id]')
+          .forEach((element) => {
+            if (element.getAttribute('data-drupal-facet-id') === facetId) {
+              addBlock(element);
+            }
+          });
+        if (facetSettings.facets_summary_id) {
+          document
+            .querySelectorAll('[data-drupal-facets-summary-id]')
+            .forEach((element) => {
+              if (
+                element.getAttribute('data-drupal-facets-summary-id') ===
+                facetSettings.facets_summary_id
+              ) {
+                addBlock(element);
+              }
+            });
+        }
+      },
+    );
+    return blocks;
+  }
+
+  /**
+   * Reloads only the AJAX View and legacy blocks owned by one toolbar.
+   */
+  function reloadToolbar(toolbar, url) {
+    const instance = getViewInstance(toolbar);
+    if (!instance) {
+      return false;
     }
 
-    // Update items_per_page links in pager 
-    if (url.indexOf("items_per_page=") == -1) { 
-      // append items_per_page
-      $("a.pager__itemsperpage").each(function( index ) {
-        var newUrl = url + "&items_per_page=" + $(this).attr('itemsperpage');
-        $(this).attr("href", newUrl);
-      });
-    } 
-    else { 
-      // replace existed items_per_page
-      var params = parseQueryString(url.split("?")[1]);
-      var newParams = [];
-      var existingDateQuery = false; // true if a date query already exists
-
-      var links = {};
-      // update publication date in url if previously queried
-      for (var key in params) {
-        if (!params[key]) { // no search parameters in url
-          break;
-        }
-
-        // check for items_per_page query
-        if (!key.startsWith("items_per_page")) { 
-          newParams.push(key + "=" + params[key]);
-        }
-      }
-      var newParamsUrl = newParams.join('&');
-      $("a.pager__itemsperpage").each(function( index ) {
-        $(this).attr("href", url.split("?")[0] + '?' + newParamsUrl + "&items_per_page=" + $(this).attr('itemsperpage'));
-      });
+    syncToolbar(toolbar, url);
+    const toolbarSettings = getToolbarSettings(toolbar);
+    const destination = new URL(url, window.location.origin);
+    const viewSettings = instance.settings;
+    const viewArguments = Drupal.Views.parseViewArgs(
+      destination.toString(),
+      viewSettings.view_base_path,
+    );
+    const submit = $.extend(
+      {},
+      viewSettings,
+      viewArguments,
+      parseQueryParameters(destination.toString()),
+    );
+    let ajaxPath =
+      toolbarSettings.ajax_path || drupalSettings.views?.ajax_path || '';
+    if (Array.isArray(ajaxPath)) {
+      [ajaxPath] = ajaxPath;
     }
-
-
-
-    // Update display mode links in pager 
-    if (url.indexOf("display=") == -1) { 
-      // append items_per_page
-      $("a.pager__display").each(function( index ) {
-        var newUrl = url + "&display=" + $(this).attr('type');
-        $(this).attr("href", newUrl);
-      });
-      
-    } 
-    else { 
-      // replace existed display
-      var params = parseQueryString(url.split("?")[1]);
-      var newParams = [];
-      var existingDateQuery = false; // true if a date query already exists
-
-      var links = {};
-      // update publication date in url if previously queried
-      for (var key in params) {
-        if (!params[key]) { // no search parameters in url
-          break;
-        }
-
-        // check for display query
-        if (!key.startsWith("display")) { 
-          newParams.push(key + "=" + params[key]);
-        }
-      }
-      var newParamsUrl = newParams.join('&');
-      $("a.pager__display").each(function( index ) {
-
-        var value = $(this).attr('type');
-        $(this).attr("href", url.split("?")[0] + '?' + newParamsUrl + "&display=" + value);
-      });
-    }
-
-
-    
-    // Replace filter, pager, summary, and facet blocks.
-    var blocks = {};
-    $(
-      "[class*='block-plugin-id--islandora-advanced-search-result-pager'], [class*='block-plugin-id--views-exposed-filter-block'], [class*='block-facets']"
-    ).each(function () {
-      var id = $(this).attr("id");
-      var block_id = id
-        .slice("block-".length, id.length)
-        .replace(/--.*$/g, "")
-        .replace(/-/g, "_");
-      blocks[block_id] = "#" + id;
+    const separator = ajaxPath.includes('?') ? '&' : '?';
+    const ajaxSettings = $.extend({}, instance.element_settings, {
+      submit,
+      url: `${ajaxPath}${separator}${destination.searchParams.toString()}`,
+      httpMethod: 'GET',
     });
+    Drupal.ajax(ajaxSettings).execute();
+
+    const blocks = getRelatedBlocks(toolbar, instance);
     if (Object.keys(blocks).length > 0) {
       Drupal.ajax({
-        url: Drupal.url("islandora-advanced-search-ajax-blocks"),
+        url: Drupal.url('islandora-advanced-search-ajax-blocks'),
         submit: {
-          link: url,
-          blocks: blocks,
+          link: destination.toString(),
+          blocks,
         },
       }).execute();
     }
+    return true;
   }
 
-  // On location change reload all the blocks / ajax view.
-  window.addEventListener("pushstate", function (e) {
-    reload(window.location.href);
-  });
-
-  window.addEventListener("popstate", function (e) {
-      reload(window.location.href);
-  });
-
   /**
-   * Push state on form/pager/facet change.
+   * Uses AJAX for one toolbar, retaining ordinary navigation as the fallback.
    */
+  function navigate(toolbar, url) {
+    if (!getViewInstance(toolbar)) {
+      return false;
+    }
+    const toolbarId = toolbar.getAttribute('data-drupal-pager-id');
+    const currentState =
+      window.history.state && typeof window.history.state === 'object'
+        ? window.history.state
+        : {};
+    if (currentState[historyStateKey] !== toolbarId) {
+      window.history.replaceState(
+        { ...currentState, [historyStateKey]: toolbarId },
+        document.title,
+        window.location.href,
+      );
+    }
+    window.history.pushState(
+      { [historyStateKey]: toolbarId },
+      document.title,
+      url,
+    );
+    reloadToolbar(toolbar, url);
+    window.dispatchEvent(
+      new CustomEvent('advancedsearchlocationchange', {
+        detail: { toolbarId, url: window.location.href },
+      }),
+    );
+    return true;
+  }
+
+  Drupal.advancedSearchNavigate = (toolbarId, url) => {
+    const toolbar = findToolbar(toolbarId);
+    return toolbar ? navigate(toolbar, url) : false;
+  };
+
+  function handlePopState(event) {
+    const toolbarId = event.state?.[historyStateKey];
+    const toolbar = findToolbar(toolbarId);
+    if (toolbar && reloadToolbar(toolbar, window.location.href)) {
+      window.dispatchEvent(
+        new CustomEvent('advancedsearchlocationchange', {
+          detail: { toolbarId, url: window.location.href },
+        }),
+      );
+    }
+  }
+
+  window.addEventListener('popstate', handlePopState);
+
   Drupal.behaviors.islandoraAdvancedSearchViewsAjax = {
-    attach: function (context, settings) {
-      window.historyInitiated = true;
-      // Remove existing behavior from form.
-      if (settings && settings.views && settings.views.ajaxViews) {
-        $.each(settings.views.ajaxViews, function (index, settings) {
-          var exposed_form = $(
-            "form#views-exposed-form-" +
-            settings.view_name.replace(/_/g, "-") +
-            "-" +
-            settings.view_display_id.replace(/_/g, "-")
+    attach(context, settings) {
+      document.querySelectorAll(toolbarSelector).forEach((toolbar) => {
+        toolbar.dataset.advancedSearchAjaxReady = getViewInstance(toolbar)
+          ? 'true'
+          : 'false';
+      });
+
+      once('advanced-search-toolbar', toolbarSelector, context).forEach(
+        (toolbar) => {
+          syncToolbar(toolbar, window.location.href);
+          $(toolbar).on(
+            'click',
+            'a.pager__itemsperpage, a.pager__display, nav.pager a',
+            function (event) {
+              if (
+                event.shiftKey ||
+                event.ctrlKey ||
+                event.metaKey ||
+                event.altKey ||
+                (typeof event.button === 'number' && event.button !== 0) ||
+                !getViewInstance(toolbar)
+              ) {
+                return;
+              }
+              event.preventDefault();
+              event.stopImmediatePropagation();
+              navigate(toolbar, this.href);
+            },
           );
-          $(once('exposed-form',
-            "form#views-exposed-form-" +
-            settings.view_name.replace(/_/g, "-") +
-            "-" +
-            settings.view_display_id.replace(/_/g, "-")))
-            .find("input[type=submit], input[type=image]")
-            .not("[data-drupal-selector=edit-reset]")
-            .each(function (index) {
-              $(this).unbind("click");
-              $(this).click(function (e) {
-                // Let ctrl/cmd click open in a new window.
-                if (e.shiftKey || e.ctrlKey || e.metaKey) {
-                  return;
-                }
-                e.preventDefault();
-                e.stopPropagation();
-                var href = window.location.href;
-                var params = Drupal.Views.parseQueryString(href);
-                // Remove the page if set as submitting the form should always take
-                // the user to the first page (facets do the same).
-                delete params.page;
-                // Include values from the form in the URL.
-                $.each(exposed_form.serializeArray(), function () {
-                  params[this.name] = this.value;
-                });
-                href = href.split("?")[0] + "?" + $.param(params);
-                window.history.pushState(null, document.title, href);
-              });
+
+          $(toolbar)
+            .find('select[name="order"]')
+            .on('change', function () {
+              const href = new URL(window.location.href);
+              const selection = this.value;
+              const separator = selection.lastIndexOf('_');
+              if (separator === -1) {
+                return;
+              }
+              href.searchParams.set(
+                'sort_by',
+                selection.slice(0, separator),
+              );
+              href.searchParams.set(
+                'sort_order',
+                selection.slice(separator + 1).toUpperCase(),
+              );
+              href.searchParams.delete('page');
+              if (!navigate(toolbar, href.toString())) {
+                window.location.assign(href.toString());
+              }
             });
-        });
+        },
+      );
 
-          if (window.location.search.includes("display=") === true) {
-
-              $("li.pager__item a.pager__display").each(function () {
-                  $(this).parent().removeClass("is-active");
-                  $(this).removeClass("pager__link--is-active");
-                  if ($(this).attr('type').trim().toLowerCase() === getParam(window.location.search, "display").trim().toLowerCase()) {
-                      $(this).addClass("pager__link--is-active");
-                  }
-              });
-          }
-
-          if (window.location.search.includes("items_per_page=") === true) {
-              $("li.pager__item a.pager__itemsperpage").each(function() {
-                  $(this).parent().removeClass("is-active");
-                  $(this).removeClass("pager__link--is-active");
-                  if ($(this).text().trim().toLowerCase() === getParam(window.location.search, "items_per_page").trim().toLowerCase()) {
-                      $(this).addClass("pager__link--is-active");
-                  }
-              });
-          }
-
-
-      }
-        function getParam(urlstring, param) {
-            var searchparam = new URLSearchParams(urlstring);
-            return searchparam.get(param);
+      Object.values(settings.views?.ajaxViews || {}).forEach((viewSettings) => {
+        const toolbar = findToolbarForView(viewSettings);
+        const instance = toolbar ? getViewInstance(toolbar) : null;
+        const form = instance?.$exposed_form?.get(0);
+        if (!toolbar || !form) {
+          return;
         }
 
-      // Attach behavior to pager, summary, facet links.
-      $(once("new-window", "[data-drupal-pager-id], [data-drupal-facets-summary-id], [data-drupal-facet-id]"))
-        .find("a:not(.facet-item)")
-        .click(function (e) {
-          // Let ctrl/cmd click open in a new window.
-          if (e.shiftKey || e.ctrlKey || e.metaKey) {
+        const submitForm = (event) => {
+          if (event.submitter?.matches('[data-drupal-selector="edit-reset"]')) {
             return;
           }
-          e.preventDefault();
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          const href = new URL(window.location.href);
+          href.searchParams.delete('page');
+          $(form)
+            .find(':input[name]')
+            .each(function () {
+              href.searchParams.delete(this.name);
+            });
+          $(form)
+            .serializeArray()
+            .forEach(({ name, value }) => {
+              href.searchParams.append(name, value);
+            });
+          navigate(toolbar, href.toString());
+        };
 
-          // added to prevent page reload if a facet link is clicked (Ajax of view is enabled)
-          e.stopImmediatePropagation();
-
-          window.history.pushState(null, document.title, $(this).attr("href"));
+        once('advanced-search-exposed-form', form).forEach((element) => {
+          element.addEventListener('submit', submitForm, true);
         });
-
-      // Trigger on sort change.
-      $(once('params-sort', '[data-drupal-pager-id] select[name="order"], .pager__sort select[name="order"]'))
-        .change(function () {
-          var href = window.location.href;
-          var params = Drupal.Views.parseQueryString(href);
-
-          var selection = $(this).val();
-          var option = selection.split('_');
-          params.sort_order = option[option.length - 1].toUpperCase();
-          params.sort_by = selection.replace("_" + option[option.length - 1], "");
-          href = href.split("?")[0] + "?" + $.param(params);
-          window.history.pushState(null, document.title, href);
+        once(
+          'advanced-search-exposed-submit',
+          $(form)
+            .find(
+              'input[type="submit"], button[type="submit"], input[type="image"]',
+            )
+            .not('[data-drupal-selector="edit-reset"]')
+            .get(),
+        ).forEach((element) => {
+          element.addEventListener('click', submitForm, true);
         });
+      });
 
+      // Facets 2 emits this ownership map. Facets 3 uses Views exposed filters,
+      // so its native controls are deliberately left untouched.
+      Object.entries(settings.facets_views_ajax || {}).forEach(
+        ([facetId, facetSettings]) => {
+          const toolbar = Array.from(
+            document.querySelectorAll(toolbarSelector),
+          ).find((candidate) => {
+            const toolbarSettings = getToolbarSettings(candidate);
+            return (
+              toolbarSettings?.view_id === facetSettings.view_id &&
+              toolbarSettings?.current_display_id ===
+                facetSettings.current_display_id &&
+              getViewInstance(candidate)
+            );
+          });
+          if (!toolbar) {
+            return;
+          }
+
+          if (facetId === 'facets_summary_ajax') {
+            once(
+              'advanced-search-facets-summary',
+              '[data-drupal-facets-summary-id] a',
+              context,
+            ).forEach((link) => {
+              link.addEventListener('click', (event) => {
+                if (
+                  event.shiftKey ||
+                  event.ctrlKey ||
+                  event.metaKey ||
+                  event.altKey
+                ) {
+                  return;
+                }
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                navigate(toolbar, link.href);
+              });
+            });
+            return;
+          }
+
+          $('[data-drupal-facet-id]', context)
+            .filter(function () {
+              return this.getAttribute('data-drupal-facet-id') === facetId;
+            })
+            .each(function () {
+              if (!this.classList.contains('js-facets-widget')) {
+                return;
+              }
+              $(this)
+                .off('facets_filter.facets')
+                .on('facets_filter.facets', (_event, url) => {
+                  navigate(toolbar, url);
+                });
+            });
+        },
+      );
     },
   };
-})(jQuery, Drupal);
+})(jQuery, Drupal, drupalSettings, once);

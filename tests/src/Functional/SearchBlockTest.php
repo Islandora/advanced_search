@@ -21,7 +21,6 @@ class SearchBlockTest extends BrowserTestBase {
     'search_api',
     'search_api_solr',
     'facets',
-    'facets_summary',
     'node',
   ];
 
