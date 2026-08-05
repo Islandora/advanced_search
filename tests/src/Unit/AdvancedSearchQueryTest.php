@@ -4,8 +4,12 @@ namespace Drupal\Tests\advanced_search\Unit;
 
 use Drupal\advanced_search\AdvancedSearchQuery;
 use Drupal\advanced_search\AdvancedSearchQueryTerm;
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Tests\UnitTestCase;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Routing\Matcher\RequestMatcherInterface;
 
 /**
  * Tests defensive parsing of advanced-search query parameters.
@@ -18,7 +22,14 @@ final class AdvancedSearchQueryTest extends UnitTestCase {
    * Tests configured names and malformed nested query values.
    */
   public function testConfiguredParametersAndMalformedTerms(): void {
-    $query = new AdvancedSearchQuery('criteria', 'descendants');
+    $query = new AdvancedSearchQuery(
+      $this->createMock(ConfigFactoryInterface::class),
+      $this->createMock(EntityTypeManagerInterface::class),
+      new RequestStack(),
+      $this->createMock(RequestMatcherInterface::class),
+      'criteria',
+      'descendants',
+    );
     $request = Request::create('/search', 'GET', [
       'criteria' => [
         ['f' => 'title', 'v' => 'A valid value'],

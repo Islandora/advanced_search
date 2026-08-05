@@ -4,6 +4,9 @@ namespace Drupal\advanced_search;
 
 use Drupal\advanced_search\Form\SettingsForm;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Routing\Matcher\RequestMatcherInterface;
 
 /**
  * Creates advanced-search queries using the configured URL parameter names.
@@ -15,6 +18,9 @@ final class AdvancedSearchQueryFactory {
    */
   public function __construct(
     protected ConfigFactoryInterface $configFactory,
+    protected EntityTypeManagerInterface $entityTypeManager,
+    protected RequestStack $requestStack,
+    protected RequestMatcherInterface $requestMatcher,
   ) {}
 
   /**
@@ -24,6 +30,10 @@ final class AdvancedSearchQueryFactory {
     $config = $this->configFactory->get(SettingsForm::CONFIG_NAME);
 
     return new AdvancedSearchQuery(
+      $this->configFactory,
+      $this->entityTypeManager,
+      $this->requestStack,
+      $this->requestMatcher,
       $this->parameterName(
         $config->get(SettingsForm::SEARCH_QUERY_PARAMETER),
         AdvancedSearchQuery::DEFAULT_QUERY_PARAM,

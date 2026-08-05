@@ -3,6 +3,9 @@ services:
     class: Drupal\advanced_search\AdvancedSearchQueryFactory
     arguments:
       - '@config.factory'
+      - '@entity_type.manager'
+      - '@request_stack'
+      - '@router'
   advanced_search.query:
     class: Drupal\advanced_search\AdvancedSearchQuery
     factory: ['@advanced_search.query_factory', 'create']
@@ -16,5 +19,6 @@ services:
   Drupal\advanced_search\EventSubscriber\PostConvertedQueryEventSubscriber:
     arguments:
       - '@advanced_search.query'
+      - '@request_stack'
     tags:
       - { name: 'event_subscriber' }

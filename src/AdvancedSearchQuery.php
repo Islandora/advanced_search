@@ -2,7 +2,8 @@
 
 namespace Drupal\advanced_search;
 
-use Drupal\block\Entity\Block;
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\EventSubscriber\MainContentViewSubscriber;
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Url;
@@ -13,6 +14,8 @@ use Drupal\search_api\Query\QueryInterface as DrupalQueryInterface;
 use Drupal\views\ViewExecutable;
 use Solarium\Core\Query\QueryInterface as SolariumQueryInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Routing\Matcher\RequestMatcherInterface;
 use Drupal\search_api_solr\Utility\Utility as SearchAPISolrUtility;
 
 /**
@@ -43,12 +46,27 @@ class AdvancedSearchQuery {
   /**
    * Constructs an AdvancedSearchQuery object.
    *
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
+   *   The configuration factory.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   *   The entity type manager.
+   * @param \Symfony\Component\HttpFoundation\RequestStack $requestStack
+   *   The request stack.
+   * @param \Symfony\Component\Routing\Matcher\RequestMatcherInterface $requestMatcher
+   *   The request matcher.
    * @param string $query_parameter
    *   The field to search against.
    * @param string $recurse_parameter
    *   The field that signifies the search should be recursive.
    */
-  public function __construct(string $query_parameter = self::DEFAULT_QUERY_PARAM, string $recurse_parameter = self::DEFAULT_RECURSE_PARAM) {
+  public function __construct(
+    protected ConfigFactoryInterface $configFactory,
+    protected EntityTypeManagerInterface $entityTypeManager,
+    protected RequestStack $requestStack,
+    protected RequestMatcherInterface $requestMatcher,
+    string $query_parameter = self::DEFAULT_QUERY_PARAM,
+    string $recurse_parameter = self::DEFAULT_RECURSE_PARAM,
+  ) {
     $this->queryParameter = $query_parameter;
     $this->recurseParameter = $recurse_parameter;
   }
@@ -181,7 +199,7 @@ class AdvancedSearchQuery {
       // Disable for Lucene and wildcard
       // $q[] = "{!boost b=boost_document}";
       // Create a flag for active/inactive dismax.
-      $config = \Drupal::config(SettingsForm::CONFIG_NAME);
+      $config = $this->configFactory->get(SettingsForm::CONFIG_NAME);
       $isDismax = $config->get(SettingsForm::EDISMAX_SEARCH_FLAG);
       if (!isset($isDismax)) {
         $isDismax = TRUE;
@@ -315,7 +333,9 @@ class AdvancedSearchQuery {
       $block_id = array_search([$view->id(), $display_id], $views, TRUE);
     }
     if ($settings === NULL && $block_id !== FALSE) {
-      $block = Block::load($block_id);
+      $block = $this->entityTypeManager
+        ->getStorage('block')
+        ->load($block_id);
       $settings = $block?->get('settings');
     }
 
@@ -354,18 +374,22 @@ class AdvancedSearchQuery {
               return;
             }
             $view->initHandlers();
-            $request_stack = \Drupal::requestStack();
             $refer = Request::create($referer);
-            $refer->getPathInfo();
-            $refer->attributes->add(\Drupal::getContainer()->get('router')->matchRequest($refer));
-            $request_stack->push($refer);
-            if (isset($view->argument[$immediate_children_contextual_filter])) {
-              $plugin = $view->argument[$immediate_children_contextual_filter]->getPlugin('argument_default');
-              if ($plugin) {
-                $view->args[$index] = $plugin->getArgument();
+            $refer->attributes->add(
+              $this->requestMatcher->matchRequest($refer),
+            );
+            $this->requestStack->push($refer);
+            try {
+              if (isset($view->argument[$immediate_children_contextual_filter])) {
+                $plugin = $view->argument[$immediate_children_contextual_filter]->getPlugin('argument_default');
+                if ($plugin) {
+                  $view->args[$index] = $plugin->getArgument();
+                }
               }
             }
-            $request_stack->pop();
+            finally {
+              $this->requestStack->pop();
+            }
           }
         }
       }
