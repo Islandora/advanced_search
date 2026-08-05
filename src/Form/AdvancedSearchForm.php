@@ -12,8 +12,8 @@ use Drupal\advanced_search\AdvancedSearchQueryTerm;
 use Drupal\advanced_search\GetConfigTrait;
 use Drupal\views\DisplayPluginCollection;
 use Drupal\views\Entity\View;
+use Drupal\views\Plugin\ViewsPluginManager;
 use Drupal\views\Plugin\views\display\PathPluginBase;
-use Drupal\views\Views;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -59,11 +59,32 @@ class AdvancedSearchForm extends FormBase {
   protected $currentRouteMatch;
 
   /**
+   * Parses and builds configured advanced-search URLs.
+   *
+   * @var \Drupal\advanced_search\AdvancedSearchQuery
+   */
+  protected $advancedSearchQuery;
+
+  /**
+   * The Views display plugin manager.
+   *
+   * @var \Drupal\views\Plugin\ViewsPluginManager
+   */
+  protected $displayPluginManager;
+
+  /**
    * Class constructor.
    */
-  final public function __construct(Request $request, RouteMatchInterface $current_route_match) {
+  final public function __construct(
+    Request $request,
+    RouteMatchInterface $current_route_match,
+    AdvancedSearchQuery $advanced_search_query,
+    ViewsPluginManager $display_plugin_manager,
+  ) {
     $this->request = $request;
     $this->currentRouteMatch = $current_route_match;
+    $this->advancedSearchQuery = $advanced_search_query;
+    $this->displayPluginManager = $display_plugin_manager;
   }
 
   /**
@@ -71,9 +92,11 @@ class AdvancedSearchForm extends FormBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-          $container->get('request_stack')->getMainRequest(),
-          $container->get('current_route_match')
-      );
+      $container->get('request_stack')->getMainRequest(),
+      $container->get('current_route_match'),
+      $container->get('advanced_search.query'),
+      $container->get('plugin.manager.views.display'),
+    );
   }
 
   /**
@@ -196,22 +219,35 @@ class AdvancedSearchForm extends FormBase {
    */
   protected function processInput(FormStateInterface $form_state, array $term_default_values) {
     $input = $form_state->getUserInput();
-    $input['recursive'] = $input['recursive'] ?? self::getRecursive();
+    $input = is_array($input) ? $input : [];
+    $trigger = $form_state->getTriggeringElement();
+    $has_form_input = $form_state->isProcessingInput()
+      || $trigger !== NULL
+      || $input !== [];
+    if ($has_form_input) {
+      // An unchecked checkbox is intentionally absent from submitted input.
+      $recursive = filter_var(
+        $input['recursive'] ?? FALSE,
+        FILTER_VALIDATE_BOOLEAN,
+      );
+    }
+    elseif ($this->request->query->has($this->advancedSearchQuery->getRecurseParameterName())) {
+      $recursive = $this->advancedSearchQuery->shouldRecurse($this->request);
+    }
+    else {
+      $recursive = (bool) self::getRecursive();
+    }
+    $input['recursive'] = $recursive;
 
     $term_values = isset($input['terms']) && is_array($input['terms']) ? $input['terms'] : [];
     // Form was not submitted see if we can rebuild from query parameters.
-    $advanced_search_query = new AdvancedSearchQuery();
     if (empty($term_values)) {
-      $terms = $advanced_search_query->getTerms($this->request);
+      $terms = $this->advancedSearchQuery->getTerms($this->request);
       foreach ($terms as $term) {
         $term_values[] = $term->toUserInput();
       }
     }
-    if (!isset($input['recursive'])) {
-      $recursive = $advanced_search_query->shouldRecurse($this->request);
-    }
     // Form was submitted via +/- operators.
-    $trigger = $form_state->getTriggeringElement();
     if ($trigger != NULL) {
       $term_index = $trigger['#term_index'] ?? 0;
       $value = $trigger['#value'] instanceof TranslatableMarkup ?
@@ -252,7 +288,10 @@ class AdvancedSearchForm extends FormBase {
   protected function getRouteName(FormStateInterface $form_state) {
     $view = $form_state->get('view');
     $display = $form_state->get('display');
-    $display_handlers = new DisplayPluginCollection($view->getExecutable(), Views::pluginManager('display'));
+    $display_handlers = new DisplayPluginCollection(
+      $view->getExecutable(),
+      $this->displayPluginManager,
+    );
     $display_handler = $display_handlers->get($display['id']);
     if ($display_handler instanceof PathPluginBase) {
       return $display_handler->getRouteName();
@@ -263,20 +302,42 @@ class AdvancedSearchForm extends FormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, ?View $view = NULL, array $display = [], array $fields = [], ?string $context_filter = NULL) {
+  public function buildForm(array $form, FormStateInterface $form_state, ?View $view = NULL, array $display = [], array $fields = [], ?string $context_filter = NULL, ?string $instance_id = NULL) {
     // Keep reference to view and display as the submit handler may use them
     // to redirect the user to the search page.
     $form_state->set('view', $view);
     $form_state->set('display', $display);
     $route_name = $this->getRouteName($form_state);
     $requires_redirect = $route_name ? $this->currentRouteMatch->getRouteName() !== $route_name : FALSE;
+    $view_id = $view?->id();
+    $display_id = $display['id'] ?? NULL;
+    $ajax_enabled = FALSE;
+    if ($view !== NULL && $display_id !== NULL) {
+      $view_executable = $view->getExecutable();
+      if ($view_executable->setDisplay($display_id)) {
+        $ajax_enabled = $view_executable->display_handler->ajaxEnabled();
+      }
+    }
+    $form_dom_id = $instance_id !== NULL && $instance_id !== ''
+      ? Html::getId($this->getFormId() . '-' . $instance_id)
+      : Html::getUniqueId($this->getFormId());
+    $ajax_wrapper_id = Html::getId(
+      $form_dom_id . '-' . self::AJAX_WRAPPER,
+    );
+    $form['#id'] = $form_dom_id;
+    $form['#attributes']['data-drupal-selector'] = Html::getId(
+      $this->getFormId(),
+    );
 
     $form['#attached']['library'][] = 'advanced_search/advanced.search.form';
-    $form['#attached']['drupalSettings']['advanced_search_form'] = [
-      'id' => Html::getId($this->getFormId()),
+    $form['#attached']['drupalSettings']['advanced_search_form'][$form_dom_id] = [
+      'id' => $form_dom_id,
       'redirect' => $requires_redirect,
-      'query_parameter' => AdvancedSearchQuery::getQueryParameter(),
-      'recurse_parameter' => AdvancedSearchQuery::getRecurseParameter(),
+      'ajax_enabled' => $ajax_enabled,
+      'view_id' => $view_id,
+      'display_id' => $display_id,
+      'query_parameter' => $this->advancedSearchQuery->getQueryParameterName(),
+      'recurse_parameter' => $this->advancedSearchQuery->getRecurseParameterName(),
       'mapping' => [
         self::CONJUNCTION_FORM_FIELD => AdvancedSearchQueryTerm::CONJUNCTION_QUERY_PARAMETER,
         self::SEARCH_FORM_FIELD => AdvancedSearchQueryTerm::FIELD_QUERY_PARAMETER,
@@ -299,11 +360,25 @@ class AdvancedSearchForm extends FormBase {
       $term_value = !empty($term_values) ? array_shift($term_values) : $term_default_values;
       $conjunction = $term_value[self::CONJUNCTION_FORM_FIELD] ?? $term_default_values[self::CONJUNCTION_FORM_FIELD];
       $term_elements[] = [
+        '#type' => 'container',
+        '#attributes' => [
+          'class' => [
+            'advanced-search-form__condition',
+            $first
+              ? 'advanced-search-form__condition--first'
+              : 'advanced-search-form__condition--additional',
+          ],
+          'role' => 'group',
+          'aria-label' => $this->t('Search condition @number', [
+            '@number' => $i + 1,
+          ]),
+        ],
             // Only show on terms after the first.
         self::CONJUNCTION_FORM_FIELD => $first ? NULL : [
           '#type' => 'select',
           '#attributes' => [
             'aria-label' => $this->t("Select search condition"),
+            'class' => ['advanced-search-form__conjunction'],
           ],
           '#options' => [
             self::AND_OP => $this->t('and'),
@@ -316,6 +391,7 @@ class AdvancedSearchForm extends FormBase {
           '#type' => 'select',
           '#attributes' => [
             'aria-label' => $this->t("Select search field"),
+            'class' => ['advanced-search-form__field'],
           ],
           '#options' => $options,
           '#default_value' => $term_value[self::SEARCH_FORM_FIELD],
@@ -325,6 +401,7 @@ class AdvancedSearchForm extends FormBase {
           '#type' => 'select',
           '#attributes' => [
             'aria-label' => $this->t("Select search operator"),
+            'class' => ['advanced-search-form__operator'],
           ],
           '#options' => [
             self::IS_OP => $this->t('is'),
@@ -359,12 +436,16 @@ class AdvancedSearchForm extends FormBase {
           '#type' => 'textfield',
           '#attributes' => [
             'aria-label' => $this->t("Enter a search term"),
+            'class' => ['advanced-search-form__value'],
           ],
           '#default_value' => $term_value[self::VALUE_FORM_FIELD],
           '#theme_wrappers' => [],
         ],
         'actions' => [
           '#type' => 'container',
+          '#attributes' => [
+            'class' => ['advanced-search-form__condition-actions'],
+          ],
           'add' => [
             '#type' => 'button',
             '#value' => $this->getAddOperator(),
@@ -372,10 +453,12 @@ class AdvancedSearchForm extends FormBase {
             '#term_index' => $i,
             '#attributes' => [
               'class' => [$block_class_prefix . '__add', 'fa'],
+              'aria-label' => $this->t('Add another search condition'),
             ],
+            '#weight' => 10,
             '#ajax' => [
               'callback' => [$this, 'ajaxCallback'],
-              'wrapper' => self::AJAX_WRAPPER,
+              'wrapper' => $ajax_wrapper_id,
               'progress' => [
                 'type' => 'none',
               ],
@@ -388,11 +471,12 @@ class AdvancedSearchForm extends FormBase {
             '#term_index' => $i,
             '#attributes' => [
               'class' => [$block_class_prefix . '__remove', 'fa'],
-              'aria-label' => $this->t("Remove"),
+              'aria-label' => $this->t('Remove this search condition'),
             ],
+            '#weight' => 0,
             '#ajax' => [
               'callback' => [$this, 'ajaxCallback'],
-              'wrapper' => self::AJAX_WRAPPER,
+              'wrapper' => $ajax_wrapper_id,
               'progress' => [
                 'type' => 'none',
               ],
@@ -405,10 +489,16 @@ class AdvancedSearchForm extends FormBase {
 
     $form['ajax'] = [
       '#type' => 'container',
-      '#attributes' => ['id' => self::AJAX_WRAPPER],
+      '#attributes' => [
+        'id' => $ajax_wrapper_id,
+        'class' => ['advanced-search-form__builder'],
+      ],
       'terms' => array_merge([
         '#tree' => TRUE,
         '#type' => 'container',
+        '#attributes' => [
+          'class' => ['advanced-search-form__conditions'],
+        ],
       ], $term_elements),
     ];
 
@@ -427,7 +517,7 @@ class AdvancedSearchForm extends FormBase {
       ],
       '#ajax' => [
         'callback' => [$this, 'ajaxCallback'],
-        'wrapper' => self::AJAX_WRAPPER,
+        'wrapper' => $ajax_wrapper_id,
         'progress' => [
           'type' => 'none',
         ],
@@ -440,6 +530,8 @@ class AdvancedSearchForm extends FormBase {
         'class' => [$block_class_prefix . '__search'],
       ],
     ];
+    $form['#attributes']['class'][] = 'advanced-search-form';
+    $form['#attributes']['aria-label'] = $this->t('Advanced search');
     return $form;
   }
 
@@ -455,8 +547,7 @@ class AdvancedSearchForm extends FormBase {
     $terms = array_filter($terms);
     $recurse = filter_var($values['recursive'] ?? FALSE, FILTER_VALIDATE_BOOLEAN);
     $route = $this->getRouteName($form_state);
-    $advanced_search_query = new AdvancedSearchQuery();
-    return $advanced_search_query->toUrl($this->request, $terms, $recurse, $route);
+    return $this->advancedSearchQuery->toUrl($this->request, $terms, $recurse, $route);
   }
 
   /**

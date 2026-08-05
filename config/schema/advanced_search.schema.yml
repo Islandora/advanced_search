@@ -66,3 +66,35 @@ block.settings.search_block:
     search_submit_label:
       type: label
       label: 'Search button label'
+
+views.area.advanced_search_form:
+  type: views_area
+  label: 'Advanced Search form'
+  mapping:
+    fields:
+      type: sequence
+      label: 'Search fields'
+      sequence:
+        type: string
+        label: 'Search API field identifier'
+    context_filter:
+      type: string
+      label: 'Direct-child contextual filter'
+
+views.area.advanced_search_results_toolbar:
+  type: views_area
+  label: 'Advanced Search results toolbar'
+  mapping:
+    override_list_on_off:
+      type: boolean
+      label: 'Expose the List view option'
+    override_grid_on_off:
+      type: boolean
+      label: 'Expose the Grid view option'
+    override-default-display-mode:
+      type: string
+      label: 'Default view mode'
+      constraints:
+        Choice:
+          - list
+          - grid

@@ -9,20 +9,19 @@ advanced.search.admin:
 advanced.search.form:
   js:
     js/advanced_search.form.js: {}
-  css:
-    component:
-      css/advanced_search.form.css: {}
-
-advanced.search.pager:
-  css:
-    component:
-      css/advanced_search.pager.css: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - core/jquery
+    - core/once
 
 advanced.search.facets_views_ajax: 
   js: 
      js/facets/facets-views-ajax.js: {}
   dependencies:
+    - core/drupal
     - core/drupal.ajax
+    - core/drupalSettings
     - core/jquery
     - core/once
     - views/views.ajax

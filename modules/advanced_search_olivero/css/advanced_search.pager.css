@@ -1,3 +1,4 @@
+/* Legacy Advanced Search presentation for Olivero. */
 .advanced_search_result_pager .pager__summary {
   font-weight: 700;
 }
@@ -45,77 +46,76 @@
   margin: 0.25rem;
 }
 
-.pager {
+.advanced-search-view .pager {
   margin: initial;
 }
 
-.pager__item {
+.advanced-search-view .pager__item {
   margin: 0.125rem;
   text-align: center;
 }
 
-.pager__items {
+.advanced-search-view .pager__items {
   text-align: right;
 }
 
 @media all and (max-width: 45em) {
-  .pager__items {
+  .advanced-search-view .pager__items {
     text-align: center;
   }
 }
 
-.pager__items__first-previous,
-.pager__items__num-pages,
-.pager__items__next-last {
+.advanced-search-view .pager__items__first-previous,
+.advanced-search-view .pager__items__num-pages,
+.advanced-search-view .pager__items__next-last {
   display: inline;
 }
 
-.pager__items__first-previous,
-.pager__items__next-last {
+.advanced-search-view .pager__items__first-previous,
+.advanced-search-view .pager__items__next-last {
   float: none;
 }
 
-.pager__items__first-previous .pager__item,
-.pager__items__next-last .pager__item {
+.advanced-search-view .pager__items__first-previous .pager__item,
+.advanced-search-view .pager__items__next-last .pager__item {
   display: inline;
 }
 
-.pager .pager__link,
-.pager__results .pager__link {
+.advanced-search-view .pager .pager__link,
+.advanced-search-view .pager__results .pager__link {
   display: inherit;
   border-radius: 0.125em;
   border: 1px solid;
-  transition: all, 0.2s, ease-in-out;
+  transition: all 0.2s ease-in-out;
   min-width: 1.75em;
   padding: 0.125rem 0.4375rem 0;
 }
 
-.pager .pager__link:focus,
-.pager .pager__link:hover,
-.pager__results .pager__link:focus,
-.pager__results .pager__link:hover {
+.advanced-search-view .pager .pager__link:focus,
+.advanced-search-view .pager .pager__link:hover,
+.advanced-search-view .pager__results .pager__link:focus,
+.advanced-search-view .pager__results .pager__link:hover {
   text-decoration: underline;
 }
 
-.pager__display .pager__link {
+.advanced-search-view .pager__display .pager__link {
   background-color: #ffffff;
 }
 
-.pager__display .pager__link:hover,
-.pager__display .pager__link:focus {
+.advanced-search-view .pager__display .pager__link:hover,
+.advanced-search-view .pager__display .pager__link:focus {
   background-color: #ffffff;
 }
 
-.pager__link--is-active {
+.advanced-search-view .pager__link--is-active {
   text-decoration: underline !important;
   border: solid 2px #0d77b5;
 }
 
-.view-grid .view-content .views-row {
-  padding: 0px 20px 20px 0px !important;
+.advanced-search-view.view-grid .view-content .views-row {
+  padding: 0 20px 20px 0 !important;
 }
 
-/* generalizing */
 .advanced_search_result_pager .pager__group .pager {
   display: none;
 }
@@ -129,11 +129,11 @@
   margin-right: 0;
 }
 
-.view-filters {
+.advanced-search-view .view-filters {
   display: none;
 }
 
-.pager__group .container {
+.advanced_search_result_pager .pager__group .container {
   width: auto !important;
   padding-left: 0 !important;
   padding-right: 0 !important;
@@ -143,14 +143,13 @@
   display: none;
 }
 
-.view-grid >  .view-content {
+.advanced-search-view.view-grid > .view-content {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  /*margin: 0.47214rem 0 0.47214rem 2.61803rem;*/
 }
 
 @media only screen and (max-width: 600px) {
-  .view-grid > .view-content {
+  .advanced-search-view.view-grid > .view-content {
     display: grid;
     grid-template-columns: repeat(1, 1fr);
   }

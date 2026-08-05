@@ -1,0 +1,7 @@
+name: 'Advanced Search Olivero'
+description: 'Preserves the legacy Advanced Search presentation for the Olivero theme.'
+type: module
+package: Islandora
+core_version_requirement: ^10.3 || ^11
+dependencies:
+  - advanced_search:advanced_search

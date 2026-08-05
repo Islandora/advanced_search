@@ -1,4 +1,20 @@
 services:
+  advanced_search.query_factory:
+    class: Drupal\advanced_search\AdvancedSearchQueryFactory
+    arguments:
+      - '@config.factory'
+  advanced_search.query:
+    class: Drupal\advanced_search\AdvancedSearchQuery
+    factory: ['@advanced_search.query_factory', 'create']
+  advanced_search.search_results_toolbar_builder:
+    class: Drupal\advanced_search\SearchResultsToolbarBuilder
+    arguments:
+      - '@config.factory'
+      - '@request_stack'
+      - '@path.current'
+      - '@string_translation'
   Drupal\advanced_search\EventSubscriber\PostConvertedQueryEventSubscriber:
+    arguments:
+      - '@advanced_search.query'
     tags:
       - { name: 'event_subscriber' }

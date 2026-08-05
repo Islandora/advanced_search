@@ -8,6 +8,7 @@ use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Url;
 use Drupal\advanced_search\Form\SettingsForm;
 use Drupal\advanced_search\Plugin\Block\AdvancedSearchBlock;
+use Drupal\advanced_search\Plugin\views\area\AdvancedSearchFormArea;
 use Drupal\search_api\Query\QueryInterface as DrupalQueryInterface;
 use Drupal\views\ViewExecutable;
 use Solarium\Core\Query\QueryInterface as SolariumQueryInterface;
@@ -40,7 +41,7 @@ class AdvancedSearchQuery {
   protected $recurseParameter;
 
   /**
-   * Constructs a FacetBlockAjaxController object.
+   * Constructs an AdvancedSearchQuery object.
    *
    * @param string $query_parameter
    *   The field to search against.
@@ -74,6 +75,20 @@ class AdvancedSearchQuery {
   }
 
   /**
+   * Gets the configured parameter that stores advanced-search terms.
+   */
+  public function getQueryParameterName(): string {
+    return $this->queryParameter;
+  }
+
+  /**
+   * Gets the configured parameter that enables recursive collection search.
+   */
+  public function getRecurseParameterName(): string {
+    return $this->recurseParameter;
+  }
+
+  /**
    * Extracts a list of AdvancedSearchQueryTerms from the given request.
    *
    * @param \Symfony\Component\HttpFoundation\Request $request
@@ -88,11 +103,17 @@ class AdvancedSearchQuery {
       $query_params = $request->query->all()[$this->queryParameter];
       if (is_array($query_params)) {
         foreach ($query_params as $params) {
-          $terms[] = AdvancedSearchQueryTerm::fromQueryParams($params);
+          if (!is_array($params)) {
+            continue;
+          }
+          $term = AdvancedSearchQueryTerm::fromQueryParams($params);
+          if ($term !== NULL) {
+            $terms[] = $term;
+          }
         }
       }
     }
-    return array_filter($terms);
+    return $terms;
   }
 
   /**
@@ -105,11 +126,10 @@ class AdvancedSearchQuery {
    *   TRUE if the search should recurse FALSE otherwise.
    */
   public function shouldRecurse(Request $request) {
-    if ($request->query->has($this->recurseParameter)) {
-      $recurse_param = $request->query->get($this->recurseParameter);
-      return filter_var($recurse_param, FILTER_VALIDATE_BOOLEAN);
-    }
-    return FALSE;
+    $recurse_param = $request->query->all()[$this->recurseParameter] ?? NULL;
+    return is_scalar($recurse_param)
+      ? filter_var($recurse_param, FILTER_VALIDATE_BOOLEAN)
+      : FALSE;
   }
 
   /**
@@ -149,6 +169,14 @@ class AdvancedSearchQuery {
       $backend = $index->getServerInstance()->getBackend();
       $language_ids = $search_api_query->getLanguages();
       $field_mapping = $backend->getSolrFieldNamesKeyedByLanguage($language_ids, $index);
+      $terms = array_values(array_filter(
+        $terms,
+        static fn (AdvancedSearchQueryTerm $term): bool =>
+          $term->hasSolrFieldMapping($field_mapping),
+      ));
+      if ($terms === []) {
+        return;
+      }
 
       // Disable for Lucene and wildcard
       // $q[] = "{!boost b=boost_document}";
@@ -274,20 +302,39 @@ class AdvancedSearchQuery {
    *   The view display to potentially alter.
    */
   public function alterView(Request $request, ViewExecutable $view, $display_id) {
-    $views = Utilities::getAdvancedSearchViewDisplays();
-    // Only specify contextual filters for views which the advanced search
-    // blocks are derived from.
-    $block_id = array_search([$view->id(), $display_id], $views);
-    if ($block_id !== FALSE) {
+    // Prefer configuration colocated with the View display. Fall back to the
+    // original placed-block discovery so existing sites remain compatible.
+    $settings = Utilities::getViewAreaConfiguration(
+      $view,
+      $display_id,
+      AdvancedSearchFormArea::PLUGIN_ID,
+    );
+    $block_id = FALSE;
+    if ($settings === NULL) {
+      $views = Utilities::getAdvancedSearchViewDisplays();
+      $block_id = array_search([$view->id(), $display_id], $views, TRUE);
+    }
+    if ($settings === NULL && $block_id !== FALSE) {
       $block = Block::load($block_id);
-      $settings = $block->get('settings');
+      $settings = $block?->get('settings');
+    }
+
+    if (is_array($settings)) {
       // Ignore the immediate children contextual filter in the query to allow
       // for recursive search.
-      if (isset($settings[AdvancedSearchBlock::SETTING_CONTEXTUAL_FILTER])) {
+      $immediate_children_contextual_filter =
+        $settings[AdvancedSearchBlock::SETTING_CONTEXTUAL_FILTER] ?? '';
+      if ($immediate_children_contextual_filter !== '') {
         $display = $view->getDisplay();
         $display_arguments = $display->getOption('arguments');
-        $immediate_children_contextual_filter = $settings[AdvancedSearchBlock::SETTING_CONTEXTUAL_FILTER];
-        $index = array_search($immediate_children_contextual_filter, array_keys($display_arguments));
+        if (!isset($display_arguments[$immediate_children_contextual_filter])) {
+          return;
+        }
+        $index = array_search(
+          $immediate_children_contextual_filter,
+          array_keys($display_arguments),
+          TRUE,
+        );
         if ($this->shouldRecurse($request)) {
           // Change the argument to the exception value which should cause the
           // contextual filter to be ignored.
@@ -302,9 +349,13 @@ class AdvancedSearchQuery {
           // argument in case it is build from the URL. If this is not an AJAX
           // request this logic can be ignored.
           if ($request->isXmlHttpRequest()) {
+            $referer = $request->headers->get('referer');
+            if ($referer === NULL || $referer === '') {
+              return;
+            }
             $view->initHandlers();
             $request_stack = \Drupal::requestStack();
-            $refer = Request::create($request->server->get('HTTP_REFERER'));
+            $refer = Request::create($referer);
             $refer->getPathInfo();
             $refer->attributes->add(\Drupal::getContainer()->get('router')->matchRequest($refer));
             $request_stack->push($refer);

@@ -15,6 +15,13 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 class PostConvertedQueryEventSubscriber implements EventSubscriberInterface {
 
   /**
+   * Constructs a PostConvertedQueryEventSubscriber object.
+   */
+  public function __construct(
+    protected AdvancedSearchQuery $advancedSearchQuery,
+  ) {}
+
+  /**
    * {@inheritdoc}
    */
   public static function getSubscribedEvents(): array {
@@ -36,8 +43,11 @@ class PostConvertedQueryEventSubscriber implements EventSubscriberInterface {
     // with it as it converts conditions into separate filter queries.
     // Additionally filter queries do not affect the score so are not
     // suitable for use in the advanced search queries.
-    $advanced_search_query = new AdvancedSearchQuery();
-    $advanced_search_query->alterQuery(\Drupal::request(), $solarium_query, $search_api_query);
+    $this->advancedSearchQuery->alterQuery(
+      \Drupal::request(),
+      $solarium_query,
+      $search_api_query,
+    );
   }
 
 }

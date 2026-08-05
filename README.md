@@ -4,12 +4,14 @@
 - [Feature and Advantages](#features-and-advantages)
 - [Requirements](#requirements)
 - [Installation](#installation)
+- [Theme integration](#theme-integration)
 - [Configuration](#configuration)
 - [Configuring Solr](#configuring-solr)
 - [eDismax Search](#edismax-search)
 - [Configure Collection Search](#configure-collection-search)
 - [Configure Views](#configure-views)
   - [Exposed Form](#exposed-form)
+  - [View-integrated controls](#view-integrated-controls)
   - [Collection Search](#collection-search)
   - [Paging](#paging)
   - [Sorting](#sorting)
@@ -235,6 +237,9 @@ Use the following syntaxes (eDismax ONLY) to increase Search acuracy is provided
 
 ## Requirements
 
+Advanced Search supports Drupal 10.3 and later, and Drupal 11. It requires
+PHP 8.1 or later.
+
 Advanced Search requires an installation of Solr, as its syntax is Solr-specific.
 The Advanced Search blocks also utilize the Facets API, therefore they only work on Views where Facets are enabled.
 
@@ -260,6 +265,30 @@ To download and enable just this module, use the following from the command line
 composer require drupal/advanced_search
 drush en advanced_search
 ```
+
+## Theme integration
+
+Advanced Search owns search behavior and emits stable semantic classes, while
+the active theme owns layout, color, typography, and component presentation.
+The base module therefore does not impose a front-end design on every theme.
+
+The optional `advanced_search_olivero` submodule preserves the presentation
+that Advanced Search 2.x historically shipped for Olivero. Existing sites with
+Olivero installed receive it automatically when database updates run. New
+Olivero sites can enable it explicitly:
+
+```bash
+drush en advanced_search_olivero
+```
+
+The compatibility styles load only for Advanced Search forms and Views while
+Olivero or an Olivero subtheme is active. Custom themes should style the base
+module's markup directly and do not need the submodule.
+
+For new integrations, add the **Advanced Search form** and **Advanced Search
+results toolbar** as View header areas. They are deliberately header-only so
+the form, exposed filters, and toolbar remain together in the View's AJAX
+replacement. The legacy derived blocks remain available for existing sites.
 
 ## Configuration
 
@@ -362,6 +391,23 @@ The Advanced Search Block requires that if present the Exposed forms
 additional query in the Exposed form as well.
 
 ![Exposed Form set to Basic.](./docs/basic-exposed-form.png)
+
+### View-integrated controls
+
+Advanced Search can place its controls directly in a Search API View so that
+the form, exposed filters, result summary, sorting, page-size links, and display
+switcher participate in the same Views AJAX replacement.
+
+Add these handlers to the View's **Header** section:
+
+- **Advanced Search form**: choose and order the searchable index fields. For a
+  collection display, select the direct-child contextual filter.
+- **Advanced Search results toolbar**: configure the available list/grid modes
+  and the default display mode.
+
+The integrated handlers are the preferred setup for new sites because one View
+owns the whole search experience. Existing Advanced Search and Pager block
+plugins remain supported for upgrades and layouts that need separate blocks.
 
 ### Collection Search
 
@@ -567,4 +613,3 @@ get started.
 ## License
 
 [GPLv2](http://www.gnu.org/licenses/gpl-2.0.txt)
-
