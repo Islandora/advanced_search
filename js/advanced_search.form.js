@@ -111,20 +111,6 @@
             }
           });
 
-          /* digitalutsc added */
-          $("input[name*='[value]']").each(function () {
-            // enable enter key trigger submit searching
-            $(this).on("keypress", function (e) {
-
-              if (e.keyCode == 13) {
-                // Cancel the default action on keypress event
-                e.preventDefault();
-                $form.submit();
-              }
-            });
-          });
-
-
           // Prevent form submission and push state instead.
           //
           // Logic server side / client side should match to generate the
