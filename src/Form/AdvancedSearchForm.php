@@ -367,6 +367,7 @@ class AdvancedSearchForm extends FormBase {
           '#type' => 'container',
           'add' => [
             '#type' => 'button',
+            '#submit_button' => FALSE,
             '#value' => $this->getAddOperator(),
             '#name' => 'add-term-' . $i,
             '#term_index' => $i,
@@ -383,6 +384,7 @@ class AdvancedSearchForm extends FormBase {
           ],
           'remove' => $total_terms <= 1 ? NULL : [
             '#type' => 'button',
+            '#submit_button' => FALSE,
             '#value' => $this->getRemoveOperator(),
             '#name' => 'remove-term-' . $i,
             '#term_index' => $i,
@@ -421,6 +423,7 @@ class AdvancedSearchForm extends FormBase {
     }
     $form['reset'] = [
       '#type' => 'button',
+      '#submit_button' => FALSE,
       '#value' => $this->t('Reset'),
       '#attributes' => [
         'class' => [$block_class_prefix . '__reset'],
