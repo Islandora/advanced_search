@@ -169,7 +169,7 @@ class AjaxBlocksController extends ControllerBase {
     foreach ($blocks as $block_id => $block_selector) {
       $block_entity = $this->storage->load($block_id);
 
-      if ($block_entity) {
+      if ($block_entity && $block_entity->access('view')) {
         // Render a block, then add it to the response as a replace command.
         $block_view = $this->entityTypeManager
           ->getViewBuilder('block')
