@@ -177,6 +177,14 @@
           let resetTriggered = false;
           $form.find('input[data-drupal-selector = "edit-reset"]').mousedown(function (e) {
             resetTriggered = true;
+            
+            // Put back because issue https://github.com/Islandora/advanced_search/issues/95
+            const inputs = [];
+            const href = url(inputs, settings.advanced_search_form);
+            window.history.pushState(null, document.title, href.split('?')[0] );
+
+            /* reset the url after reset button clicked */
+            window.location.replace(href.split('?')[0]);
           });
 
           // Handle the page summary
