@@ -1,0 +1,9 @@
+form:
+  css:
+    component:
+      css/advanced_search.form.css: {}
+
+pager:
+  css:
+    component:
+      css/advanced_search.pager.css: {}

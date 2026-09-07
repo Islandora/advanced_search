@@ -3,208 +3,260 @@
  * @file
  * Handles Ajax submission / updating form action on url change, etc.
  */
-(function ($, Drupal, drupalSettings) {
-  // Replace Results per page html h3 tag with strong tag
-  jQuery('h3:contains("Results per page")').replaceWith(function(){
-      return jQuery("<strong />", {html: jQuery(this).html()});
-  });
+(function ($, Drupal, drupalSettings, once) {
+  'use strict';
 
+  const toolbarSelector = '[data-drupal-pager-id]';
 
-  // Gets current parameters minus ones provided by the form.
-  function getParams(query_parameter, recurse_parameter) {
-    const url_search_params = new URLSearchParams(window.location.search);
-    const params = Object.fromEntries(url_search_params.entries());
+  /**
+   * Gets current parameters minus ones provided by the form.
+   */
+  function getParams(queryParameter, recurseParameter) {
+    const params = new URLSearchParams(window.location.search);
     // Remove Advanced Search Query Parameters.
-    const param_match = "query\\[\\d+\\]\\[.+\\]".replace("query", query_parameter);
-    const param_regex = new RegExp(param_match, "g");
-    for (const param in params) {
-      if (param.match(param_regex)) {
-        delete params[param];
+    const escapedQueryParameter = queryParameter.replace(
+      /[.*+?^${}()|[\]\\]/g,
+      '\\$&',
+    );
+    const paramRegex = new RegExp(
+      `^${escapedQueryParameter}\\[\\d+\\]\\[[^\\]]+\\]$`,
+    );
+    Array.from(params.keys()).forEach((param) => {
+      if (paramRegex.test(param)) {
+        params.delete(param);
       }
-    }
+    });
     // Remove Recurse parameter.
-    delete params[recurse_parameter];
+    params.delete(recurseParameter);
     // Remove the page if set as submitting the form should always take
     // the user to the first page (facets do the same).
-    delete params["page"];
+    params.delete('page');
     return params;
   }
 
-  // Groups form inputs by search term.
+  /**
+   * Groups form inputs by search term.
+   */
   function getTerms(inputs) {
-    const input_regex = /terms\[(?<index>\d+)\]\[(?<component>.*)\]/;
+    const inputRegex = /terms\[(?<index>\d+)\]\[(?<component>.*)\]/;
     const terms = [];
-    for (const input in inputs) {
-      const name = inputs[input].name;
-      const value = inputs[input].value;
-      const found = name.match(input_regex);
+    inputs.forEach(({ name, value }) => {
+      const found = name.match(inputRegex);
       if (found) {
-        const index = parseInt(found.groups.index);
+        const index = parseInt(found.groups.index, 10);
         const component = found.groups.component;
         if (typeof terms[index] !== 'object') {
           terms[index] = {};
         }
         terms[index][component] = value;
       }
-    }
+    });
     return terms;
   }
 
-  // Checks if the form user has set recursive to true in the form.
+  /**
+   * Checks if the form user has set recursive to true in the form.
+   */
   function getRecurse(inputs) {
-    for (const input in inputs) {
-      const name = inputs[input].name;
-      const value = inputs[input].value;
-      if (name == "recursive" && value == "1") {
-        return true;
-      }
-    }
-    return false;
+    return inputs.some(
+      ({ name, value }) => name === 'recursive' && value === '1',
+    );
   }
 
-  function url(inputs, settings) {
+  /**
+   * Builds the destination represented by one Advanced Search form.
+   */
+  function buildUrl(inputs, settings) {
     const terms = getTerms(inputs);
     const recurse = getRecurse(inputs);
-    const params = getParams(settings.query_parameter, settings.recurse_parameter);
+    const params = getParams(
+      settings.query_parameter,
+      settings.recurse_parameter,
+    );
     for (const index in terms) {
       const term = terms[index];
       // Do not include terms with no value.
-      if (term.value.length != 0) {
+      if (String(term.value ?? '').length !== 0) {
         for (const component in term) {
           const value = term[component];
-          const param = "query[index][component]"
-            .replace("query", settings.query_parameter)
-            .replace("index", index)
-            .replace("component", settings.mapping[component]);
-          params[param] = value;
+          const mappedComponent = settings.mapping[component];
+          if (!mappedComponent) {
+            continue;
+          }
+          const param = `${settings.query_parameter}[${index}][${mappedComponent}]`;
+          params.set(param, value);
         }
       }
     }
     if (recurse) {
-      params[settings.recurse_parameter] = '1';
+      params.set(settings.recurse_parameter, '1');
     }
-    return window.location.href.split("?")[0] + "?" + $.param(params);
+    const destination = new URL(window.location.href);
+    destination.search = params.toString();
+    return destination.toString();
   }
 
-  function updateParam(urlstring, param, value) {
-    var url = new URL(urlstring);
-    var search_params = url.searchParams;
-
-    search_params.set(param, value);
-
-    url.search = search_params.toString();
-
-    return url.toString();
+  /**
+   * Normalizes both current keyed settings and the legacy singleton shape.
+   */
+  function normalizeSettings(settings) {
+    if (!settings) {
+      return {};
+    }
+    return settings.id ? { [settings.id]: settings } : settings;
   }
+
+  /**
+   * Returns all form settings known after an initial or AJAX attachment.
+   */
+  function getFormSettings(settings) {
+    return {
+      ...normalizeSettings(drupalSettings.advanced_search_form),
+      ...normalizeSettings(settings?.advanced_search_form),
+    };
+  }
+
+  /**
+   * Tests whether a toolbar represents the configured View display.
+   */
+  function toolbarMatches(toolbar, settings) {
+    return (
+      toolbar.dataset.advancedSearchViewId === settings.view_id &&
+      toolbar.dataset.advancedSearchDisplayId === settings.display_id
+    );
+  }
+
+  /**
+   * Finds the form's toolbar, preferring one inside the same View instance.
+   */
+  function findOwnedToolbar(form, settings) {
+    if (!settings.view_id || !settings.display_id) {
+      return null;
+    }
+    const view = form.closest('.view');
+    const localMatches = view
+      ? Array.from(view.querySelectorAll(toolbarSelector)).filter((toolbar) =>
+          toolbarMatches(toolbar, settings),
+        )
+      : [];
+    if (localMatches.length === 1) {
+      return localMatches[0];
+    }
+
+    const matches = Array.from(document.querySelectorAll(toolbarSelector)).filter(
+      (toolbar) => toolbarMatches(toolbar, settings),
+    );
+    return matches.length === 1 ? matches[0] : null;
+  }
+
+  /**
+   * Navigates through the form's AJAX-capable toolbar when available.
+   */
+  function navigate(form, settings, destination) {
+    const toolbar = findOwnedToolbar(form, settings);
+    const toolbarId = toolbar?.getAttribute('data-drupal-pager-id');
+    if (
+      !settings.ajax_enabled ||
+      !toolbarId ||
+      toolbar.dataset.advancedSearchAjaxReady !== 'true' ||
+      typeof Drupal.advancedSearchNavigate !== 'function'
+    ) {
+      return false;
+    }
+    return Drupal.advancedSearchNavigate(toolbarId, destination) === true;
+  }
+
+  /**
+   * Keeps live forms pointed at the browser's current search state.
+   */
+  function updateFormActions() {
+    document
+      .querySelectorAll('form[data-drupal-selector="advanced-search-form"]')
+      .forEach((form) => {
+        form.action = window.location.pathname + window.location.search;
+      });
+  }
+
+  window.addEventListener(
+    'advancedsearchlocationchange',
+    updateFormActions,
+  );
 
   Drupal.behaviors.advanced_search_form = {
-    attach: function (context, settings) {
-      if (settings.advanced_search_form.id !== 'undefined') {
-        const $form = $(once('search-form', 'form#' + settings.advanced_search_form.id));
-        if ($form.length > 0) {
-          window.addEventListener("pushstate", function (e) {
-            $form.attr('action', window.location.pathname + window.location.search);
-          });
-          window.addEventListener("popstate", function (e) {
-            if (e.state != null) {
-              $form.attr('action', window.location.pathname + window.location.search);
-            }
-          });
+    attach(context, settings) {
+      Object.values(getFormSettings(settings)).forEach((formSettings) => {
+        if (!formSettings?.id) {
+          return;
+        }
+        const form = document.getElementById(formSettings.id);
+        if (
+          !form ||
+          (context !== document && context !== form && !context.contains(form))
+        ) {
+          return;
+        }
 
-          /* digitalutsc added */
-          $("input[name*='[value]']").each(function () {
-            // enable enter key trigger submit searching
-            $(this).on("keypress", function (e) {
-
-              if (e.keyCode == 13) {
-                // Cancel the default action on keypress event
-                e.preventDefault();
-                $form.submit();
-              }
+        once('search-form', form).forEach((element) => {
+          const $form = $(element);
+          element
+            .querySelectorAll('input[name*="[value]"]')
+            .forEach((input) => {
+              input.addEventListener('keydown', (event) => {
+                if (event.key !== 'Enter' || event.isComposing) {
+                  return;
+                }
+                const submit = element.querySelector(
+                  '.advanced-search-form__search',
+                );
+                if (!submit) {
+                  return;
+                }
+                event.preventDefault();
+                if (typeof element.requestSubmit === 'function') {
+                  element.requestSubmit(submit);
+                }
+                else {
+                  submit.click();
+                }
+              });
             });
-          });
 
+          if (!formSettings.redirect) {
+            element.addEventListener('submit', (event) => {
+              if (
+                event.submitter &&
+                !event.submitter.matches('.advanced-search-form__search')
+              ) {
+                return;
+              }
+              const destination = buildUrl(
+                $form.serializeArray(),
+                formSettings,
+              );
+              if (!navigate(element, formSettings, destination)) {
+                return;
+              }
+              event.preventDefault();
+              event.stopImmediatePropagation();
+            });
 
-          // Prevent form submission and push state instead.
-          //
-          // Logic server side / client side should match to generate the
-          // appropriate URL with javascript enabled or disable.
-          //
-          // If a route is set for the view display that this form is derived
-          // from, and we are not on the same page as that route, rely on the
-          // normal submit which will redirect to the appropriate page.
-          if (!settings.advanced_search_form.redirect) {
-            $form.submit(function (e) {
-              e.preventDefault();
-              e.stopPropagation();
-              const inputs = $form.serializeArray();
-              const href = url(inputs, settings.advanced_search_form);
-
-              /* digitalutsc added*/
-              $("li.pager__item a.pager__itemsperpage").each(function( index ) {
-                // update pager links - items per page
-                var new_link = href;
-                if (href.includes("items_per_page=") === false) {
-                  new_link = new_link + '&items_per_page=' + $(this).text().trim().toLowerCase();
-                  $( this ).attr("href", new_link);
-                }
-                else {
-                  // replace with new param
-                  new_link = updateParam(new_link, "items_per_page", $(this).text().trim().toLowerCase());
-                  $( this ).attr("href", new_link);
-                }
-              });
-
-              $("li.pager__item a.pager__display").each(function( index ) {
-                // update pager links - display
-                var new_link = href;
-                if (href.includes("display=") === false) {
-                  new_link = new_link + '&display=' + $(this).text().trim().toLowerCase();
-                  $( this ).attr("href", new_link);
-                }
-                else {
-                  // replace with new param
-                  new_link = updateParam(new_link, "display", $(this).text().trim().toLowerCase());
-                  $( this ).attr("href", new_link);
+            const reset = element.querySelector(
+              '.advanced-search-form__reset',
+            );
+            reset?.addEventListener('click', () => {
+              $(document).one('ajaxComplete', () => {
+                const destination = new URL(
+                  buildUrl([], formSettings),
+                );
+                destination.search = '';
+                if (!navigate(element, formSettings, destination.toString())) {
+                  window.location.assign(destination.toString());
                 }
               });
-
-              window.history.pushState(null, document.title, href);
             });
           }
-          // Reset should trigger refresh of AJAX Blocks / Views.
-          // Add a simple flag so we know that the user wants a reset.
-          let resetTriggered = false;
-          $form.find('input[data-drupal-selector = "edit-reset"]').mousedown(function (e) {
-            resetTriggered = true;
-          });
-
-          // Handle the page summary
-          $("#ajax-page-summary").hide();
-          $( document ).ajaxComplete(function( event, request, ajaxSettings ) {
-              $("#ajax-page-summary").hide();
-              if (jQuery("#ajax-page-summary").length >0) { 
-                $(".pager__summary").html($("#ajax-page-summary").html());
-              }
-              else {
-                $(".pager__summary").html("");
-              }
-
-              // After the ajax completes, see if the user wanted the reset.
-              if (resetTriggered){
-                const inputs = [];
-                const href = url(inputs, settings.advanced_search_form);
-
-                // Instead of using window.location.replace which causes full page to reload,
-                // Use pushState to update the URL without stopping any processes.
-                window.history.pushState(null, document.title, href.split('?')[0] );
-
-                // Reset the flag.
-                resetTriggered = false;
-              }
-          });
-        }
-      }
-    }
+        });
+      });
+    },
   };
-})(jQuery, Drupal, drupalSettings);
+})(jQuery, Drupal, drupalSettings, once);

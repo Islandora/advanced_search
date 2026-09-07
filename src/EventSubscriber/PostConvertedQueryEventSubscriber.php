@@ -6,6 +6,7 @@ use Drupal\advanced_search\AdvancedSearchQuery;
 use Drupal\search_api_solr\Event\PostConvertedQueryEvent;
 use Drupal\search_api_solr\Event\SearchApiSolrEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * Subscribes to PostConvertedQueryEvents.
@@ -13,6 +14,14 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
  * @package Drupal\advanced_search\EventSubscriber
  */
 class PostConvertedQueryEventSubscriber implements EventSubscriberInterface {
+
+  /**
+   * Constructs a PostConvertedQueryEventSubscriber object.
+   */
+  public function __construct(
+    protected AdvancedSearchQuery $advancedSearchQuery,
+    protected RequestStack $requestStack,
+  ) {}
 
   /**
    * {@inheritdoc}
@@ -28,6 +37,11 @@ class PostConvertedQueryEventSubscriber implements EventSubscriberInterface {
    * Alter the query.
    */
   public function alter(PostConvertedQueryEvent $event) {
+    $request = $this->requestStack->getCurrentRequest();
+    if ($request === NULL) {
+      return;
+    }
+
     $search_api_query = $event->getSearchApiQuery();
     $solarium_query = $event->getSolariumQuery();
 
@@ -36,8 +50,11 @@ class PostConvertedQueryEventSubscriber implements EventSubscriberInterface {
     // with it as it converts conditions into separate filter queries.
     // Additionally filter queries do not affect the score so are not
     // suitable for use in the advanced search queries.
-    $advanced_search_query = new AdvancedSearchQuery();
-    $advanced_search_query->alterQuery(\Drupal::request(), $solarium_query, $search_api_query);
+    $this->advancedSearchQuery->alterQuery(
+      $request,
+      $solarium_query,
+      $search_api_query,
+    );
   }
 
 }

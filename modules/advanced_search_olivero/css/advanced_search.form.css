@@ -1,15 +1,20 @@
+.advanced-search-form .form-type-select,
 .islandora-advanced-search-form .form-type-select {
   display: inline-block;
 }
 
+.advanced-search-form .form-type-select__select-wrapper,
 .islandora-advanced-search-form .form-type-select__select-wrapper {
   width: auto;
 }
 
+.advanced-search-form .form-select,
 .islandora-advanced-search-form .form-select {
   margin-right: 0.25em;
 }
 
+input.advanced-search-form__add,
+input.advanced-search-form__remove,
 input.islandora-advanced-search-form__add,
 input.islandora-advanced-search-form__remove {
   display: inline-block;
@@ -22,24 +27,36 @@ input.islandora-advanced-search-form__remove {
   margin: 0 0 1rem;
 }
 
+input.advanced-search-form__add:hover,
+input.advanced-search-form__remove:hover,
 input.islandora-advanced-search-form__add:hover,
-input.islandora-advanced-search-form__add:focus,
-input.islandora-advanced-search-form__remove:hover,
-input.islandora-advanced-search-form__remove:focus {
+input.islandora-advanced-search-form__remove:hover {
   text-decoration: underline;
   color: #0c6170;
-  outline: none;
 }
 
+input.advanced-search-form__add:focus,
+input.advanced-search-form__remove:focus,
+input.islandora-advanced-search-form__add:focus,
+input.islandora-advanced-search-form__remove:focus {
+  color: #0c6170;
+  outline: 0.1875rem solid currentColor;
+  outline-offset: 0.1875rem;
+}
+
+input.advanced-search-form__reset,
+input.advanced-search-form__search,
 input.islandora-advanced-search-form__reset,
 input.islandora-advanced-search-form__search {
   display: inline-block;
 }
 
-.form-wrapper select {
+.advanced-search-form .form-wrapper select,
+.islandora-advanced-search-form .form-wrapper select {
   margin-bottom: 1.125rem;
 }
 
-[id^="edit-terms"] {
+.advanced-search-form [id^="edit-terms"],
+.islandora-advanced-search-form [id^="edit-terms"] {
   display: initial !important;
 }

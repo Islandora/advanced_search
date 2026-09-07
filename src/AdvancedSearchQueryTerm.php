@@ -144,12 +144,24 @@ class AdvancedSearchQueryTerm {
    *   An object which represents a valid search term.
    */
   public static function fromQueryParams(array $params) {
-    // Field & value are required values. We do not check if field is a valid
-    // value only that it is non-empty. All other fields will be cast to
-    // defaults if they are not valid / missing.
-    $has_required_params = isset($params[self::FIELD_QUERY_PARAMETER], $params[self::VALUE_QUERY_PARAMETER]);
-    $search_value_empty = isset($params[self::VALUE_QUERY_PARAMETER]) && empty($params[self::VALUE_QUERY_PARAMETER]);
-    if (!$has_required_params || $search_value_empty) {
+    foreach ([
+      self::FIELD_QUERY_PARAMETER,
+      self::VALUE_QUERY_PARAMETER,
+      self::INCLUDE_QUERY_PARAMETER,
+      self::CONJUNCTION_QUERY_PARAMETER,
+    ] as $parameter) {
+      if (array_key_exists($parameter, $params) && !is_string($params[$parameter])) {
+        return NULL;
+      }
+    }
+
+    // Field and value are required scalar values. Field membership is checked
+    // later, once the Search API index's Solr mapping is available.
+    if (
+      !isset($params[self::FIELD_QUERY_PARAMETER], $params[self::VALUE_QUERY_PARAMETER])
+      || trim($params[self::FIELD_QUERY_PARAMETER]) === ''
+      || trim($params[self::VALUE_QUERY_PARAMETER]) === ''
+    ) {
       return NULL;
     }
     $field = $params[self::FIELD_QUERY_PARAMETER];
@@ -160,6 +172,9 @@ class AdvancedSearchQueryTerm {
     $conjunction = isset($params[self::CONJUNCTION_QUERY_PARAMETER]) ?
       self::normalizeConjunction($params[self::CONJUNCTION_QUERY_PARAMETER]) :
       self::DEFAULT_CONJUNCTION;
+    if ($conjunction === self::CONJUNCTION_OR && !$include) {
+      return NULL;
+    }
     return new self($field, $value, $include, $conjunction);
   }
 
@@ -176,8 +191,18 @@ class AdvancedSearchQueryTerm {
     // Search field & value are required values we do not check if field is a
     // valid value only that it is non-empty. All other fields will use
     // defaults if they are not valid / missing.
+    foreach ([
+      AdvancedSearchForm::SEARCH_FORM_FIELD,
+      AdvancedSearchForm::VALUE_FORM_FIELD,
+      AdvancedSearchForm::INCLUDE_FORM_FIELD,
+      AdvancedSearchForm::CONJUNCTION_FORM_FIELD,
+    ] as $component) {
+      if (array_key_exists($component, $input) && !is_string($input[$component])) {
+        return NULL;
+      }
+    }
     $has_required_inputs = isset($input[AdvancedSearchForm::SEARCH_FORM_FIELD], $input[AdvancedSearchForm::VALUE_FORM_FIELD]);
-    $search_value_empty = isset($input[AdvancedSearchForm::VALUE_FORM_FIELD]) && empty($input[AdvancedSearchForm::VALUE_FORM_FIELD]);
+    $search_value_empty = isset($input[AdvancedSearchForm::VALUE_FORM_FIELD]) && trim($input[AdvancedSearchForm::VALUE_FORM_FIELD]) === '';
     if (!$has_required_inputs || $search_value_empty) {
       return NULL;
     }
@@ -283,6 +308,10 @@ class AdvancedSearchQueryTerm {
    */
   public function toSolrQuery(array $solr_field_mapping) {
     $terms = [];
+    $mapped_fields = $this->getMappedSolrFields($solr_field_mapping);
+    if ($this->field !== 'all' && $mapped_fields === []) {
+      return '';
+    }
     $query_helper = \Drupal::service('solarium.query_helper');
     $value = $query_helper->escapePhrase(trim($this->value));
 
@@ -323,7 +352,7 @@ class AdvancedSearchQueryTerm {
       // Fixed for https://github.com/digitalutsc/advanced_search/issues/4
       if ($this->field !== "all") {
         $search_fields = "(";
-        foreach ($solr_field_mapping[$this->field] as $field) {
+        foreach ($mapped_fields as $field) {
           $search_fields .= " $field:$value";
         }
         $search_fields .= ")";
@@ -333,7 +362,7 @@ class AdvancedSearchQueryTerm {
     }
     else {
       $isTitleSearch = FALSE;
-      foreach ($solr_field_mapping[$this->field] as $field) {
+      foreach ($mapped_fields as $field) {
         // If field fulltext title is selected.
         if (strpos($field, "fulltext_title") !== FALSE) {
           $isTitleSearch = TRUE;
@@ -385,15 +414,36 @@ class AdvancedSearchQueryTerm {
    *   The conjunction to use for this term conjunction.
    */
   public function toSolrFields(array $solr_field_mapping) {
-    $terms = [];
+    return implode(' ', $this->getMappedSolrFields($solr_field_mapping));
+  }
 
-    if ($this->field !== "all") {
-      foreach ($solr_field_mapping[$this->field] as $field) {
-        $terms[] = "$field";
-      }
+  /**
+   * Determines whether this term has a usable Solr field mapping.
+   */
+  public function hasSolrFieldMapping(array $solr_field_mapping): bool {
+    return $this->field === 'all'
+      || $this->getMappedSolrFields($solr_field_mapping) !== [];
+  }
+
+  /**
+   * Gets valid Solr field names for this term.
+   *
+   * @return string[]
+   *   Non-empty mapped Solr field names.
+   */
+  private function getMappedSolrFields(array $solr_field_mapping): array {
+    if (
+      $this->field === 'all'
+      || !isset($solr_field_mapping[$this->field])
+      || !is_array($solr_field_mapping[$this->field])
+    ) {
+      return [];
     }
-    $terms = implode(' ', $terms);
-    return $terms;
+
+    return array_values(array_filter(
+      $solr_field_mapping[$this->field],
+      static fn ($field): bool => is_string($field) && $field !== '',
+    ));
   }
 
   /**

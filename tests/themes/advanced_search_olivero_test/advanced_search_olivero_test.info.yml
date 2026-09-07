@@ -1,0 +1,5 @@
+name: 'Advanced Search Olivero test theme'
+type: theme
+base theme: olivero
+package: Testing
+core_version_requirement: ^10 || ^11
