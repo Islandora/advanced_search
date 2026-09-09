@@ -20,6 +20,9 @@ jobs:
       matrix:
         php-versions: ["8.4", "8.5"]
         drupal-version: ["10.6", "11.3", "11.4"]
+        exclude:
+          - drupal-version: "10.6"
+            php-versions: "8.5"
     name: PHP ${{ matrix.php-versions }} | drupal ${{ matrix.drupal-version }}
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
