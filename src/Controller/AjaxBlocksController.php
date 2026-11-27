@@ -175,10 +175,12 @@ class AjaxBlocksController extends ControllerBase {
           ->getViewBuilder('block')
           ->view($block_entity);
 
-        $block_view = (string) $this->renderer->renderPlain($block_view);
         $response->addCommand(new ReplaceCommand($block_selector, $block_view));
       }
     }
+
+    $request_stack->pop();
+
     return $response;
   }
 
