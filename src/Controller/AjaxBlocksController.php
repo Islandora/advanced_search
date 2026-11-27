@@ -178,7 +178,7 @@ class AjaxBlocksController extends ControllerBase {
         $response->addCommand(new ReplaceCommand($block_selector, $block_view));
       }
     }
-    
+
     $request_stack->pop();
 
     return $response;
