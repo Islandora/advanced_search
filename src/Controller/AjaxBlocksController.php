@@ -175,10 +175,23 @@ class AjaxBlocksController extends ControllerBase {
           ->getViewBuilder('block')
           ->view($block_entity);
 
-        $block_view = (string) $this->renderer->renderPlain($block_view);
+        // Pass the render array, not a pre-rendered string, so the block's
+        // attachments (drupalSettings and libraries) are added to the AJAX
+        // response. Widgets configured through drupalSettings, such as the
+        // facets range slider, otherwise keep the min/max values from the
+        // initial page load.
         $response->addCommand(new ReplaceCommand($block_selector, $block_view));
       }
     }
+
+    // The blocks are rendered when each command is added, so the simulated
+    // request is no longer needed. Remove it so the AJAX attachments
+    // processor reads ajax_page_state from the real request. Otherwise it
+    // sees no loaded libraries and tells the browser to load every library
+    // again, including jQuery and core/drupal, which resets Drupal's
+    // JavaScript state and leaves in-progress AJAX throbbers on screen.
+    $request_stack->pop();
+
     return $response;
   }
 
